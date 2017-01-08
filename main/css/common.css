@@ -1,0 +1,95 @@
+@charset "utf-8";
+/* CSS Document */
+/*Floatti tuntuu jostakin syystä olevan pakollinen*/
+
+body {
+	margin:0px;
+	font-size:100%;
+	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    background-color: #F4F4F4;
+    align-content: center;
+}
+
+/*Header tavaraa*/
+header {
+	background-color: #373737;
+    color: #DCD0C0;
+	margin:0px;
+	padding:1%;
+	text-align: center;
+}
+
+nav {
+    background-color: #373737;
+    color: #DCD0C0;
+	padding:0px;
+    margin: 0px 10px 0px 0px;
+	text-align: center;
+}
+
+section {
+    background-color: #DCD0C0;
+    color: black;
+    margin: 0px;
+}
+
+/*Footter tavaraa*/
+footer {
+	background-color: #373737;
+    color: #DCD0C0;
+    margin: 0px;
+	text-align: center;
+}
+
+h1 {
+    margin: 0px;
+    padding: 10px;
+}
+
+h2 {
+    margin: 0px;
+    padding: 30px;
+    text-align: center;
+}
+
+h3 {
+    margin: 0px;
+    padding: 10px 0px 20px 0px;
+    text-align: center;
+}
+
+p {
+    margin: 0px;
+    padding: 0px 10px 10px 10px;
+}
+
+a:link, a:visited {
+    background-color:#373737;
+    color: #DCD0C0;
+    display:inline-block;
+    width: 200px;
+    padding: 4px;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+a:hover, a:active {
+	background-color:#808080;
+    color: #373737;
+}
+
+ul {
+    margin: 0px;
+}
+
+li {
+    margin: 0px;
+    padding: 0px 5px 5px 5px;
+}
+
+#map {
+    border: 1px dashed black;
+    height: 480px;
+    width:  100%;
+}

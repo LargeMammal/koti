@@ -1,0 +1,96 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body {
+	margin:0px;
+	font-size:100%;
+	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+}
+
+#page {
+	max-width:95%;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+#header {
+	background-color:#000000;
+	float:right;
+	width:98%;
+	margin:0px;
+	padding:1%;
+}
+
+#title_h {
+	display:inline-block;
+	margin-left: calc(50% - (358px/2));
+	color:#FFCC00;
+	text-align:center;
+	font-size:150%;
+}
+
+#header_info {
+	width:25%;
+	float:right;
+	background-color:#808080;
+	padding:8px 8px 0px 8px;
+}
+#header_text {
+	float:left;
+}
+#header_img {
+	float:right;
+}
+
+
+#footer {
+	float:left;
+	width:100%;
+	height:1.875em;
+	background-color:#000000;
+	color:#FFCC00;
+	text-align:center;
+	align-content:center;
+}
+
+#content {
+	background-color:#808080;
+	float:left;
+	width:100%;
+}
+#nav_right {
+	float:right;
+	margin:0px;
+	padding:0px;
+	background-color:#eeeeee;
+	width:208px;
+	text-align:center;
+}
+
+#content_left {
+	width:calc(100% - 210px - 4em);
+	min-width:472px;
+	padding:1em;
+	float:left;
+	margin:0px 1em;
+	background-color:#eeeeee;
+	border:1px solid #BFBFBF;
+	overflow:hidden;
+	border-radius:3px;
+}
+
+a:link, a:visited {
+    display:inline-block;
+    width: 200px;
+    color:#000000;
+    background-color:#eeeeee;
+    text-align: center;
+    padding: 4px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+a:hover, a:active {
+    background-color:#808080;
+}
