@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta name="description" content="I see you" />
+      <title>Here be dragons</title>
+      <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+      <meta charset="utf-8">
+      <link rel="stylesheet" type="text/css" href="css/siwu.css">
+    </head>
+    <body>
+        <section>
+            <h1>Web- ja webpalvelinohjelmoinnin harjoitustyö</h1>
+            <a href="peli.php">Tästä pääsee peliin</a>
+            <p>Tekijät: Jari Loippo ja Matti Schroderus</p>
+            <h3>Tavoite</h3>
+            <p>
+                Tavoitteena on luoda webselaimessa toimiva peli, jonka tavoitteena on ostaa ja myydä asuntoja tienataksesi rahaa. Peli on suunniteltu siten että pelaaja progressio, eli omistetut talot ja rahat, tallentuu json tiedostoon palvelinpuolelle.<br><br>
+            </p>
+            <h3>Työn selostus</h3>
+            <p>
+                Pelin kartta luodaan samalla tavalla kuin kurssin golfkenttä tehtävässä. Mutta nyt kentät haetaan meidän omasta json tiedostosta joka haettiin googlelta. <br><br>
+                
+                Tähän tiedostoon lisätään hinnat, omistaja ja muita tietoja PHP skriptillä ja tallennetaan player.json tiedostoon. Tähän tarvittavat skriptit löytyy test.html tiedostosta. Näitä ei lisätty ajax.php tiedostoon, koska emme luultavasti ehdi lisätä tähän muita pelaajia. <br>
+                <img src="kuvat/testscript.jpg" alt="test skripti" width="600">
+                <br><br>
+                
+                js/siwu.js tiedosto luo ajaxin avulla karttaan markkerit ja listenerit. Kuten golfkentät esimerkissä, kun markkereita näpäytetään niistä tulee ikkuna jossa näkyy paikan nimi, omistaja, id:n ja pari nappia. Näitä painamalla siirrytään javascriptiin funktioon joka kutsuu uuden jQuery post funktion joka lähettää paikan id:n ja myynti tai osto käskyn serverille.<br>
+                <img src="kuvat/ajaxskripti.jpg" alt="test skripti" width="600"> <br><br>
+                
+                Serveripuolella PHP lukee if lausekkeilla annetun käskyn ja suorittaa sen määräämän skriptin. PHP käyttää file_get/put_contents funktiota ladatakseen player.json tiedoston arrayhyn. Arrayta muokataan lisäämällä uusi omistaja tai korottamalla asunnon tasoa. Kun serveri on saanut täällä tehtyä hommansa se voisi lähettää takaisin ajaxille viestin että se voi päivittää karttansa. En vielä tosin keksinyt miten implementoida tuota, joten pelaajan täytyy päivittää sivu jotta muutokset tulevat näkyviin.<br>
+                <img src="kuvat/phpkuva.jpg" alt="test skripti" width="600"><br><br>
+                
+                Työ jakautui kahtia jossa Matti keskittyi selinpuolen ohjelmointiin ja Jari Keskittyi palvelinpuolen ohjelmointiin.
+                <br><br>
+                <img src="kuvat/postskriptit.jpg" alt="test skripti" width="600"><br>
+                <img src="kuvat/pelikuva.jpg" alt="test skripti" width="300">
+                <img src="kuvat/alertkuva.jpg" alt="test skripti" width="300">
+            </p>
+        </section>
+    </body>
+</html>

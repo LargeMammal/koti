@@ -1,0 +1,9 @@
+{
+    "Player" : [
+        {
+            "player" : true,
+            "name" : "Jari",
+            "money" : 30000
+        }
+    ]
+}
