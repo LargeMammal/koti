@@ -9,7 +9,7 @@
     </head>
     <body>
         <header>
-            <h1>Hello!</h1>
+            <h1>Welcome to my corner of Internet!</h1>
             <nav>
                 <a href="main/hobbies.html">Harrastukset</a>
                 <a href="main/programs.html">Ohjelmat</a>
@@ -19,22 +19,19 @@
         
         <section>
             <p style="text-align:center; padding:5px;"><img style="border: solid 1px black" src="main/img/mina.jpg" alt="mina"></p>
-            <h2>Hei</h2>
-            <p>Teretulemast sivuilleni. Suoritan tällä hetkellä pientä yllä pitoa. Koitan tehdä sivusta helpommin luettavan.</p>
-            <h2>
-                Lyhyesti minusta
-            </h2>
-            <p>
-                Nimeni on Jari Loippo. Olen toisen vuoden tieto- ja viestintätekniikan opiskelija. Valitsin ohjelmistotekniikan suuntautumisen, koska haluan kokea ohjelmointia mahdollisimman laajalti.
-            </p>
-            <p>
-                Harrastukset sivulta löytyy tietoa harrastuksista ja ei töihin liittyvistä asioista. Projektit sivulta pääsee ihailemaan koulutehtäviä.
-            </p>
+            <p style="text-align:center;"><strong>Nimi:</strong> Jari Loippo</p>
+            <p style="text-align:center;"><strong>Ala:</strong> Ohjelmistotekniikka(ICT)</p>
             <h2>
                 Taivoitteet
             </h2>
+            <ul>
+                <li>Peli ohjelmointi</li>
+                <li>Sulatetut järjestelmät</li>
+                <li>Mobiili ohjelmointi</li>
+                <li>Ryhmätöskentely</li>
+            </ul>
             <p>
-                Tavoitteeni on päästä kokeilemaan taitoja tosielämän tilanteissa. Arvostaisin jos pääsisin tekemään töitä ryhmässä. Uskon että oppisin tällöin tehokkaammin, kun pystyisin vertailemaan itseäni muiden töihin. 
+                
             </p>
             <h2>
                 Osaamisalueet
@@ -45,11 +42,33 @@
             <ul>
                 <li>Tietokoneiden kasaus ja ylläpito</li>
                 <li>Windows, linux ja Mac käyttöjärjestelmien hallinta</li>
-                <li>Ohjelmointi seuraavilla kielillä: C, C++, C#, JavaScript, HTML, CSS, PHP, (my)SQL</li>
+                <li>Ohjelmointi seuraavilla kielillä: C, C++, C#, JavaScript, HTML, CSS, PHP ja (my)SQL</li>
                 <li>jQuery ja ajax on myös hallinnassa</li>
                 <li>Google API:en kanssa on tullut myös työkenneltyä</li>
+                <li>LAMP</li>
                 <li>Front ja Back endien ohjelmointi. Esimerkki: projektit -> ttms0500 -> tuo</li>
                 <li>Arduino pohjaisten mikro-ohjain/elektroniikkalaitteiden ohjelmointi</li>
+            </ul>
+            <h2>Mielenkiintoisia kursseja</h2>
+            <ul>
+                <li>Kyberturvallisuus(4)</li>
+                <li>Järjestelmätestaus(on going)
+                    <ul>
+                        <li>Järjestelmätestaus kurssilla opetellaan yksikkö ja hyäksymistestausta</li>
+                        <li><a style="width:auto;" href="https://github.com/JAMK-IT/TTOS0900-Jarjestelmatestaus/wiki">Jäjestelmätestauksen wiki</a> </li>
+                    </ul>
+                </li>
+                <li>Ohjelmistoprojekti(on going)
+                    <ul>
+                        <li>Ohjelmistoprojekti kurssilla harjoitellaan ohjelmistoprojektin läpivientiä ja ohjelmistoprojektin käsitteitä(sprint, etapit jne...).</li>
+                        <li><a style="width:auto;" href="https://github.com/JAMK-IT/TTOS0800-Ohjelmistoprojekti/wiki">Ohjelmistoprojektin wiki</a>
+                        </li>
+                    </ul>
+                </li>
+                <li></li>
+            </ul>
+            <ul>
+                <li>Suomi: äidinkieli</li>
             </ul>
             <h2>
                 Kielitaito
@@ -61,22 +80,11 @@
                 <li>Espania: alkeet</li>
             </ul>
             <h2>
-                Historia
+                Sotilasarvo
             </h2>
-            <h3>
-                Ammattikorkeakoulu (JAMK), 10.08.2015-10.05.2019
-            </h3>
             <ul>
-                <li>Insinööriopiskelija, tieto- ja viestintätekniikan koulutusohjelma</li>
-                <li>Suuntautumien: Ohjelmistotekniikka</li>
-                <li>Suoritettujen opintopisteiden määrä 23 op (240op)</li>
-            </ul>
-            <h3>
-                Varusmiespalvelus, 2013
-            </h3>
-            <ul>
-                <li>Keuruun Pioneerirykmentti</li>
                 <li>Pioneeri</li>
+                <li>Keuruun Pioneerirykmentti 2013</li>
             </ul>
         </section>
         <footer><p>Mandatory footer.</p></footer>
