@@ -9,7 +9,7 @@
     </head>
     <body>
         <header>
-            <h1>Welcome to my corner of Internet!</h1>
+            <h1>Welcome to my corner of the Internet!</h1>
             <nav>
                 <a href="main/hobbies.html">Harrastukset</a>
                 <a href="main/programs.html">Ohjelmat</a>
@@ -21,6 +21,12 @@
             <p style="text-align:center; padding:5px;"><img style="border: solid 1px black" src="main/img/mina.jpg" alt="mina"></p>
             <p style="text-align:center;"><strong>Nimi:</strong> Jari Loippo</p>
             <p style="text-align:center;"><strong>Ala:</strong> Ohjelmistotekniikka(ICT)</p>
+            <h2>
+                Pikkusen minusta
+            </h2>
+            <p>
+                Olen Arch Linux jamppa. Linux hörhöille tuo lause kertoo kaiken tarpeellisen. Mutta muilta taustoilta tuleville: Olen valmis tekemään extra työtä tai opiskelemaan pikkusen enemmän saavuttaakseni haluamani tuloksen. Tykkään pitää asiat simppeleinä ja elegantteina. 
+            </p>
             <h2>
                 Taivoitteet
             </h2>
