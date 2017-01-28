@@ -65,10 +65,6 @@
                         </li>
                     </ul>
                 </li>
-                <li></li>
-            </ul>
-            <ul>
-                <li>Suomi: äidinkieli</li>
             </ul>
             <h2>
                 Kielitaito
