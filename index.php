@@ -25,16 +25,16 @@
                 Pikkusen minusta
             </h2>
             <p>
-                Olen Arch Linux jamppa. Linux hörhöille tuo lause kertoo kaiken tarpeellisen. Mutta muilta taustoilta tuleville: Olen valmis tekemään extra työtä tai opiskelemaan pikkusen enemmän saavuttaakseni haluamani tuloksen. Tykkään pitää asiat simppeleinä ja elegantteina. 
+                Olen toisen vuoden oohjelmistotekniikan opiskelija. Seuraan Arch Linuxin periaatteita. Pidän asiat siis simppeleinä ja tehokaina. Tykkään nikkaroida microcontrollereilla ja IoT laitteilla. Olen mm. rakennellut 3D printteriä vanhasta tulostimesta.
             </p>
             <h2>
-                Taivoitteet
+                Toivotut työtehtävät
             </h2>
             <ul>
                 <li>Peli ohjelmointi</li>
                 <li>Sulatetut järjestelmät</li>
                 <li>Mobiili ohjelmointi</li>
-                <li>Ryhmätöskentely</li>
+                <li>Front- tai backendien ohjelmointi</li>
             </ul>
             <p>
                 
