@@ -25,7 +25,7 @@
                 Pikkusen minusta
             </h2>
             <p>
-                Olen toisen vuoden oohjelmistotekniikan opiskelija. Seuraan Arch Linuxin periaatteita. Pidän asiat siis simppeleinä ja tehokaina. Tykkään nikkaroida microcontrollereilla ja IoT laitteilla. Olen mm. rakennellut 3D printteriä vanhasta tulostimesta.
+                Olen toisen vuoden ohjelmistotekniikan opiskelija. Seuraan Arch Linuxin periaatteita. Pidän siis asiat simppeleinä ja tehokaina. Tykkään nikkaroida mikrokontrollerialustoilla ja IoT laitteilla. Olen mm. rakennellut 3D printteriä vanhasta tulostimesta.
             </p>
             <h2>
                 Toivotut työtehtävät
@@ -34,7 +34,7 @@
                 <li>Peli ohjelmointi</li>
                 <li>Sulatetut järjestelmät</li>
                 <li>Mobiili ohjelmointi</li>
-                <li>Front- tai backendien ohjelmointi</li>
+                <li>Front- tai back endien ohjelmointi</li>
             </ul>
             <p>
                 
