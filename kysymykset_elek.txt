@@ -1,0 +1,35 @@
+Eleketorniikan tentin kysymykset
+
+1. 
+mitoita kytkentä siten, että AD-muuntimelle saadaan
+0V-5V signaali (Kytkentä + signaalit annettu) (NTC)
+(Vastuksille arvot).
+Izmax = Pz/Uz
+R1 = (Ucd-Ux)/Izmax
+RL = Ux/100mA
+
+2.
+Kytkinkäyttö (BJT/FET). Datalehti annettu.
+Ominaiskäyrältä valinta. Pc = Uce * Ic.
+Kuumeneeko? Pc = (Tj - Ta) / Rthja
+
+3.
+Mitoita diodisillan kondensaattori siten että rippeli
+korkeintaan 5/10%.
+Mitoita zener-stabilointi.
+Ur=Umax*5%
+Umax/(2*R*f*Ur)
+
+4. 
+Mitoita RC ja LC -alipäästösuodattimet siten että
+kaikki 10k Hz suuremmat taajuudet suodattuvat.
+Piirrä vaihe- ja vahvistuskäyrät (taajuuden funktiona).
+Vertaile taulukossa AD-muuntimien ominaisuuksia -
+muuntimia: DLASH, integroiva, peräkkäisaproksimaatio.
+RC:
+R = 1000 Ohm
+C = 1/(2*pi*f*R)
+
+LC:
+L = 10ÂµH
+C = (1/(2*pi*f*sqrt(L)))^2
