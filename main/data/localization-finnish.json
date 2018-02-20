@@ -1,0 +1,45 @@
+{
+	"header":{
+		"news":{
+			"news":"Uutiset",
+			"technology":"Teknologia",
+			"finland":"Suomi"
+		},
+		"videos":"Videot",
+		"opinions":"Mielipiteet",
+		"about":"Meistä",
+		"login":{
+			"login":"Kirjaudu",
+			"logout":"Ulostaudu",
+			"publish":"Julkaise",
+			"manager":"Manageri"
+		}
+	},
+	"home":{
+
+	},
+	"news":{
+
+	},
+	"videos":{
+
+	},
+	"opinions":{
+
+	},
+	"about":{
+		"mission":"",
+		"team":"Tapaa tiimi:",
+		"member":{
+			"name":"Nimi",
+			"email":"Email",
+			"role":"Rooli"
+		}
+	},
+	"account":{
+
+	},
+	"footer":{
+		"nm24":"Nordic Media 24"
+	}
+}

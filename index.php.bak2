@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zxx">
+	<head>
+	    <title>Nordic Media 24</title>
+	    <meta name="description" content="Nordic Media 24">
+	    <meta charset="utf-8">
+
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge" >
+
+ 		<link rel="stylesheet" type="text/css" href="main/css/common.css">
+		<link rel="icon" href="main/data/img/nordic_media24.png" type="image/x-icon" />
+	</head>
+	<body>
+	    <header>
+			<noscript><h2>Sorry guy/gal. This site demands javascript. So either enable javascript or get a browser that can</h2></noscript>
+	    </header>
+
+	    <section>
+			<section class="content"></section>
+	    </section>
+	    <footer><p>Work in progress</p></footer>
+
+		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+	</body>
+</html>

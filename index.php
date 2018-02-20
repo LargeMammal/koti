@@ -1,97 +1,65 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Pääsivu</title>
-        <meta name="description" content="My home page">
-        <meta charset="utf-8">
-        
-        <link rel="stylesheet" type="text/css" href="main/css/common.css">
-    </head>
-    <body>
-        <header>
-            <h1>Welcome to my corner of the Internet!</h1>
-            <nav>
-                <a href="main/hobbies.html">Harrastukset</a>
-                <a href="main/programs.html">Ohjelmat</a>
-                <a href="projects/">Projektit</a>
-		<a href="https://github.com/K1729">Github</a>
-		<a href="https://gitlab.com/K1729">Gitlab</a>
-		<a href="https://www.linkedin.com/in/jari-loippo-272331115/">LinkedIn</a>
-            </nav>
-        </header>
-        
-        <section>
-            <p style="text-align:center; padding:5px;"><img style="border: solid 1px black" src="main/img/mina.jpg" alt="mina"></p>
-            <p style="text-align:center;"><strong>Nimi:</strong> Jari Loippo</p>
-            <p style="text-align:center;"><strong>Ala:</strong> Ohjelmistotekniikka(ICT)</p>
-            <h2>
-                Pikkusen minusta
-            </h2>
-            <p>
-                Olen toisen vuoden ohjelmistotekniikan opiskelija. Seuraan Arch Linuxin periaatteita. Pidän siis asiat simppeleinä ja tehokaina. Tykkään nikkaroida mikrokontrollerialustoilla ja IoT laitteilla. Olen mm. rakennellut 3D printteriä vanhasta tulostimesta.
-            </p>
-            <h2>
-                Toivotut työtehtävät
-            </h2>
-            <ul>
-                <li>Peli ohjelmointi</li>
-                <li>Sulatetut järjestelmät</li>
-                <li>Mobiili ohjelmointi</li>
-                <li>Front- tai back endien ohjelmointi</li>
-            </ul>
-            <p>
-                
-            </p>
-            <h2>
-                Osaamisalueet
-            </h2>
-            <h3>
-                Taidot
-            </h3>
-            <ul>
-                <li>Tietokoneiden kasaus ja ylläpito</li>
-                <li>Windows, linux ja Mac käyttöjärjestelmien hallinta</li>
-                <li>Ohjelmointi seuraavilla kielillä: C, C++, C#, JavaScript, HTML, CSS, PHP ja (my)SQL</li>
-                <li>jQuery ja ajax on myös hallinnassa</li>
-                <li>Google API:en kanssa on tullut myös työkenneltyä</li>
-                <li>LAMP</li>
-                <li>Front ja Back endien ohjelmointi. Esimerkki: projektit -> ttms0500 -> tuo</li>
-                <li>Arduino pohjaisten mikro-ohjain/elektroniikkalaitteiden ohjelmointi</li>
-            </ul>
-            <h2>Mielenkiintoisia kursseja</h2>
-            <ul>
-                <li>Kyberturvallisuus(4)</li>
-                <li>Järjestelmätestaus(on going)
-                    <ul>
-                        <li>Järjestelmätestaus kurssilla opetellaan yksikkö ja hyäksymistestausta</li>
-                        <li><a style="width:auto;" href="https://github.com/JAMK-IT/TTOS0900-Jarjestelmatestaus/wiki">Jäjestelmätestauksen wiki</a> </li>
-                    </ul>
-                </li>
-                <li>Ohjelmistoprojekti(on going)
-                    <ul>
-                        <li>Ohjelmistoprojekti kurssilla harjoitellaan ohjelmistoprojektin läpivientiä ja ohjelmistoprojektin käsitteitä(sprint, etapit jne...).</li>
-                        <li><a style="width:auto;" href="https://github.com/JAMK-IT/TTOS0800-Ohjelmistoprojekti/wiki">Ohjelmistoprojektin wiki</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-            <h2>
-                Kielitaito
-            </h2>
-            <ul>
-                <li>Suomi: äidinkieli</li>
-                <li>Englanti: erinomainen</li>
-                <li>Ruotsi: alkeet</li>
-                <li>Espania: alkeet</li>
-            </ul>
-            <h2>
-                Sotilasarvo
-            </h2>
-            <ul>
-                <li>Pioneeri</li>
-                <li>Keuruun Pioneerirykmentti 2013</li>
-            </ul>
-        </section>
-        <footer><p>Mandatory footer.</p></footer>
-    </body>
-</html>
+<?php
+
+// get the HTTP method, path and body of the request
+$method = $_SERVER['REQUEST_METHOD'];
+$request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
+$input = json_decode(file_get_contents('php://input'),true);
+
+// connect to the mysql database
+$link = mysqli_connect('localhost', 'user', 'pass', 'dbname');
+mysqli_set_charset($link,'utf8');
+
+// retrieve the table and key from the path
+$table = preg_replace('/[^a-z0-9_]+/i','',array_shift($request));
+$key = array_shift($request)+0;
+
+// escape the columns and values from the input object
+$columns = preg_replace('/[^a-z0-9_]+/i','',array_keys($input));
+$values = array_map(function ($value) use ($link) {
+	if ($value===null) return null;
+	return mysqli_real_escape_string($link,(string)$value);
+},array_values($input));
+
+// build the SET part of the SQL command
+$set = '';
+for ($i=0;$i<count($columns);$i++) {
+	$set.=($i>0?',':'').'`'.$columns[$i].'`=';
+	$set.=($values[$i]===null?'NULL':'"'.$values[$i].'"');
+}
+
+// create SQL based on HTTP method
+switch ($method) {
+	case 'GET':
+		$sql = "select * from `$table`".($key?" WHERE id=$key":''); break;
+	case 'PUT':
+		$sql = "update `$table` set $set where id=$key"; break;
+	case 'POST':
+		$sql = "insert into `$table` set $set"; break;
+	case 'DELETE':
+		$sql = "delete `$table` where id=$key"; break;
+}
+
+// excecute SQL statement
+$result = mysqli_query($link,$sql);
+
+// die if SQL statement failed
+if (!$result) {
+	http_response_code(404);
+	die(mysqli_error());
+}
+
+// print results, insert id or affected row count
+if ($method == 'GET') {
+	if (!$key) echo '[';
+	for ($i=0;$i<mysqli_num_rows($result);$i++) {
+		echo ($i>0?',':'').json_encode(mysqli_fetch_object($result));
+	}
+	if (!$key) echo ']';
+} elseif ($method == 'POST') {
+	echo mysqli_insert_id($link);
+} else {
+	echo mysqli_affected_rows($link);
+}
+
+// close mysql connection
+mysqli_close($link);
