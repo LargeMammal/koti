@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PHP lomake</title>
+    </head>
+    
+    <body>
+        <form method="get" action="<?php echo $_SERVER['PHP-SELF'];?>">
+            <p>Osta talo nro:</p><br>
+            <input type="text" name="buy" placeholder="0"><br>
+            <input type="submit" name="nappi" value="Osta">
+        </form>
+        
+        <p>Stars: <script language="php">
+            if (isset($_GET["nappi"])) {
+                $jsonString = file_get_contents("data/kentatC.json");
+                $data = json_decode($jsonString, true);
+                $results = $data["results"];
+                $number = 0;
+                
+                foreach ($results as $thing) {
+                    $hinta = rand(20000, 50000);
+                    $thing["price"] = $hinta;
+                    $thing["owner"] = "Computer";
+                    $thing["number"] = $number;
+                    $thing["level"] = 0;
+                    $results[$number] = $thing;
+                    $number++;
+                }
+                
+                echo var_dump($results);
+                $data["results"] = $results;
+                $jsonString = json_encode($data);
+                file_put_contents("user/player.json", $jsonString);
+            }
+            </script></p>
+    </body>
+    
+</html>
