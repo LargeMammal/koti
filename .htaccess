@@ -1,0 +1,19 @@
+# To enable php, uncomment the following line and change USER to your userid. e.g., if you$
+# Please be aware that PHP scripts will run under your credentials. See ~/instructions/ fo$
+#Action php-cgi /~K1729/cgi-bin/php-fastcgi # This will cause internal server error 
+# If used on non php-cgi system
+
+#AddDefaultCharset UTF-8
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_FILENAME} !-s
+        RewriteRule ^(.*)$ index.php?request=$1 [QSA,NC,L]
+        
+        RewriteCond %{REQUEST_FILENAME} -d
+        RewriteRule ^(.*)$ index.php [QSA,NC,L]
+
+        RewriteCond %{REQUEST_FILENAME} -s
+        RewriteRule ^(.*)$ index.php [QSA,NC,L]
+</IfModule>
