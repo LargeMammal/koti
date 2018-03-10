@@ -1,5 +1,7 @@
+_notes/*
 projects/*
-#.htaccess # Actually needed if one wants to do RESTful API.
+cgi-bin/*
+.htaccess # Actually needed if one wants to do RESTful API.
 # We could do it machine by machine. But initially we're going to do it like this.
 
 # Compiled source #
