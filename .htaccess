@@ -1,7 +1,6 @@
-# To enable php, uncomment the following line and change USER to your userid. e.g., if you$
-# Please be aware that PHP scripts will run under your credentials. See ~/instructions/ fo$
-#Action php-cgi /~K1729/cgi-bin/php-fastcgi # This will cause internal server error 
-# If used on non php-cgi system
+# To enable php, uncomment the following line and change USER to your userid. e.g., if your username is 'c5431', change /~USER/ to /~c5431/
+# Please be aware that PHP scripts will run under your credentials. See ~/instructions/ for further details
+Action php-cgi /~K1729/cgi-bin/php-fastcgi
 
 #AddDefaultCharset UTF-8
 
