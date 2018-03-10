@@ -5,15 +5,20 @@
 
 #AddDefaultCharset UTF-8
 
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_FILENAME} !-s
-        RewriteRule ^(.*)$ index.php?request=$1 [QSA,NC,L]
-        
-        RewriteCond %{REQUEST_FILENAME} -d
-        RewriteRule ^(.*)$ index.php [QSA,NC,L]
+#DocumentRoot "/home/mammal/public_html/"
 
-        RewriteCond %{REQUEST_FILENAME} -s
-        RewriteRule ^(.*)$ index.php [QSA,NC,L]
+#Options +FollowSymLinks
+<IfModule mod_rewrite.so>
+    RewriteEngine on
+
+    # redirect all api calls to api.php
+    RewriteRule "^api$" "api.php" [L,NC]
+
+    # If the request is a file, folder or symlink that exists, serve it up
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # otherwise, serve your index.html app
+    RewriteRule ^(.+)$ index.php [L]
 </IfModule>
