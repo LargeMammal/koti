@@ -1,8 +1,8 @@
-_notes/*
+_notes/
 projects/*
-cgi-bin/*
-.htaccess # Actually needed if one wants to do RESTful API.
-# We could do it machine by machine. But initially we're going to do it like this.
+cgi-bin/
+.htaccess # Need to study effects of this
+test.php
 
 # Compiled source #
 ###################
