@@ -7,17 +7,17 @@ Action php-cgi /~K1729/cgi-bin/php-fastcgi
 #DocumentRoot "/home/mammal/public_html/"
 
 #Options +FollowSymLinks
-<IfModule mod_rewrite.so>
-    RewriteEngine on
+#<IfModule mod_rewrite.so>
+#    RewriteEngine on
 
     # redirect all api calls to api.php
-    RewriteRule "^api$" "api.php" [L,NC]
+#    RewriteRule "^api$" "api.php" [L,NC]
 
     # If the request is a file, folder or symlink that exists, serve it up
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+#    RewriteCond %{REQUEST_FILENAME} -f [OR]
+#    RewriteCond %{REQUEST_FILENAME} -d
+#    RewriteRule ^ - [L]
 
-    # otherwise, serve your index.html app
-    RewriteRule ^(.+)$ index.php [L]
-</IfModule>
+    # otherwise, serve your index.php app
+#    RewriteRule ^(.+)$ index.php [L]
+#</IfModule>
