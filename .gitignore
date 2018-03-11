@@ -1,7 +1,7 @@
 _notes/
 projects/*
 cgi-bin/
-.htaccess # Need to study effects of this
+.htaccess # Need to study effects of this. Is needed for true REST API
 test.php
 
 # Compiled source #

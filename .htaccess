@@ -2,16 +2,13 @@
 # Please be aware that PHP scripts will run under your credentials. See ~/instructions/ for further details
 Action php-cgi /~K1729/cgi-bin/php-fastcgi
 
-#AddDefaultCharset UTF-8
+AddDefaultCharset UTF-8
 
-#DocumentRoot "/home/mammal/public_html/"
-
-#Options +FollowSymLinks
-#<IfModule mod_rewrite.so>
+#<IfModule mod_rewrite.c>
 #    RewriteEngine on
 
     # redirect all api calls to api.php
-#    RewriteRule "^api$" "api.php" [L,NC]
+#    RewriteRule "api" "api.php" [L,NC]
 
     # If the request is a file, folder or symlink that exists, serve it up
 #    RewriteCond %{REQUEST_FILENAME} -f [OR]
