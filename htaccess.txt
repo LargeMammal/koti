@@ -3,7 +3,8 @@
 #Action php-cgi /~K1729/cgi-bin/php-fastcgi
 
 AddDefaultCharset UTF-8
-AddType application/x-httpd-php .php
+# AddType is necessary because other rewriter doesn't understand to execute 
+AddType application/x-httpd-php .php 
 
 <IfModule mod_rewrite.c>
     RewriteEngine on
