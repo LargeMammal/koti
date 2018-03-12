@@ -1,4 +1,6 @@
 <?php
+// TODO: Refactor this further
+
 // Load header
 function loadHeader() {
     $header = "<header><h1>Welcome to my corner of the Internet!</h1><nav>";

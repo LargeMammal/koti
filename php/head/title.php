@@ -1,4 +1,5 @@
 <?php 
+// TODO: Needs refactoring
 // Load footer
 function loadTitle() {
     return '<title>Pääsivu</title>

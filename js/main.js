@@ -6,6 +6,7 @@ The page does not resize correctly.
 The video selection is not pretty. You might want to improve it.
 Translations
 You need to split this file into multiples.
+REFACTOR
 */
 
 /* Set cookie with certain name, value and expiration date*/
