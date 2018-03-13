@@ -1,0 +1,8 @@
+{
+    "Database": "localhost",
+    "Tables": {
+        "Users": "users",
+        "Articles": "articles",
+        "Languages": "languages"
+    }
+}
