@@ -28,26 +28,38 @@ function getRootDir() {
     return implode("/", $output);
 }
 
-function checkFile($file) {
-	$pwd = "/home/mammal/public_html/";
-	if (!file_exists($pwd."main/data/". $file .".json")) {
-		$data = array();
-		$json = json_encode($data);
-		file_put_contents($pwd."main/data/localization-". $language .".json", $json);
+// checkFile checks if file exists.
+function checkFile($pwd) {
+	if (!file_exists($pwd)) {
 		return false;
-	} else {
-		return true;
-	}
+    }
+    return true;
 }
 
-// This shouldn't be needed anymore
-if(isset($_POST['file']) &&
-!empty($_POST['file'])) {
-	$file = $_POST['file'];
-	if (checkFile($file)) {
-		echo "File already exists";
-	} else {
-		echo "File created";
-	}
+// loadFile gets file and returns contents in an array
+function loadFile($file) {
+    $pwd = getRootDir() . "/" . $file; 
+    $output = [
+        "err" => "hello", 
+        "data" => "",
+    ];
+    if (!checkFile($pwd)) {
+        $output["err"] = "file.loadFile: File not found";
+        return $output;
+    }
+    $json = file_get_contents($pwd);
+    $data = json_decode($json);
+    echo implode("", $data);
+    if (is_array($data)) {
+        foreach ($data as $key => $val) {
+            if (is_array($val)) {
+                break;
+            }
+            $output["data"] = $key . ": " . $val;
+        }
+    } else {
+        $output = "file.loadFile: Could not read data";
+    }
+    return $output;
 }
 ?>

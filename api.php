@@ -1,31 +1,43 @@
 <?php
-    // This isn't necessary anymore
-    echo "Request method: " . $_SERVER["REQUEST_METHOD"] . "<br>";
-    echo "Path info: " . $_SERVER["PATH_INFO"] . "<br>";
-    echo "Request uri: " . $_SERVER["REQUEST_URI"] . "<br>";
-    echo "Server signature: " . $_SERVER["SERVER_SIGNATURE"] . "<br>";
+include "php/loadAll.php";
+include "php/miscellaneous/file.php";
+// These are for research purposes.
+//$str = "";
+//foreach ($_SERVER as $key => $val) {
+//    $str .= $key . ":" . $val . "<br>";
+//} 
 
-    // Study about cookies and how to load the language from header
-    if ($_SERVER["REQUEST_METHOD"] == "GET") {
-        echo "api.php: Recorded GET request!" . "<br>";
-        // Get values from URI
-        $str = $_SERVER["PATH_INFO"];
-        $arr = explode("/", $str); // Explode path into variables
-        // Count the variables
-        $len = sizeof($arr);
-        // Split into multiple paths
-        switch ($len) {
-            case 1: // Present the base site
-                // Refactor the sites into functions
-                break;
-            case 2: // Load site with two variables
-                // somesite()
-                break;
-            default: // The default case: just load the main site.
-                include "index.php";
+$config = loadFile("config/default-config.json");
+if (empty($config["data"])) {
+    echo "Error: " . $config["err"] . ", Data: empty<br>";
+} else {
+    $str = "";
+    if (is_array($config)) {
+        foreach ($config as $key => $val) {
+            $str .= $val;
         }
-        // Do something with those variables
     } else {
-        echo "api.php: only GET method supported";
+        $str .= "could not read data";
     }
+    $str .= "<br>";
+    echo $str;
+}
+// Study about cookies and how to load the language from header
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    // Get values from URI
+    $str = $_SERVER["PATH_INFO"];
+    $arr = explode("/", $str); // Explode path into variables
+    // Count the variables
+    $len = sizeof($arr);
+    // Split into multiple paths
+    switch ($len) {
+        case 1: // Present the base site
+            // Refactor the sites into functions
+        case 2: // Load site with two variables
+            // somesite()
+        default: // The default case: just load the main site.
+            echo loadAll();
+    }
+    // Do something with those variables
+}
 ?>

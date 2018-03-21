@@ -6,7 +6,7 @@ include "php/body/body.php";
 include "php/body/footer.php";
 // Load the whole page 
 function loadAll() {
-    $str .= "<!DOCTYPE html><html><head>";
+    $str = "<!DOCTYPE html><html><head>";
     $str .= loadTitle();
     $str .= "</head><body>";
     $str .= loadHeader();
