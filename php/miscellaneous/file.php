@@ -2,7 +2,8 @@
 // TODO: Break the conditioning!!!
 
 // getRootDir gets the root directory of the app.
-// This is useful when you need to access files in highly refactored environment. 
+// This is useful when you need to access files 
+// in highly refactored environment. 
 function getRootDir() {
     // getcwd gives you the working directory
     $path = getcwd();
@@ -28,38 +29,20 @@ function getRootDir() {
     return implode("/", $output);
 }
 
-// checkFile checks if file exists.
-function checkFile($pwd) {
-	if (!file_exists($pwd)) {
-		return false;
-    }
-    return true;
-}
-
-// loadFile gets file and returns contents in an array
+// loadFile gets file and returns contents in an object
 function loadFile($file) {
     $pwd = getRootDir() . "/" . $file; 
     $output = [
-        "err" => "hello", 
+        "err" => "", 
         "data" => "",
     ];
-    if (!checkFile($pwd)) {
+    if (!file_exists($pwd)) {
         $output["err"] = "file.loadFile: File not found";
         return $output;
     }
-    $json = file_get_contents($pwd);
-    $data = json_decode($json);
-    echo implode("", $data);
-    if (is_array($data)) {
-        foreach ($data as $key => $val) {
-            if (is_array($val)) {
-                break;
-            }
-            $output["data"] = $key . ": " . $val;
-        }
-    } else {
-        $output = "file.loadFile: Could not read data";
-    }
+    $json = file_get_contents($pwd); // reads file into string
+    $data = json_decode($json); // turns json into php object
+    $output["data"] = $data;
     return $output;
 }
 ?>

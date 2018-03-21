@@ -11,16 +11,7 @@ $config = loadFile("config/default-config.json");
 if (empty($config["data"])) {
     echo "Error: " . $config["err"] . ", Data: empty<br>";
 } else {
-    $str = "";
-    if (is_array($config)) {
-        foreach ($config as $key => $val) {
-            $str .= $val;
-        }
-    } else {
-        $str .= "could not read data";
-    }
-    $str .= "<br>";
-    echo $str;
+    echo $config["data"];
 }
 // Study about cookies and how to load the language from header
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
