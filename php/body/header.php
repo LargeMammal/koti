@@ -1,11 +1,10 @@
 <?php
 include "nav.php";
-// TODO: Refactor this further
-// TODO: Split this into header and nav
 
 // Load header
 function loadHeader() {
     $header = "<header>";
+    //if (file_exists("css/common.css")) $header .= "File exists!";
     // Get title from db
     $header .= "<h1>Welcome to my corner of the Internet!</h1>";
     $header .= loadNav();

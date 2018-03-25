@@ -1,18 +1,7 @@
 <?php
 include "php/loadAll.php";
 include "php/miscellaneous/file.php";
-// These are for research purposes.
-//$str = "";
-//foreach ($_SERVER as $key => $val) {
-//    $str .= $key . ":" . $val . "<br>";
-//} 
 
-$config = loadFile("config/default-config.json");
-if (empty($config["data"])) {
-    echo "Error: " . $config["err"] . ", Data: empty<br>";
-} else {
-    echo $config["data"];
-}
 // Study about cookies and how to load the language from header
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     // Get values from URI

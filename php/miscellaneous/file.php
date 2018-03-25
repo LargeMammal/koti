@@ -29,8 +29,25 @@ function getRootDir() {
     return implode("/", $output);
 }
 
-// loadFile gets file and returns contents in an object
-function loadFile($file) {
+// parseObject recursively reads through object vars
+// and returns them in an array. Runs only 20 times max.
+function parseObject($obj, $i = 0) {
+    $output = [];
+    if ($i > 20) {
+        return $output;
+    }
+    foreach ($obj as $key=>$val) {
+        if (is_object($val)) {
+            $output[$key] = parseObject($val, ($i+1));
+        } else {
+            $output[$key] = $val;
+        }
+    }
+    return $output;
+}
+
+// loadFile gets file and returns contents in an array
+function LoadJSON($file) {
     $pwd = getRootDir() . "/" . $file; 
     $output = [
         "err" => "", 
@@ -42,7 +59,7 @@ function loadFile($file) {
     }
     $json = file_get_contents($pwd); // reads file into string
     $data = json_decode($json); // turns json into php object
-    $output["data"] = $data;
+    $output["data"] = parseObject($data);
     return $output;
 }
 ?>

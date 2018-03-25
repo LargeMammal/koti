@@ -3,7 +3,7 @@
 // Load footer
 function loadBody() {
     return "<section>
-            <p style=\"text-align:center; padding:5px;\"><img style=\"border: solid 1px black\" src=\"img/mina.jpg\" alt=\"mina\"></p>
+            <p style=\"text-align:center; padding:5px;\"><img style=\"border: solid 1px black\" src=\"https://tardigrade.ddns.net/~mammal/img/mina.jpg\" alt=\"mina\"></p>
             <p style=\"text-align:center;\"><strong>Nimi:</strong> Jari Loippo</p>
             <p style=\"text-align:center;\"><strong>Ala:</strong> Ohjelmistotekniikka(ICT)</p>
             <h2>
