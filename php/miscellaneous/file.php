@@ -31,6 +31,7 @@ function getRootDir() {
 
 // parseObject recursively reads through object vars
 // and returns them in an array. Runs only 20 times max.
+// Recursiot on perseestä. Koita muuttaa iteratiiviseksi.
 function parseObject($obj, $i = 0) {
     $output = [];
     if ($i > 20) {

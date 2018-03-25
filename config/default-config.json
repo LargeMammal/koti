@@ -1,8 +1,23 @@
 {
-    "Database": "localhost",
-    "Tables": {
-        "Users": "users",
-        "Articles": "articles",
-        "Languages": "languages"
-    }
+    "Name":"tardigrade.ddns.net",
+    "Localhost": {
+        "User":"site",
+        "Site":"localhost",
+        "Database":"home",
+        "Tables": {
+            "Users": "users",
+            "Articles": "articles",
+            "Languages": "languages"
+            }
+        },
+    "Tardigrade": {
+        "User":"site",
+        "Site":"tardograde.ddns.net",
+        "Database":"home",
+        "Tables": {
+            "Users": "users",
+            "Articles": "articles",
+            "Languages": "languages"
+            }
+        }
 }

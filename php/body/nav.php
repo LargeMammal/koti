@@ -1,5 +1,5 @@
 <?php 
-function loadNav() {
+function loadNav($config) {
     $nav = "<nav>";
     $nav .= "<a href=\"main/hobbies.html\">Harrastukset</a>
                 <a href=\"main/programs.html\">Ohjelmat</a>
