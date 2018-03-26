@@ -2,7 +2,7 @@
 // TODO: Needs refactoring
 
 // Load footer
-function loadTitle($config) {
+function loadHead($config) {
     $str = "";
     $str .= '<title>Pääsivu</title>
     <meta name="description" content="My home page">

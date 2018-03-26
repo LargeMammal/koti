@@ -3,10 +3,11 @@ include "php/loadAll.php";
 include "php/miscellaneous/file.php";
 
 $config = loadJSON("/config/default-config.json");
+$err = "";
 if ($config["err"] != "") {
-    echo "Error occured: " . $config["err"];
+    $err = "Error occured: " . $config["err"];
 } else {
-    echo "Data: " . $config["data"]["Localhost"]["Site"];
+    $err = "Data: " . $config["data"]["Localhost"]["Site"];
 }
 // Study about cookies and how to load the language from header
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
@@ -22,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         case 2: // Load site with two variables
             // somesite()
         default: // The default case: just load the main site.
-            echo loadAll($config);
+            echo $err . "<br>" . loadAll($config);
     }
     // Do something with those variables
 }

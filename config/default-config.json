@@ -3,21 +3,19 @@
     "Localhost": {
         "User":"site",
         "Site":"localhost",
-        "Database":"home",
+        "Database":"site",
         "Tables": {
             "Users": "users",
-            "Articles": "articles",
-            "Languages": "languages"
+            "Items":"items"
             }
         },
     "Tardigrade": {
         "User":"site",
         "Site":"tardograde.ddns.net",
-        "Database":"home",
+        "Database":"site",
         "Tables": {
             "Users": "users",
-            "Articles": "articles",
-            "Languages": "languages"
+            "Items":"items"
             }
         }
 }
