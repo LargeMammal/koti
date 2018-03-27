@@ -1,4 +1,11 @@
 <?php
+// getSite gets specified top site.
+function getSite($db, $top = "", $sub = "") {
+	$output = [];
+	
+	return $output;
+}
+
 // InsertDB inserts something into database
 function InsertDB($newUser, $newPass, $email) {
 	$username = "site";

@@ -6,9 +6,9 @@ include "php/body/body.php";
 include "php/body/footer.php";
 
 // Load the whole page 
-function loadAll($config) {
+function loadAll($config, $site) {
     // Do we use localhost or other host?
-    $item = LoadItem($config["Localhost"]);
+    $site = getSite($config["Localhost"]);
 
     $str = "<!DOCTYPE html><html><head>";
     $str .= loadHead($config);
