@@ -1,7 +1,7 @@
 <?php 
 // TODO: Needs refactoring
 // Load footer
-function loadFooter($config) {
+function loadFooter($content) {
     return "<footer><p>Mandatory footer.</p></footer>";
 }
 ?>

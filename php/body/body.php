@@ -1,7 +1,7 @@
 <?php 
 // TODO: This definintely needs more refactoring
 // Load footer
-function loadBody($config) {
+function loadBody($content) {
     return "<section>
             <p style=\"text-align:center; padding:5px;\"><img style=\"border: solid 1px black\" src=\"https://tardigrade.ddns.net/~mammal/img/mina.jpg\" alt=\"mina\"></p>
             <p style=\"text-align:center;\"><strong>Nimi:</strong> Jari Loippo</p>

@@ -34,6 +34,7 @@ function getRootDir() {
 // Recursiot on perseestä. Koita muuttaa iteratiiviseksi.
 function parseObject($obj, $i = 0) {
     $output = [];
+    // Don't go deeper than 20
     if ($i > 20) {
         return $output;
     }
@@ -51,11 +52,11 @@ function parseObject($obj, $i = 0) {
 function LoadJSON($file) {
     $pwd = getRootDir() . "/" . $file; 
     $output = [
-        "err" => "", 
-        "data" => "",
+        "err" => [], 
+        "data" => [],
     ];
     if (!file_exists($pwd)) {
-        $output["err"] = "file.loadFile: File not found";
+        $output["err"][] = "file.loadFile: File not found";
         return $output;
     }
     $json = file_get_contents($pwd); // reads file into string
