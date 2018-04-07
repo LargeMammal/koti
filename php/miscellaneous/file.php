@@ -30,7 +30,7 @@ function getRootDir() {
 }
 
 // parseObject recursively reads through object vars
-// and returns them in an array. Runs only 20 times max.
+// and returns them in an array. Runs only 20 layers deep.
 // Recursiot on perseestä. Koita muuttaa iteratiiviseksi.
 function parseObject($obj, $i = 0) {
     $output = [];
@@ -52,7 +52,7 @@ function LoadJSON($file) {
     $pwd = getRootDir() . "/" . $file; 
     $output = [
         "err" => "", 
-        "data" => "",
+        "data" => [],
     ];
     if (!file_exists($pwd)) {
         $output["err"] = "file.loadFile: File not found";
