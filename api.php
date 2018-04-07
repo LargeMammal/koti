@@ -1,30 +1,33 @@
 <?php
-include "php/loadAll.php";
-include "php/miscellaneous/file.php";
+include_once "php/loadAll.php";
+include_once "php/miscellaneous/file.php";
+include_once "php/miscellaneous/lang.php";
+include_once "php/miscellaneous/upload.php";
 
-$config = loadJSON("/config/default-config.json");
-$err = "";
-if ($config["err"] != "") {
-    $err = "Error occured: " . $config["err"];
+/* if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
+    echo 'We don\'t have mysqli!!!';
 } else {
-    $err = "Data: " . $config["data"]["Localhost"]["Site"];
-}
-// Study about cookies and how to load the language from header
+    echo 'Phew we have it!';
+} */
+
+// Get json array from json file
+$config = loadJSON("/config/default-config.json");
+// Get language from browser
+$lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     // Get values from URI
     $str = $_SERVER["PATH_INFO"];
-    $arr = explode("/", $str); // Explode path into variables
-    // Count the variables
-    $len = sizeof($arr);
+    // Remove slashes from both sides. 
+    $str = trim($str, "/");
+    $site = explode("/", $str); // Explode path into variables
     // Split into multiple paths
-    switch ($len) {
-        case 1: // Present the base site
-            // Refactor the sites into functions
-        case 2: // Load site with two variables
-            // somesite()
-        default: // The default case: just load the main site.
-            echo $err . "<br>" . loadAll($config);
+    if ($site[0] === "upload") {
+        $str = loadSaveSite($config, $lang, $site);
+    } else {
+        $str = loadAll($config, $lang, $site);
     }
     // Do something with those variables
+    echo $str;
 }
 ?>

@@ -1,13 +1,6 @@
 <?php
-// include necessary functions
-include_once "php/head/head.php";
-include_once "php/body/header.php";
-include_once "php/body/body.php";
-include_once "php/body/footer.php";
-include_once "php/db/db.php";
-
 // Load the whole page 
-function loadAll($config, $lang, $site) {
+function loadSaveSite($config, $lang, $site) {
     // Get databases
     $databases = $config["data"];
     // Do we use localhost or other host?
@@ -21,15 +14,12 @@ function loadAll($config, $lang, $site) {
     $str .= loadHead($content);
     $str .= "</head><body>";
 
-    // If you want to test something do it here. Only prints if error occurs.
-    // If you try to do it else where, it will break the html structure.
-    foreach($config["err"] as $val) {
-        $str .= "Error: " . $val . "<br>";
-    }
-
     // Stuff in body
     $str .= loadHeader($content);
-    $str .= loadBody($content);
+
+    // create the content.
+    $str .= "<section><form method='get'>Stuff<input type='text' name='fname'></input></form></section>";
+
     $str .= loadFooter($content);
     $str .= "</body></html>";
     return $str;

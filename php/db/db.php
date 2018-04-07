@@ -1,6 +1,16 @@
 <?php
+/** db.php library:
+ * db.php should hold functions for handling databases.
+ * I'll prolly need to refactor this file in future.
+ */
+
+/** On create* functions below:
+ * The follofing create* are not really necessary in future.
+ * Well that statement is not strictly true. These functions 
+ * are hopefully used only once. 
+ */
+
 // createTitle creates title table
-// Do I need this?
 function createTitle() {
 	return "CREATE TABLE '$element' (".
 	"title_uri VARCHAR(255) NOT NULL PRIMARY KEY, ".
@@ -50,98 +60,56 @@ function getElement($db, $element, $language) {
 
 	return $output;
 }
+
+// checkTable checks if table exists
+function checkTable($conn, $table) {
+	$result = $conn->query("SHOW TABLES LIKE '$table'");
+	if ($result->num_rows < 1) {
+		return false;
+	}
+	return true;
+}
+
 // getSite gets specified top site.
-function getSite($db, $top = "", $sub = "") { 
+function getSite($config, $lang, $site, $title = "") {
+	// I should probably turn this into global class
     $output = [
-        "err" => "", 
-        "result" => [],
+        "err" => [], 
+        "data" => [],
     ];
-	$conn = new mysqli($db["Site"], $db["User"], "", $db["Database"]);
+	// Create connection
+	$conn = new mysqli($config["Site"], $config["User"], "", $config["Database"]);
+	// Check connection
 	if ($conn->connect_error) {
-		echo "Failed to connect to MySQL: (" . $conn;
+		$output["err"][] = "db.getSite: Connection failed: " . $conn->connect_error;
+		return $output;
 	}
 
-	if ($top == "") {
-		$top = "index";
-	}
+	// If site has multiple values use those for search.
+	// For now we'll use only the first
+	$main = $site[0];
 
-	$sql = "SELECT * FROM information_schema.tables WHERE table_schema = 'site' AND table_name = 'title' LIMIT 1;";
-
-	$result = $conn->query($sql);
-	if ($result->num_rows < 1) {
-		echo "Table not found. Creating one.<br>";
-		$sql = "CREATE TABLE 'site' (".
-			"title VARCHAR(64) NOT NULL PRIMARY KEY, ".
-			"password VARCHAR(255) NOT NULL, ".
-			"email VARCHAR(64) NOT NULL, ".
-			"full_name VARCHAR(128), ".
-			"image VARCHAR(255), ".
-			"admin TINYINT(1) NOT NULL, ".
-			"editor TINYINT(1) NOT NULL, ".
-			"blogger TINYINT(1) NOT NULL, ".
-			"reg_date TIMESTAMP);";
-		if ($conn->query($sql) === TRUE) {
-			echo "Table users created successfully";
-		} else {
-			echo "Error creating table ". $conn->error;
-		}
+	// Check if table exists
+	if (!checkTable($conn, $main)) {
+		$output["err"][] = "db.getSite: Table, $main , not found";
+		return $output;
 	}
+	// Get all stuff with english stuff. Turn language and limit into variables.
+	// The way I designed this is that when one wants, for example, the title
+	// this returns only that in that language. If you want the contents 
+	// this returns all matcing results. User does with them whatever they want.
+	$sql = "SELECT * FROM $main WHERE lang='english' LIMIT 10";
+	if ($sub != "") {
+		$sql = "SELECT * FROM $main WHERE title='$title'";
+	}
+	// Results
+	$results = $conn->query($sql);
+	// If none found stop here
+	if ($results->num_rows < 1) {
+		$outputs["err"][] = "db.getSite: Non found";
+		return $output;
+	}
+	$output["data"] = $results;
 	return $output;
-}
-
-// InsertDB inserts something into database
-function InsertDB($newUser, $newPass, $email) {
-	$username = "site";
-	$servername = "localhost";
-	$dbname = "site";
-
-	//$hashedPass = password_hash( $newPass, PASSWORD_DEFAULT);
-
-	// Create connection
-	$conn = new mysqli($servername, $username, $password, $dbname);
-	// Check connection
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	}
-
-	$sql = "INSERT INTO users(username, password, email, admin, editor, blogger) VALUES ('" . $newUser . "', '" . $hashedPass . "', '".$email."', 0, 0, 0)";
-
-	if ($conn->query($sql) === TRUE) {
-		echo "success";
-	} else {
-		echo "Error: ". $conn->error;
-	}
-	$conn->close();
-}
-
-function checkTables() {
-	$username = "site";
-	$servername = "localhost";
-	$dbname = "nordicmedia24";
-	// Create connection
-	$conn = new mysqli($servername, $username, "", $dbname);
-	// Check connection
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	}
-	$result = $conn->query("SHOW TABLES LIKE 'users'");
-	if ($result->num_rows < 1) {
-		$sql = "CREATE TABLE 'users' (".
-			"username VARCHAR(64) NOT NULL PRIMARY KEY, ".
-			"password VARCHAR(255) NOT NULL, ".
-			"email VARCHAR(64) NOT NULL, ".
-			"full_name VARCHAR(128), ".
-			"image VARCHAR(255), ".
-			"admin TINYINT(1) NOT NULL, ".
-			"editor TINYINT(1) NOT NULL, ".
-			"blogger TINYINT(1) NOT NULL, ".
-			"reg_date TIMESTAMP)";
-		if ($conn->query($sql) === TRUE) {
-			echo "Table users created successfully";
-		} else {
-			echo "Error creating table ". $conn->error;
-		}
-	}
-	$conn->close();
 }
 ?>
