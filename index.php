@@ -15,6 +15,6 @@ $config = loadJSON("/config/default-config.json");
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 // Load index site with config data
 $site = ["index"];
-$str = loadAll($config, $lang, $site);
+$str = loadAll($config, $site, $lang);
 echo $str;
 ?>

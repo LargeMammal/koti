@@ -23,9 +23,9 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $site = explode("/", $str); // Explode path into variables
     // Split into multiple paths
     if ($site[0] === "upload") {
-        $str = loadSaveSite($config, $lang, $site);
+        $str = loadSaveSite($config, $site, $lang);
     } else {
-        $str = loadAll($config, $lang, $site);
+        $str = loadAll($config, $site, $lang);
     }
     // Do something with those variables
     echo $str;
