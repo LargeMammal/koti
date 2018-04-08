@@ -45,9 +45,9 @@ function initialise($config, $site, $lang) {
     }
 
     // Stuff in body
-    $str .= loadHeader($content['title']);
+    $str .= loadHeader($upload['title']);
     $str .= loadNav($nav["data"]);
-    $str .= loadBody($content);
+    $str .= loadBody($upload);
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
     return $str;
