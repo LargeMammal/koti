@@ -14,11 +14,11 @@ function loadAll($config, $site, $lang) {
     // Get database
     $database = ($config["data"])["Localhost"];
     // Get elements and errors
-    $head = getElement($database, "head", $lang);
+    $head = getElement($database, ["head"], $lang);
     foreach($head["err"] as $val) {
         $config["err"][] = $val;
     }
-    $nav = getElement($database, "nav", $lang);
+    $nav = getElement($database, ["nav"], $lang);
     foreach($nav["err"] as $val) {
         $config["err"][] = $val;
     }
@@ -26,7 +26,7 @@ function loadAll($config, $site, $lang) {
     foreach($content["err"] as $val) {
         $config["err"][] = $val;
     }
-    $footer = getElement($database, "footer", $lang);
+    $footer = getElement($database, ["footer"], $lang);
     foreach($footer["err"] as $val) {
         $config["err"][] = $val;
     }
