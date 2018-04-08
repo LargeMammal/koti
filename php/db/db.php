@@ -4,10 +4,20 @@
  * I'll prolly need to refactor this file in future.
  */
 
+/** On database abstraction:
+ * I really shouldn't call "mysqli(something)" 
+ * What if I use different db in future?
+ * Code needs to be portable and agnostic.
+ * Even the create* functions should be
+ * like that. Pass table column names as 
+ * properties in arrays.
+ */
+
 /** On create* functions below:
  * The follofing create* are not really necessary in future.
  * Well that statement is not strictly true. These functions 
  * are hopefully used only once. 
+ *     Read the above on how they should be. 
  */
 
 // createTitle creates title table
@@ -16,49 +26,6 @@ function createTitle() {
 	"title_uri VARCHAR(255) NOT NULL PRIMARY KEY, ".
 	"title VARCHAR(255), ".
 	"language VARCHAR(64) NOT NULL);";
-}
-
-// createTable 
-function  createTable($element) {
-	$output = "";
-	switch ($element) {
-		case "title":
-			$output = createTitle();
-			break;
-		case "index":
-		default:
-			break;
-	}
-	return $output;
-}
-
-// getElement gets specific part of site
-function getElement($db, $element, $language) { 
-    $output = [
-        "err" => "", 
-        "result" => [],
-    ];
-	$conn = new mysqli($db["Site"], $db["User"], "", $db["Database"]);
-	if ($conn->connect_error) {
-		$output["err"] .= "db.getElement: Connection error: " . $conn->connect_error;
-	}
-
-	$sql = "SELECT * FROM information_schema.tables WHERE table_schema = 'site' AND table_name = '$element' LIMIT 1;";
-
-	$result = $conn->query($sql);
-	if ($result->num_rows < 1) {
-		$output["err"] .= "db.getElement $element not found. Creating $element table...<br>";
-		$sql = createElement($element);
-		if ($conn->query($sql) === TRUE) {
-			$output["err"] .= "Table users created successfully";
-		} else {
-			$output["err"] .= "Error creating table ". $conn->error;
-			return $output;
-		}
-	}
-	$sql = "SELECT * FROM $element;";
-
-	return $output;
 }
 
 // checkTable checks if table exists
@@ -71,7 +38,7 @@ function checkTable($conn, $table) {
 }
 
 // getSite gets specified top site.
-function getSite($config, $lang, $site, $title = "") {
+function getElement($config, $site, $lang = "") {
 	// I should probably turn this into global class
     $output = [
         "err" => [], 
@@ -87,20 +54,21 @@ function getSite($config, $lang, $site, $title = "") {
 
 	// If site has multiple values use those for search.
 	// For now we'll use only the first
-	$main = $site[0];
+	$element = $site[0];
 
 	// Check if table exists
-	if (!checkTable($conn, $main)) {
-		$output["err"][] = "db.getSite: Table, $main , not found";
+	if (!checkTable($conn, $element)) {
+		$output["err"][] = "db.getSite: Table, $element , not found";
 		return $output;
 	}
 	// Get all stuff with english stuff. Turn language and limit into variables.
 	// The way I designed this is that when one wants, for example, the title
 	// this returns only that in that language. If you want the contents 
 	// this returns all matcing results. User does with them whatever they want.
-	$sql = "SELECT * FROM $main WHERE lang='english' LIMIT 10";
-	if ($sub != "") {
-		$sql = "SELECT * FROM $main WHERE title='$title'";
+	$sql = "SELECT * FROM $element WHERE lang=$lang LIMIT 10";
+	if ($lang === "") {
+		$title = $site[1];
+		$sql = "SELECT * FROM $element WHERE title='$title'";
 	}
 	// Results
 	$results = $conn->query($sql);
@@ -109,7 +77,7 @@ function getSite($config, $lang, $site, $title = "") {
 		$outputs["err"][] = "db.getSite: Non found";
 		return $output;
 	}
-	$output["data"] = $results;
+	$output["data"][] = $results;
 	return $output;
 }
 ?>

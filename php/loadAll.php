@@ -1,36 +1,51 @@
 <?php
-// include necessary functions
+// Load meta data 
 include_once "php/head/head.php";
+// Load site functions
 include_once "php/body/header.php";
+include_once "php/body/nav.php";
 include_once "php/body/body.php";
 include_once "php/body/footer.php";
+// Load database functions
 include_once "php/db/db.php";
 
 // Load the whole page 
-function loadAll($config, $lang, $site) {
-    // Get databases
-    $databases = $config["data"];
-    // Do we use localhost or other host?
-    $content = getSite($databases["Localhost"], $lang, $site);
+function loadAll($config, $site, $lang) {
+    // Get database
+    $database = ($config["data"])["Localhost"];
+    // Get elements and errors
+    $head = getElement($database, "head", $lang);
+    foreach($head["err"] as $val) {
+        $config["err"][] = $val;
+    }
+    $nav = getElement($database, "nav", $lang);
+    foreach($nav["err"] as $val) {
+        $config["err"][] = $val;
+    }
+    $content = getElement($database, $site);
     foreach($content["err"] as $val) {
+        $config["err"][] = $val;
+    }
+    $footer = getElement($database, "footer", $lang);
+    foreach($footer["err"] as $val) {
         $config["err"][] = $val;
     }
 
     // Stuff in head
     $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
-    $str .= loadHead($content);
+    $str .= loadHead($head["data"]);
     $str .= "</head><body>";
 
-    // If you want to test something do it here. Only prints if error occurs.
-    // If you try to do it else where, it will break the html structure.
+    // Print all errors. If you try to do it else where, it will break the html structure.
     foreach($config["err"] as $val) {
         $str .= "Error: " . $val . "<br>";
     }
 
     // Stuff in body
-    $str .= loadHeader($content);
-    $str .= loadBody($content);
-    $str .= loadFooter($content);
+    $str .= loadHeader($content["data"]);
+    $str .= loadNav($nav["data"]);
+    $str .= loadBody($content["data"]);
+    $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
     return $str;
 }

@@ -1,5 +1,5 @@
 <?php 
-// Load footer
+// LoadHead returns meta-data stuff. 
 function loadHead($content) {
     $str = '';
     $str .= '<meta charset="UTF-8">';
