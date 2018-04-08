@@ -9,7 +9,7 @@ $config = loadJSON("/config/default-config.json");
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
 if (isset($_POST['title'])) {
-    $config['err'][] = "We got post";
+    echo "We got post";
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
