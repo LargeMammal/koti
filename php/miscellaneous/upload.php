@@ -27,8 +27,4 @@ function loadSaveSite($config, $site, $lang) {
     $str .= "</body></html>";
     return $str;
 }
-
-/* if (isset($_POST['']) && isset($_POST[''])) {
-
-} */
 ?>
