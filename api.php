@@ -8,6 +8,10 @@ $config = loadJSON("/config/default-config.json");
 // Get language from browser
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
+if (isset($_POST['title'])) {
+    $config['err'][] = "We got post";
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     // Get values from URI
     $str = $_SERVER["PATH_INFO"];
