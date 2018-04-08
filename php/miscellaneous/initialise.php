@@ -1,16 +1,14 @@
 <?php
-// Load meta data 
-include_once "php/head/head.php";
-// Load site functions
-include_once "php/body/header.php";
-include_once "php/body/nav.php";
-include_once "php/body/body.php";
-include_once "php/body/footer.php";
-// Load database functions
-include_once "php/db/db.php";
+/** initialise.php:
+ * initialise database with the editor interface
+ */
+function initialise($config, $site, $lang) {
+    $upload = [
+        'title' => 'Initialise',
+        'decription' => 'Initialisation page',
+        'content' => include("php/miscellaneous/initialise.html"),
+    ];
 
-// Load the whole page 
-function loadAll($config, $site, $lang) {
     // Get database
     $database = ($config["data"])["Localhost"];
     // Get elements and errors
@@ -22,10 +20,7 @@ function loadAll($config, $site, $lang) {
     foreach($nav["err"] as $val) {
         $config["err"][] = $val;
     }
-    $content = getElement($database, $site);
-    foreach($content["err"] as $val) {
-        $config["err"][] = $val;
-    }
+    $content = include("php/miscellaneous/initialise.html");
     $footer = getElement($database, ["footer"], $lang);
     foreach($footer["err"] as $val) {
         $config["err"][] = $val;
@@ -36,15 +31,16 @@ function loadAll($config, $site, $lang) {
     $str .= loadHead($head["data"]);
     $str .= "</head><body>";
 
-    // Print all errors. If you try to do it else where, it will break the html structure.
+    // Print all errors. If you try to do it else where, 
+    // it will break the html structure.
     foreach($config["err"] as $val) {
         $str .= "Error: " . $val . "<br>";
     }
 
     // Stuff in body
-    $str .= loadHeader($content["data"]);
+    $str .= loadHeader($content);
     $str .= loadNav($nav["data"]);
-    $str .= loadBody($content["data"]);
+    $str .= loadBody($content);
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
     return $str;

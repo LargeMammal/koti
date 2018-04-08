@@ -1,6 +1,9 @@
 <?php
+/** upload.php information: 
+ * This file is called when information is stored in the database.
+ */
 // Load the whole page 
-function loadSaveSite($config, $lang, $site) {
+function loadSaveSite($config, $site, $lang) {
     // Get databases
     $databases = $config["data"];
     // Do we use localhost or other host?
@@ -24,4 +27,8 @@ function loadSaveSite($config, $lang, $site) {
     $str .= "</body></html>";
     return $str;
 }
+
+/* if (isset($_POST['']) && isset($_POST[''])) {
+
+} */
 ?>
