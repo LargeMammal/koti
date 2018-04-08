@@ -6,7 +6,14 @@ function initialise($config, $site, $lang) {
     $upload = [
         'title' => 'Initialise',
         'decription' => 'Initialisation page',
-        'content' => include("php/miscellaneous/initialise.html"),
+        'content' => '<section>
+                        <form action="upload" method="POST">
+                            Title: <input type="text" name="title"><br>
+                            Description: <input type="text" name="description"><br>
+                            Content: <textarea name="content"></textarea><br>
+                            <input type="submit">
+                        </form>
+                    </section>',
     ];
 
     // Get database
@@ -20,7 +27,7 @@ function initialise($config, $site, $lang) {
     foreach($nav["err"] as $val) {
         $config["err"][] = $val;
     }
-    $content = include("php/miscellaneous/initialise.html");
+    
     $footer = getElement($database, ["footer"], $lang);
     foreach($footer["err"] as $val) {
         $config["err"][] = $val;
@@ -38,7 +45,7 @@ function initialise($config, $site, $lang) {
     }
 
     // Stuff in body
-    $str .= loadHeader($content);
+    $str .= loadHeader($content['title']);
     $str .= loadNav($nav["data"]);
     $str .= loadBody($content);
     $str .= loadFooter($footer["data"]);
