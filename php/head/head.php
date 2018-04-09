@@ -1,6 +1,6 @@
 <?php 
 // LoadHead returns meta-data stuff. 
-function loadHead($content) {
+function loadHead($content = "") {
     $str = '';
     $str .= '<meta charset="UTF-8">';
     $str .= '<title>Pääsivu</title>';

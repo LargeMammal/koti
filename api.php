@@ -9,7 +9,7 @@ $config = loadJSON("/config/default-config.json");
 // Get language from browser
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
-if (isset($_POST['title'])) {
+/* if (isset($_POST['title'])) {
     upload("content", $_POST);
 } else if (isset($_POST['nav'])) {
     foreach($_POST as $key=>$value) {
@@ -23,7 +23,7 @@ if (isset($_POST['title'])) {
     foreach($_POST as $key=>$value) {
         echo "We got $key: " . $value . "<br>";
     }
-}
+} */
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     // Get values from URI

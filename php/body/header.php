@@ -1,7 +1,7 @@
 <?php
 // LoadHeader returns header field. 
 function loadHeader($content) {
-    $title = $content['title'];
+    $title = $content["title"];
     $output = "<header>";
     $output .= "<p>settings icon</p>"; 
     $output .= "<h1>$title</h1>";

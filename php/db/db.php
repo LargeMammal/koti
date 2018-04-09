@@ -24,20 +24,21 @@
 // First item in array will become primary key
 // Use numbered arrays!
 function createTable($conn, $table, $columns) {
-	$sql = "CREATE TABLE '$table' (";
+	$sql = "CREATE TABLE $table (";
 	$count = count($columns) - 1;
-	foreach($columns as $key=>$column) {
-		$sql .= "$column VARCHAR(255) NOT NULL";
-		if ($key == 0) {
-			$sql .= "PRIMARY KEY";
-		} else if ($key == $count) {
-			break;
+	$items = [];
+	foreach($columns as $column) {
+		if ($column == "title" || $column == "lang") {
+			$items[] = "$column VARCHAR(191) NOT NULL";
+		} else {
+			$items[] = "$column LONGTEXT NOT NULL";
 		}
-		$sql .= ", ";
 	}
-	$sql .= ");";
+	$items[0] .= " PRIMARY KEY";
+	$sql .= implode(", ", $items);
+	$sql .= ")";
 	if ($conn->query($sql) !== TRUE) {
-		return $conn->error;	
+		return "db.createTable: $sql " . $conn->error;	
 	}
 	return "";
 }
@@ -62,7 +63,7 @@ function getElement($config, $site, $lang = "") {
 	$conn = new mysqli($config["Site"], $config["User"], "", $config["Database"]);
 	// Check connection
 	if ($conn->connect_error) {
-		$output["err"][] = "db.getSite: Connection failed: " . $conn->connect_error;
+		$output["err"][] = "db.getElement: Connection failed: " . $conn->connect_error;
 		return $output;
 	}
 
@@ -72,7 +73,7 @@ function getElement($config, $site, $lang = "") {
 
 	// Check if table exists
 	if (!checkTable($conn, $element)) {
-		$output["err"][] = "db.getSite: Table, $element , not found";
+		$output["err"][] = "db.getElement: Table, $element , not found";
 		return $output;
 	}
 	// Get all stuff with english stuff. Turn language and limit into variables.
@@ -88,7 +89,7 @@ function getElement($config, $site, $lang = "") {
 	$results = $conn->query($sql);
 	// If none found stop here
 	if ($results->num_rows < 1) {
-		$outputs["err"][] = "db.getSite: Non found";
+		$outputs["err"][] = "db.getElement: Non found";
 		return $output;
 	}
 	$output["data"][] = $results;
