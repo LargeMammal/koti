@@ -20,12 +20,24 @@
  *     Read the above on how they should be. 
  */
 
-// createTitle creates title table
-function createTitle() {
-	return "CREATE TABLE '$element' (".
-	"title_uri VARCHAR(255) NOT NULL PRIMARY KEY, ".
-	"title VARCHAR(255), ".
-	"language VARCHAR(64) NOT NULL);";
+// createTitle creates table with given name and data. 
+// First item in array will become primary key
+function createTitle($table, $columns) {
+	$sql = "CREATE TABLE '$table' (";
+	$index = 0;
+	$count = count($columns) - 1;
+	foreach($columns as $column) {
+		$sql .= "$column VARCHAR(255) NOT NULL";
+		if ($index == 0) {
+			$sql .= "PRIMARY KEY";
+		} else if ($index == $count) {
+			break;
+		}
+		$sql .= ", ";
+		$index = $index + 1;
+	}
+	$sql .= ");";
+	return $sql;
 }
 
 // checkTable checks if table exists
