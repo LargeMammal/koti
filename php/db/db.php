@@ -22,22 +22,24 @@
 
 // createTitle creates table with given name and data. 
 // First item in array will become primary key
-function createTitle($table, $columns) {
+// Use numbered arrays!
+function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE '$table' (";
-	$index = 0;
 	$count = count($columns) - 1;
-	foreach($columns as $column) {
+	foreach($columns as $key=>$column) {
 		$sql .= "$column VARCHAR(255) NOT NULL";
-		if ($index == 0) {
+		if ($key == 0) {
 			$sql .= "PRIMARY KEY";
-		} else if ($index == $count) {
+		} else if ($key == $count) {
 			break;
 		}
 		$sql .= ", ";
-		$index = $index + 1;
 	}
 	$sql .= ");";
-	return $sql;
+	if ($conn->query($sql) !== TRUE) {
+		return $conn->error;	
+	}
+	return "";
 }
 
 // checkTable checks if table exists
