@@ -7,13 +7,32 @@ function initialise($config, $site, $lang) {
         'title' => 'Initialise',
         'decription' => 'Initialisation page',
         'content' => '<section>
-                        <form action="upload" method="POST">
-                            Title: <input type="text" name="title"><br>
-                            Description: <input type="text" name="description"><br>
-                            Content: <textarea name="content"></textarea><br>
-                            <input type="submit">
-                        </form>
-                    </section>',
+        <h1>Add content</h1>
+        <form action="" method="POST">
+            Language: <input type="text" name="lang" required><br>
+            Table: <input type="text" name="table" required><br>
+            Title: <input type="text" name="title" required><br>
+            Description: <input type="text" name="description" required><br>
+            Content: <textarea name="content" required></textarea><br>
+            <input type="submit">
+        </form>
+        <h1>Add others</h1>
+        <form action="" method="POST">
+            Navigation: <textarea name="nav" required></textarea><br>
+            Lang: <input type="text" name="lang" required><br>
+            <input type="submit">
+        </form>
+        <form action="" method="POST">
+            Header: <textarea name="header" required></textarea><br>
+            Lang: <input type="text" name="lang" required><br>
+            <input type="submit">
+        </form>
+        <form action="" method="POST">
+            Footer: <textarea name="footer" required></textarea><br>
+            Lang: <input type="text" name="lang" required><br>
+            <input type="submit">
+        </form>
+    </section>',
     ];
 
     // Get database
@@ -27,7 +46,6 @@ function initialise($config, $site, $lang) {
     foreach($nav["err"] as $val) {
         $config["err"][] = $val;
     }
-    
     $footer = getElement($database, ["footer"], $lang);
     foreach($footer["err"] as $val) {
         $config["err"][] = $val;
@@ -45,7 +63,7 @@ function initialise($config, $site, $lang) {
     }
 
     // Stuff in body
-    $str .= loadHeader($upload['title']);
+    $str .= loadHeader("Initialise");
     $str .= loadNav($nav["data"]);
     $str .= loadBody($upload);
     $str .= loadFooter($footer["data"]);

@@ -2,6 +2,16 @@
 /** upload.php information: 
  * This file is called when information is stored in the database.
  */
+// upload uploads posted data into the database
+function upload($element, $items) {
+
+}
+
+// uploaded function informs user about uploaded data
+function uploaded() {
+    
+}
+
 // Load the whole page 
 function loadSaveSite($config, $site, $lang) {
     // Get databases
