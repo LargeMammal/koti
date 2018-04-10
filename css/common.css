@@ -7,7 +7,6 @@ body {
 	font-size:100%;
 	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
     background-color: #F4F4F4;
-    align-content: center;
 }
 
 /*Header tavaraa*/
@@ -41,7 +40,12 @@ footer {
 	text-align: center;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    text-align: center;
+}
+
 h1 {
+    font-size: 2em;
     margin: 0px;
     padding: 10px;
 }
@@ -49,13 +53,11 @@ h1 {
 h2 {
     margin: 0px;
     padding: 30px;
-    text-align: center;
 }
 
 h3 {
     margin: 0px;
     padding: 10px 0px 20px 0px;
-    text-align: center;
 }
 
 p {
