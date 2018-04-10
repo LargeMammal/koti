@@ -16,8 +16,8 @@ function initialise($config, $site, $lang) {
     // I should try to create good looking UI for content editing
     // and managing. Especially managing side. 
     $upload = [
-        'title' => 'Initialise',
-        'decription' => 'Initialisation page',
+        'title' => 'Upload',
+        'decription' => 'Upload page',
         'lang' => 'en-US',
         'content' => '<section>
         <h1>Add content</h1>
@@ -47,7 +47,6 @@ function initialise($config, $site, $lang) {
         </form>
     </section>',
     ];
-
     // Get database
     $database = ($config["data"])["Localhost"];
 

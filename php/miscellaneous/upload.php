@@ -9,25 +9,19 @@ function insert($conn, $table, $items) {
 	// Construct the query
 	$err = "";
 	$sql = "INSERT INTO $table (";
-	$columns = "";
-	$values = "";
-	$index = 0;
-	$count = count($table) - 1;
+	$columns = [];
+	$values = [];
 	foreach ($items as $column=>$item) {
-		$columns .= $column;
-		$values .= "'" . $item . "'";
-		if ($index == $count) {
-			break;
-		}
-		$columns .= ", ";
-		$values .= ", ";
+		$columns[] = $column;
+		$values[] = "'" . $item . "'";
 	}
-	$sql .= $columns . ") VALUES (" . $values . ");";
+	$sql .= implode(", ", $columns) . ") VALUES (" . implode(", ", $values) . ");";
 
 	// Query
 	if ($conn->query($sql) !== TRUE) {
 		$err = "upload.insert: " . $sql . "<br>" . $conn->error;
 	}
+	$err = "upload.insert: " . $sql;
 	return $err;
 }
 
@@ -52,8 +46,9 @@ function upload($database, $table, $items) {
         $err[] = "db.upload: " . createTable($conn, $table, $columns);
 	}
 
+	// When ready uncomment this...
 	// Insert into or update the table and merge error tables
-	//$err[] = insert($conn, $table, $items);
+	$err[] = insert($conn, $table, $items);
 	
 	// Close the connection
 	$conn->close();

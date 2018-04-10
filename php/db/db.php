@@ -22,7 +22,6 @@
 
 // createTitle creates table with given name and data. 
 // First item in array will become primary key
-// Use numbered arrays!
 function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE $table (";
 	$count = count($columns) - 1;
@@ -38,7 +37,7 @@ function createTable($conn, $table, $columns) {
 	$sql .= implode(", ", $items);
 	$sql .= ")";
 	if ($conn->query($sql) !== TRUE) {
-		return "db.createTable: $sql " . $conn->error;	
+		return "db.createTable: $sql " . $conn->error;
 	}
 	return "";
 }
@@ -82,8 +81,7 @@ function getElement($config, $site, $lang = "") {
 	// this returns all matcing results. User does with them whatever they want.
 	$sql = "SELECT * FROM $element WHERE lang=$lang LIMIT 10";
 	if ($lang === "") {
-		$title = $site[1];
-		$sql = "SELECT * FROM $element WHERE title='$title'";
+		$sql = "SELECT * FROM $element";
 	}
 	// Results
 	$results = $conn->query($sql);
@@ -92,7 +90,7 @@ function getElement($config, $site, $lang = "") {
 		$outputs["err"][] = "db.getElement: Non found";
 		return $output;
 	}
-	$output["data"][] = $results;
+	$output["data"] = $results;
 	return $output;
 }
 ?>
