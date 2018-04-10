@@ -12,43 +12,41 @@
  * footers and navigators. Navigator should also read what 
  * categories exist from database. 
  */
-function initialise($config, $site, $lang) {
+function initialise($database, $site, $lang) {
     // I should try to create good looking UI for content editing
     // and managing. Especially managing side. 
     $upload = [
         'title' => 'Upload',
-        'decription' => 'Upload page',
+        'description' => 'Upload page',
         'lang' => 'en-US',
         'content' => '<section>
         <h1>Add content</h1>
         <form action="" method="POST">
-            Table: <input type="text" name="table" required><br>
-            Title: <input type="text" name="title" required><br>
-            Description: <input type="text" name="description" required><br>
-            Language: <input type="text" name="lang" required><br>
-            Content: <textarea name="content" required></textarea><br>
+            <p>Table: </p><input type="text" name="table" required><br>
+            <p>Title: </p><input type="text" name="title" required><br>
+            <p>Description: </p><input type="text" name="description" required><br>
+            <p>Language: </p><input type="text" name="lang" required><br>
+            <p>Content: </p><textarea name="content" required></textarea><br>
             <input type="submit">
         </form>
         <h1>Add others</h1>
         <form action="" method="POST">
-            Navigation: <textarea name="nav" required></textarea><br>
-            Lang: <input type="text" name="lang" required><br>
+            <p>Head: </p><textarea name="head" required></textarea><br>
+            <p>Lang: </p><input type="text" name="lang" required><br>
             <input type="submit">
         </form>
         <form action="" method="POST">
-            Header: <textarea name="header" required></textarea><br>
-            Lang: <input type="text" name="lang" required><br>
+            <p>Navigation: </p><textarea name="nav" required></textarea><br>
+            <p>Lang: </p><input type="text" name="lang" required><br>
             <input type="submit">
         </form>
         <form action="" method="POST">
-            Footer: <textarea name="footer" required></textarea><br>
-            Lang: <input type="text" name="lang" required><br>
+            <p>Footer: </p><textarea name="footer" required></textarea><br>
+            <p>Lang: </p><input type="text" name="lang" required><br>
             <input type="submit">
         </form>
     </section>',
     ];
-    // Get database
-    $database = ($config["data"])["Localhost"];
 
     // Upload editor UI
     $err = upload($database, "upload", $upload);
@@ -60,18 +58,23 @@ function initialise($config, $site, $lang) {
 
     // Print all errors. If you try to do it else where, 
     // it will break the html structure.
-    foreach ($config["err"] as $val) {
-        $str .= "Error: " . $val . "<br>";
+    foreach ($config["err"] as $error) {
+        if ($error != "") {
+            $str .= "Error: " . $error . "<br>";
+        }
     }
-    $str .= "Upload errors: <br>";
     foreach ($err as $error) {
-        $str .= "Error: " . $error . "<br>";
+        if ($error != "") {
+            $str .= "Error: " . $error . "<br>";
+        }
     }
 
     // Stuff in body
-    $str .= loadHeader(["title"=>"Initialise"]);
-    $str .= loadBody($upload);
-    $str .= loadFooter(["footer"=>"Initialisation site"]);
+    $str .= loadHeader("Initialise");
+    $str .= "<p>Move to ";
+    $str .= "https://tardigrade.ddns.net/~mammal/api/upload ";
+    $str .= "to start uploading</p>";
+    $str .= loadFooter("Initialisation site");
     $str .= "</body></html>";
     return $str;
 }

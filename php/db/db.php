@@ -20,12 +20,24 @@
  *     Read the above on how they should be. 
  */
 
+ // This is here just to abstract the database layer
+function connect($config) {
+	// Create connection
+	$conn = new mysqli($config["Site"], $config["User"], "", $config["Database"]);
+	// Check connection
+	if ($conn->connect_error) {
+		return "db.getElement: Connection failed: " . $conn->connect_error;
+	}
+	return $conn;
+}
+
 // createTitle creates table with given name and data. 
 // First item in array will become primary key
 function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE $table (";
 	$count = count($columns) - 1;
 	$items = [];
+	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 	foreach($columns as $column) {
 		if ($column == "title" || $column == "lang") {
 			$items[] = "$column VARCHAR(191) NOT NULL";
@@ -33,7 +45,6 @@ function createTable($conn, $table, $columns) {
 			$items[] = "$column LONGTEXT NOT NULL";
 		}
 	}
-	$items[0] .= " PRIMARY KEY";
 	$sql .= implode(", ", $items);
 	$sql .= ")";
 	if ($conn->query($sql) !== TRUE) {
@@ -48,49 +59,82 @@ function checkTable($conn, $table) {
 	if ($result->num_rows < 1) {
 		return false;
 	}
+	$result->free();
 	return true;
 }
 
-// getSite gets specified top site.
-function getElement($config, $site, $lang = "") {
+// queryAll gets all items in said category.
+function queryContent($conn, $elements) {
 	// I should probably turn this into global class
     $output = [
-        "err" => [], 
+        "err" => "", 
         "data" => [],
-    ];
-	// Create connection
-	$conn = new mysqli($config["Site"], $config["User"], "", $config["Database"]);
-	// Check connection
-	if ($conn->connect_error) {
-		$output["err"][] = "db.getElement: Connection failed: " . $conn->connect_error;
+	];
+
+	// Check if table exists
+	if (!checkTable($conn, $elements[0])) {
+		$output["err"] = "db.getElement: Table, " . $elements[0] . " , not found";
+		return $output;
+	}
+	
+	$sql = "SELECT * FROM " . $elements[0] . " ";
+	if(count($elements) > 1) {
+		$sql .= "WHERE title=" . $elements[1] . " ";
+	}
+	$sql .= "LIMIT 10";
+
+	$results = $conn->query($sql);
+	// Results
+	if ( $results === FALSE) {
+		$output["err"] = "db.getElement: " . $conn->connect_error;
+		return $output;
+	}
+	
+	// If none found stop here
+	if ($results->num_rows < 1) {
+		$output["err"] = "db.getElement: Non found";
 		return $output;
 	}
 
-	// If site has multiple values use those for search.
-	// For now we'll use only the first
-	$element = $site[0];
+	// Fetch each row in associative form and pass it to output.
+	while($row = $results->fetch_assoc()) {
+		$output["data"][] = $row;
+	}
+	$results->free();
+	return $output;
+}
+
+// getSite gets specified top site.
+function getElement($conn, $element, $lang = "en-US") {
+	// I should probably turn this into global class
+    $output = [
+        "err" => '', 
+        "data" => '',
+    ];
 
 	// Check if table exists
 	if (!checkTable($conn, $element)) {
-		$output["err"][] = "db.getElement: Table, $element , not found";
+		$output["err"] = "db.getElement: Table, $element , not found";
 		return $output;
 	}
-	// Get all stuff with english stuff. Turn language and limit into variables.
-	// The way I designed this is that when one wants, for example, the title
-	// this returns only that in that language. If you want the contents 
-	// this returns all matcing results. User does with them whatever they want.
-	$sql = "SELECT * FROM $element WHERE lang=$lang LIMIT 10";
-	if ($lang === "") {
-		$sql = "SELECT * FROM $element";
-	}
+	
+	$sql = "SELECT * FROM " . $element . " WHERE lang='$lang'";
+
 	// Results
 	$results = $conn->query($sql);
+	
 	// If none found stop here
 	if ($results->num_rows < 1) {
-		$outputs["err"][] = "db.getElement: Non found";
+		$output["err"] = "db.getElement: Non found";
 		return $output;
 	}
-	$output["data"] = $results;
+
+	// Fetch each row in associative form and pass it to output.
+	while($row = $results->fetch_assoc()) {
+		$output["data"] = $row;
+		break;
+	}
+	$results->free();
 	return $output;
 }
 ?>

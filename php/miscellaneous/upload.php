@@ -7,7 +7,7 @@
 // insert inserts data into table
 function insert($conn, $table, $items) {
 	// Construct the query
-	$err = "";
+	$err = NULL;
 	$sql = "INSERT INTO $table (";
 	$columns = [];
 	$values = [];
@@ -21,12 +21,13 @@ function insert($conn, $table, $items) {
 	if ($conn->query($sql) !== TRUE) {
 		$err = "upload.insert: " . $sql . "<br>" . $conn->error;
 	}
-	$err = "upload.insert: " . $sql;
 	return $err;
 }
 
 // upload uploads posted data into the database
-function upload($database, $table, $items) {
+function upload($config, $table, $items) {
+	// Get database
+	$database = ($config["data"])["Localhost"];
     $err = [];
     
 	// Create connection
@@ -42,21 +43,22 @@ function upload($database, $table, $items) {
         $columns = [];
         foreach($items as $key=>$item) {
             $columns[] = $key;
-        }
-        $err[] = "db.upload: " . createTable($conn, $table, $columns);
+		}
+		$error = createTable($conn, $table, $columns);
+		if ($error != "") {
+			$err[] = "db.upload: " . $error;
+		}
 	}
 
-	// When ready uncomment this...
-	// Insert into or update the table and merge error tables
-	$err[] = insert($conn, $table, $items);
-	
+	// Insert into or update the table.
+	$error = insert($conn, $table, $items);
+	if (isset($error)) {
+		$err[] = "db.upload: " . $error;
+	} else {
+		$err[] = "db.upload: Upload was successfull!";
+	}
 	// Close the connection
 	$conn->close();
 	return $err;
-}
-
-// uploaded function informs user about uploaded data
-function uploaded() {
-    
 }
 ?>
