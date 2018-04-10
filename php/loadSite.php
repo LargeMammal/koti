@@ -26,10 +26,6 @@ function loadSite($config, $elements, $lang) {
         return "Could not connect to database: " . $conn;
     }
 
-    // get head element
-    $head = getElement($conn, "head", $lang[0]);
-    $config["err"][] = $head['err'];
-
     // get nav element
     $nav = getElement($conn, "nav", $lang[0]);
     $config["err"][] = $nav['err'];
@@ -37,6 +33,12 @@ function loadSite($config, $elements, $lang) {
     // query content based on URI
     $content = queryContent($conn, $elements);
     $config["err"][] = $content["err"];
+    $data = $content["data"];
+    $head = $data[0];
+    if (count($data) > 1) {
+        $head["title"] = $elements[0];
+        $head["description"] = $elements[0] . " top site";
+    }
     
     // get footer element
     $footer = getElement($conn, "footer", $lang[0]);
@@ -44,15 +46,13 @@ function loadSite($config, $elements, $lang) {
 
     // Stuff in head
     $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
-    $str .= loadHead($head["data"]);
+    $str .= loadHead($head);
     $str .= "</head><body>";
-
-    $banner = $elements[0];
-    if (count($content) === 1) {
-        $banner = ($content[0])['title'];
-    }
-
     // Stuff in body
+    $banner = $elements[0];
+    if (count($data) == 1) {
+        $banner = ($data[0])['title'];
+    }
     $str .= loadHeader($banner);
     $str .= loadNav($conn, $nav["data"]);
 
@@ -63,7 +63,7 @@ function loadSite($config, $elements, $lang) {
         }
     }
 
-    $str .= loadBody($content["data"]);
+    $str .= loadBody($data);
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
     return $str;

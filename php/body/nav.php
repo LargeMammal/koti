@@ -16,7 +16,7 @@ function loadNav($conn, $nav) {
 	// Fetch each row in associative form and pass it to output.
 	while($row = $results->fetch_assoc()) {
         $str = $row["Tables_in_site"];
-        if (!($str == "footer" || $str == "nav" || $str == "head")) {
+        if (!($str == "footer" || $str == "nav" || $str == "head" || $str == "upload" || $str == "not_index")) {
             $output .= '<a href="' . $str . '">'.$str.'</a>';
         }
     }

@@ -10,7 +10,7 @@ $database = ($config["data"])["Localhost"];
 // Get language from browser
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 // Load index site with config data
-$site = ["index"];
+$site = ["not_index"];
 // Upload site is a special case
 $str = loadSite($config, $site, $lang);
 echo $str;

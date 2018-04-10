@@ -14,6 +14,7 @@ if (isset($_POST)) {
     $table = "";
     if (isset($_POST['table'])) {
         $table = $_POST['table'];
+        unset($_POST['table']);
     } else {
         foreach($_POST as $key=>$val){
             if ($key != 'lang') {
