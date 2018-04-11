@@ -8,7 +8,6 @@ function loadHead($content) {
     $str .= '<title>' . $title . '</title>';
     $str .= '<meta name="description" content="' . $description . '">';
     $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-    $str .= '<meta name="description" content="My home page">';
     $str .= '<link rel="stylesheet" type="text/css" href="https://tardigrade.ddns.net/~mammal/css/common.css" />';
     return $str;
 }
