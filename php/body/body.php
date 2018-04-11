@@ -6,7 +6,7 @@ function loadBody($content) {
     foreach ($content as $items) {
         $output .= "<section>";
         $output .= "<h1>" . $items['title'] . "</h1>";
-        $output .= "<h2>" . $items['description'] . "</h2>";
+        $output .= "<h5>" . $items['description'] . "</h5>";
         $output .= $items['content'];
         $output .= "</section>";
     }

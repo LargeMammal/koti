@@ -10,7 +10,7 @@ $config = loadJSON("/config/default-config.json");
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
 // Listen to posts
-if (isset($_POST)) {
+if (count($_POST) > 0) {
     $table = "";
     if (isset($_POST['table'])) {
         $table = $_POST['table'];
