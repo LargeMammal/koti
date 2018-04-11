@@ -26,7 +26,7 @@ function connect($config) {
 	$conn = new mysqli($config["Site"], $config["User"], "", $config["Database"]);
 	// Check connection
 	if ($conn->connect_error) {
-		return "db.getElement: Connection failed: " . $conn->connect_error;
+		return "db.getElement: Connection failed: " . $conn->error;
 	}
 	return $conn;
 }
@@ -64,7 +64,7 @@ function checkTable($conn, $table) {
 }
 
 // queryAll gets all items in said category.
-function queryContent($conn, $elements) {
+function queryContent($conn, $elements, $lang) {
 	// I should probably turn this into global class
     $output = [
         "err" => "", 
@@ -73,26 +73,28 @@ function queryContent($conn, $elements) {
 
 	// Check if table exists
 	if (!checkTable($conn, $elements[0])) {
-		$output["err"] = "db.getElement: Table, " . $elements[0] . " , not found";
+		$output["err"] = "db.queryContent: Table, " . $elements[0] . " , not found";
 		return $output;
 	}
 	
 	$sql = "SELECT * FROM " . $elements[0] . " ";
 	if(count($elements) > 1) {
 		$sql .= "WHERE title=" . $elements[1] . " ";
+	} else {
+		$sql .= "WHERE lang='" . $lang . "' ";
 	}
 	$sql .= "LIMIT 10";
 
 	$results = $conn->query($sql);
 	// Results
-	if ( $results === FALSE) {
-		$output["err"] = "db.getElement: " . $conn->connect_error;
+	if ($results === FALSE) {
+		$output["err"] = "db.queryContent: Results: $lang " . $conn->error;
 		return $output;
 	}
 	
 	// If none found stop here
 	if ($results->num_rows < 1) {
-		$output["err"] = "db.getElement: Non found";
+		$output["err"] = "db.queryContent: Non found";
 		return $output;
 	}
 
@@ -122,7 +124,7 @@ function getElement($conn, $element, $lang = "en-US") {
 
 	// Results
 	$results = $conn->query($sql);
-	
+
 	// If none found stop here
 	if ($results->num_rows < 1) {
 		$output["err"] = "db.getElement: Non found";

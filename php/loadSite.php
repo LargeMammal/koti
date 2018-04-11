@@ -30,9 +30,17 @@ function loadSite($config, $elements, $lang) {
     $nav = getElement($conn, "nav", $lang[0]);
     $config["err"][] = $nav['err'];
     
+    $content = "";
     // query content based on URI
-    $content = queryContent($conn, $elements);
-    $config["err"][] = $content["err"];
+    foreach($lang as $l) {
+        $content = queryContent($conn, $elements, $l);
+        $data = $content["data"];
+        if($content["err"] != "") {
+            $config["err"][] = $content["err"];
+        } else {
+            break;
+        }
+    }
     $data = $content["data"];
     $head = $data[0];
     if (count($data) > 1) {
