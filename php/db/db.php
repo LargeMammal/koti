@@ -67,13 +67,13 @@ function checkTable($conn, $table) {
 function queryContent($conn, $elements, $lang) {
 	// I should probably turn this into global class
     $output = [
-        "err" => "", 
+        "err" => [], 
         "data" => [],
 	];
 
 	// Check if table exists
 	if (!checkTable($conn, $elements[0])) {
-		$output["err"] = "db.queryContent: Table, " . $elements[0] . " , not found";
+		$output["err"][] = "db.queryContent: Table, " . $elements[0] . " , not found";
 		return $output;
 	}
 	
@@ -88,14 +88,27 @@ function queryContent($conn, $elements, $lang) {
 	$results = $conn->query($sql);
 	// Results
 	if ($results === FALSE) {
-		$output["err"] = "db.queryContent: Results: $lang " . $conn->error;
+		$output["err"][] = "db.queryContent: " . $conn->error;
 		return $output;
 	}
 	
 	// If none found stop here
 	if ($results->num_rows < 1) {
-		$output["err"] = "db.queryContent: Non found";
-		return $output;
+		$output["err"][] = "db.queryContent: Non found";
+		$results->free();
+		if (!isset($elements[0])) {
+			$sql = "SELECT * FROM " . $elements[0];
+			$sql .= " WHERE lang='en-US'";
+			$sql .= " LIMIT 10";
+			$results = $conn->query($sql);
+			// Results
+			if ($results === FALSE) {
+				$output["err"][] = "db.queryContent: " . $conn->error;
+				return $output;
+			}
+		} else {
+			return $output;
+		}
 	}
 
 	// Fetch each row in associative form and pass it to output.

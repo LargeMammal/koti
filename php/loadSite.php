@@ -13,6 +13,7 @@ include_once "php/miscellaneous/initialise.php";
 
 // Load the whole page 
 function loadSite($config, $elements, $lang) {
+    $lang = ["en-US"];
     // Get database
     $database = ($config["data"])["Localhost"];
     // I should make this automatic in case of empty database.
@@ -35,7 +36,7 @@ function loadSite($config, $elements, $lang) {
     foreach($lang as $l) {
         $content = queryContent($conn, $elements, $l);
         $data = $content["data"];
-        if($content["err"] != "") {
+        if($content["err"][0] != "") {
             $config["err"][] = $content["err"];
         } else {
             break;
