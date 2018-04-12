@@ -26,7 +26,7 @@ function connect($config) {
 	$conn = new mysqli($config["Site"], $config["User"], $config["pass"], $config["Database"]);
 	// Check connection
 	if ($conn->connect_error) {
-		return "db.getElement: Connection failed: " . $conn->error;
+		return "db.connect: " . $conn->connect_error;
 	}
 	return $conn;
 }
