@@ -66,7 +66,8 @@ function loadSite($config, $elements, $lang) {
     $str .= loadHeader($banner);
     $str .= loadNav($conn, $nav["data"]);
 
-    // Print all errors. If you try to do it else where, it will break the html structure.
+    // Print all errors. If you try to do it else where, 
+    // it will break the html structure.
     foreach($config["err"] as $val) {
         if ($val != "") {
             $str .= "$val <br>";
