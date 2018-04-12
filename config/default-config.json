@@ -2,6 +2,7 @@
     "Name":"tardigrade.ddns.net",
     "Localhost": {
         "User":"site",
+        "Pass":"",
         "Site":"localhost",
         "Database":"site",
         "Tables": {
@@ -9,9 +10,10 @@
             "Items":"items"
             }
         },
-    "Tardigrade": {
+    "Student": {
         "User":"site",
-        "Site":"tardograde.ddns.net",
+        "Pass":"",
+        "Site":"mysql.labranet.jamk.fi",
         "Database":"site",
         "Tables": {
             "Users": "users",
