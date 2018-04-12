@@ -4,13 +4,10 @@
 
 body {
 	margin:0px;
-	font-size:100%;
-	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
-    background-color: #F4F4F4;
-    align-content: center;
+	font-family:"DejaVu Sans", sans-serif;
+    background-color: #DCD0C0;
 }
 
-/*Header tavaraa*/
 header {
 	background-color: #373737;
     color: #DCD0C0;
@@ -23,44 +20,27 @@ nav {
     background-color: #373737;
     color: #DCD0C0;
 	padding:0px;
-    margin: 0px 10px 0px 0px;
 	text-align: center;
 }
 
 section {
-    background-color: #DCD0C0;
     color: black;
     margin: 0px;
 }
 
-/*Footter tavaraa*/
-footer {
+footer, footer p {
 	background-color: #373737;
     color: #DCD0C0;
     margin: 0px;
 	text-align: center;
 }
 
+h1, h2, h3 {
+    text-align: center;
+}
+
 h1 {
-    margin: 0px;
-    padding: 10px;
-}
-
-h2 {
-    margin: 0px;
-    padding: 30px;
-    text-align: center;
-}
-
-h3 {
-    margin: 0px;
-    padding: 10px 0px 20px 0px;
-    text-align: center;
-}
-
-p {
-    margin: 0px;
-    padding: 0px 10px 10px 10px;
+    font-size: 2em;
 }
 
 a:link, a:visited {
@@ -79,21 +59,8 @@ a:hover, a:active {
     color: #373737;
 }
 
-ul {
-    margin: 0px;
-}
-
-li {
-    margin: 0px;
-    padding: 0px 5px 5px 5px;
-}
-
 #map {
     border: 1px dashed black;
     height: 480px;
     width:  100%;
-}
-.comment
-{
-    margin: 20px 15% 20px 15%;
 }

@@ -1,57 +1,82 @@
 <?php
 // Load meta data 
 include_once "php/head/head.php";
-// Load site functions
+// Load elements functions
 include_once "php/body/header.php";
 include_once "php/body/nav.php";
 include_once "php/body/body.php";
 include_once "php/body/footer.php";
 // Load database functions
 include_once "php/db/db.php";
-// Load initialise function just in case
+// Load initialise functions just in case
 include_once "php/miscellaneous/initialise.php";
 
 // Load the whole page 
-function loadSite($config, $site, $lang) {
-    if ($site[0] == "initialise") {
-        return initialise($config, $site, $lang);
-    }
+function loadSite($config, $elements, $lang) {
+    $lang = ["en-US"];
     // Get database
     $database = ($config["data"])["Localhost"];
-    // Get elements and errors
-    $head = getElement($database, ["head"], $lang);
-    foreach($head["err"] as $val) {
-        $config["err"][] = $val;
-    }
-    $nav = getElement($database, ["nav"], $lang);
-    foreach($nav["err"] as $val) {
-        $config["err"][] = $val;
-    }
-    $content = getElement($database, $site);
-    foreach($content["err"] as $val) {
-        $config["err"][] = $val;
-    }
-    $footer = getElement($database, ["footer"], $lang);
-    foreach($footer["err"] as $val) {
-        $config["err"][] = $val;
+    // I should make this automatic in case of empty database.
+    if ($elements[0] == "initialise") {
+        return initialise($config, $elements, $lang);
     }
 
+    // Connect to database
+    $conn = connect($database);
+    if (is_string($conn)) {
+        return "Could not connect to database: " . $conn;
+    }
+
+    // get nav element
+    $nav = getElement($conn, "nav", $lang[0]);
+    $config["err"][] = $nav['err'];
+    
+    $content = "";
+    // query content based on URI
+    foreach($lang as $l) {
+        $content = queryContent($conn, $elements, $l);
+        $data = $content["data"];
+        if($content["err"][0] != "") {
+            $config["err"][] = $content["err"];
+        } else {
+            break;
+        }
+    }
+    $data = $content["data"];
+    $head = $data[0];
+    if (count($data) > 1) {
+        $head["title"] = $elements[0];
+        $head["description"] = $elements[0] . " top site";
+    }
+    
+    // get footer element
+    $footer = getElement($conn, "footer", $lang[0]);
+    $config["err"][] = $footer['err'];
+
     // Stuff in head
-    $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
-    $str .= loadHead($head["data"]);
+    $str = ' <!doctype html><html lang="' . $lang[0] . '"><head>';
+    //$str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
+    $str .= loadHead($head);
     $str .= "</head><body>";
+    // Stuff in body
+    $banner = $elements[0];
+    if (count($data) == 1) {
+        $banner = ($data[0])['title'];
+    }
+    $str .= loadHeader($banner);
+    $str .= loadNav($conn, $nav["data"]);
 
     // Print all errors. If you try to do it else where, it will break the html structure.
     foreach($config["err"] as $val) {
-        $str .= "Error: " . $val . "<br>";
+        if ($val != "") {
+            $str .= "$val <br>";
+        }
     }
 
-    // Stuff in body
-    $str .= loadHeader($content["data"]);
-    $str .= loadNav($nav["data"]);
-    $str .= loadBody($content["data"]);
+    $str .= loadBody($data);
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
     return $str;
+    $conn->close();
 }
 ?>
