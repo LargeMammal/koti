@@ -16,15 +16,17 @@ function loadSite($config, $elements, $lang) {
     $lang = ["en-US"];
     // Get database
     $database = ($config["data"])["Localhost"];
-    // I should make this automatic in case of empty database.
-    if ($elements[0] == "initialise") {
-        return initialise($config, $elements, $lang);
-    }
-
     // Connect to database
     $conn = connect($database);
     if (is_string($conn)) {
         return "Could not connect to database: " . $conn;
+    }
+
+    // I should make this automatic in case of empty database.
+    if ($elements[0] == "initialise") {
+        $str = initialise($conn, $elements, $lang);
+        $conn->close();
+        return $str;
     }
 
     // get nav element

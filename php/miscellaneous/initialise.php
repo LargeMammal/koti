@@ -12,7 +12,7 @@
  * footers and navigators. Navigator should also read what 
  * categories exist from database. 
  */
-function initialise($database, $site, $lang) {
+function initialise($conn, $site, $lang) {
     // I should try to create good looking UI for content editing
     // and managing. Especially managing side. 
     $upload = [
@@ -49,7 +49,7 @@ function initialise($database, $site, $lang) {
     ];
 
     // Upload editor UI
-    $err = upload($database, "upload", $upload);
+    $err = upload($conn, "upload", $upload);
 
     // Stuff in head
     $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';

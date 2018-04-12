@@ -25,18 +25,8 @@ function insert($conn, $table, $items) {
 }
 
 // upload uploads posted data into the database
-function upload($config, $table, $items) {
-	// Get database
-	$database = ($config["data"])["Localhost"];
+function upload($conn, $table, $items) {
     $err = [];
-    
-	// Create connection
-	$conn = new mysqli($database["Site"], $database["User"], "", $database["Database"]);
-	// Check connection
-	if ($conn->connect_error) {
-		$err[] = "db.upload: Connection failed: " . $conn->connect_error;
-		return $err;
-	}
 
     // Create table if it doesn't exists
     if (!checkTable($conn, $table)) {
@@ -57,8 +47,6 @@ function upload($config, $table, $items) {
 	} else {
 		$err[] = "db.upload: Upload was successfull!";
 	}
-	// Close the connection
-	$conn->close();
 	return $err;
 }
 ?>
