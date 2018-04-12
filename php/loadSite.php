@@ -57,8 +57,7 @@ function loadSite($config, $elements, $lang) {
     $config["err"][] = $footer['err'];
 
     // Stuff in head
-    $str = ' <!doctype html><html lang="' . $lang[0] . '"><head>';
-    //$str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
+    $str = '<!doctype html><html lang="' . $lang[0] . '"><head>';
     $str .= loadHead($head);
     $str .= "</head><body>";
     // Stuff in body
