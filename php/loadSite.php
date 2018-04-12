@@ -15,7 +15,7 @@ include_once "php/miscellaneous/initialise.php";
 function loadSite($config, $elements, $lang) {
     $lang = ["en-US"];
     // Get database
-    $database = ($config["data"])["Localhost"];
+    $database = ($config["data"])[$config["Use"]];
     // Connect to database
     $conn = connect($database);
     if (is_string($conn)) {

@@ -1,5 +1,5 @@
 {
-    "Name":"tardigrade.ddns.net",
+    "Use":"Localhost",
     "Localhost": {
         "User":"site",
         "Pass":"",
