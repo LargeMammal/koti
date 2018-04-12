@@ -1,10 +1,11 @@
 _notes/
 projects/*
 cgi-bin/
-config/
+config/*
 /.htaccess # Need to study effects of this. Is needed for true REST API
 .htaccess
 test.php
+hackerman_hacktime*
 
 # Compiled source #
 ###################

@@ -13,7 +13,7 @@ include_once "php/miscellaneous/initialise.php";
 
 // Load the whole page 
 function loadSite($config, $elements, $lang) {
-    $lang = ["en-US"];
+    //$lang = ["en-US"];
     // Get database
     $databases = $config["data"];
     $database = $databases[$databases["Use"]];
