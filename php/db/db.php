@@ -23,7 +23,7 @@
  // This is here just to abstract the database layer
 function connect($config) {
 	// Create connection
-	$conn = new mysqli($config["Site"], $config["User"], "", $config["Database"]);
+	$conn = new mysqli($config["Site"], $config["User"], $config["pass"], $config["Database"]);
 	// Check connection
 	if ($conn->connect_error) {
 		return "db.getElement: Connection failed: " . $conn->error;
