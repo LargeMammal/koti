@@ -6,6 +6,7 @@ config/*
 .htaccess
 test.php
 hackerman_hacktime*
+.well-known
 
 # Compiled source #
 ###################
