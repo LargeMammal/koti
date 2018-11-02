@@ -1,4 +1,4 @@
-<?php 
+<?php
 // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
 function loadNav($conn, $nav) {
 	$output = "";
@@ -6,7 +6,7 @@ function loadNav($conn, $nav) {
 
 	// Results
 	$results = $conn->query($sql);
-	
+
 	// If none found stop here
 	if ($results->num_rows < 1) {
 		$output["err"] = "db.getElement: Non found";
@@ -20,8 +20,8 @@ function loadNav($conn, $nav) {
             $output .= '<a href="' . $str . '">'.$str.'</a>';
         }
     }
-    
+
 	$results->free();
-    return "<nav>" . $output . $nav['nav'] . "</nav>";
+    return "<nav>" . $output . $nav["nav"] . "</nav>";
 }
 ?>

@@ -1,24 +1,24 @@
 <?php
 /** initialise.php:
- * Initialise database with the editor interface. 
+ * Initialise database with the editor interface.
  * I should make it so that this file is only called once
- * and it then uploads the interface to database where it is then 
+ * and it then uploads the interface to database where it is then
  * loaded in the future.
- * 
- * Like this file should strait up call upload function and then 
- * reload into upload page. 
- * 
+ *
+ * Like this file should strait up call upload function and then
+ * reload into upload page.
+ *
  * Not only should this load the editor, but also basic headers,
- * footers and navigators. Navigator should also read what 
- * categories exist from database. 
+ * footers and navigators. Navigator should also read what
+ * categories exist from database.
  */
 function initialise($conn, $site, $lang) {
     // I should try to create good looking UI for content editing
-    // and managing. Especially managing side. 
+    // and managing. Especially managing side.
     $upload = [
         'title' => 'Upload',
         'description' => 'Upload page',
-        'lang' => 'en-US',
+        'lang' => $lang[0],
         'content' => '<section>
         <h1>Add content</h1>
         <form action="" method="POST">
@@ -53,16 +53,12 @@ function initialise($conn, $site, $lang) {
 
     // Stuff in head
     $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
-    $str .= loadHead();
+    $str .= loadHead("Initialise");
     $str .= "</head><body>";
+    $str .= loadHeader("Initialise");
 
-    // Print all errors. If you try to do it else where, 
+    // Print all errors. If you try to do it else where,
     // it will break the html structure.
-    foreach ($config["err"] as $error) {
-        if ($error != "") {
-            $str .= "Error: " . $error . "<br>";
-        }
-    }
     foreach ($err as $error) {
         if ($error != "") {
             $str .= "Error: " . $error . "<br>";
@@ -70,9 +66,8 @@ function initialise($conn, $site, $lang) {
     }
 
     // Stuff in body
-    $str .= loadHeader("Initialise");
     $str .= "<p>Move to ";
-    $str .= "https://tardigrade.ddns.net/~mammal/api/upload ";
+    $str .= "https://tardigrade.ddns.net/api/upload ";
     $str .= "to start uploading</p>";
     $str .= loadFooter("Initialisation site");
     $str .= "</body></html>";

@@ -5,19 +5,19 @@
  */
 
 /** On database abstraction:
- * I really shouldn't call "mysqli(something)" 
+ * I really shouldn't call "mysqli(something)"
  * What if I use different db in future?
  * Code needs to be portable and agnostic.
  * Even the create* functions should be
- * like that. Pass table column names as 
+ * like that. Pass table column names as
  * properties in arrays.
  */
 
 /** On create* functions below:
  * The follofing create* are not really necessary in future.
- * Well that statement is not strictly true. These functions 
- * are hopefully used only once. 
- *     Read the above on how they should be. 
+ * Well that statement is not strictly true. These functions
+ * are hopefully used only once.
+ *     Read the above on how they should be.
  */
 
  // This is here just to abstract the database layer
@@ -31,7 +31,7 @@ function connect($config) {
 	return $conn;
 }
 
-// createTitle creates table with given name and data. 
+// createTitle creates table with given name and data.
 // First item in array will become primary key
 function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE $table (";
@@ -67,19 +67,19 @@ function checkTable($conn, $table) {
 function queryContent($conn, $elements, $lang) {
 	// I should probably turn this into global class
     $output = [
-        "err" => [], 
+        "err" => [],
         "data" => [],
 	];
 
 	// Check if table exists
-	if (!checkTable($conn, $elements[0])) {
+	if (!checkTable($conn, $elements[1])) {
 		$output["err"][] = "db.queryContent: Table, " . $elements[0] . " , not found";
 		return $output;
 	}
-	
-	$sql = "SELECT * FROM " . $elements[0] . " ";
-	if(count($elements) > 1) {
-		$sql .= "WHERE title=" . $elements[1] . " ";
+
+	$sql = "SELECT * FROM " . $elements[1] . " ";
+	if(count($elements) > 2) {
+		$sql .= "WHERE title=" . $elements[2] . " ";
 	} else {
 		$sql .= "WHERE lang='" . $lang . "' ";
 	}
@@ -91,7 +91,7 @@ function queryContent($conn, $elements, $lang) {
 		$output["err"][] = "db.queryContent: " . $conn->error;
 		return $output;
 	}
-	
+
 	// If none found stop here
 	if ($results->num_rows < 1) {
 		$output["err"][] = "db.queryContent: Non found";
@@ -123,7 +123,7 @@ function queryContent($conn, $elements, $lang) {
 function getElement($conn, $element, $lang = "en-US") {
 	// I should probably turn this into global class
     $output = [
-        "err" => '', 
+        "err" => '',
         "data" => '',
     ];
 
@@ -132,7 +132,7 @@ function getElement($conn, $element, $lang = "en-US") {
 		$output["err"] = "db.getElement: Table, $element , not found";
 		return $output;
 	}
-	
+
 	$sql = "SELECT * FROM " . $element . " WHERE lang='$lang'";
 
 	// Results

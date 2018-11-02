@@ -1,8 +1,10 @@
 <?php
-/** upload.php information: 
+/** upload.php information:
  * This file is called when information is stored in the database.
  * These should be under db
  */
+ // Load database functions
+ include_once "php/db/db.php";
 
 // insert inserts data into table
 function insert($conn, $table, $items) {
@@ -44,8 +46,6 @@ function upload($conn, $table, $items) {
 	$error = insert($conn, $table, $items);
 	if (isset($error)) {
 		$err[] = "db.upload: " . $error;
-	} else {
-		$err[] = "db.upload: Upload was successfull!";
 	}
 	return $err;
 }
