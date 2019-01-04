@@ -26,7 +26,6 @@ function loadSite($config, $elements, $lang) {
     // I should make this automatic in case of empty database.
     if ($elements[1] == "initialise") {
         $str = initialise($conn, $elements, $lang);
-        $conn->close();
         return $str;
     }
 
@@ -85,7 +84,6 @@ function loadSite($config, $elements, $lang) {
     $str .= loadBody($data);
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
-    $conn->close();
     return $str;
 }
 ?>
