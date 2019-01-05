@@ -1,9 +1,9 @@
 <?php
 function checkUser($user) {
-    $username = "nm24";
-    $password = "298c8e5d4ab9d6b7e84bce83836e3e33";
+    $username = "";
+    $password = "";
     $servername = "localhost";
-    $dbname = "nordicmedia24";
+    $dbname = "";
     // Create connection
     $conn = new mysqli($servername, $username, $password, $dbname);
     // Check connection
@@ -23,8 +23,8 @@ function checkUser($user) {
         }
     }
 }
-// Give a string or number that represents a language and 
-// return an array that holds the language 
+// Give a string or number that represents a language and
+// return an array that holds the language
 function loadLanguage($language) {
 
     return $output;

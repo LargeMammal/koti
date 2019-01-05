@@ -6,14 +6,8 @@ include_once "php/miscellaneous/upload.php";
 
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
-//echo "Use: ".$config["data"]["Use"]."<br>";
 // Get language from browser
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-/*
-foreach($lang as $item) {
-    echo "Language: ".$item."<br>";
-}
-//*/
 
 // Listen to posts
 if (count($_POST) > 0) {
@@ -40,7 +34,6 @@ if (count($_POST) > 0) {
 
 // Get values from URI
 $str = $_SERVER["REQUEST_URI"];
-//echo "Current path: " . $str."<br>";
 // Remove slashes from both sides.
 $str = trim($str, "/");
 $site = explode("/", $str); // Explode path into variables

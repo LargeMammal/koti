@@ -28,9 +28,8 @@ function checkTable($conn, $table) {
 // First item in array will become primary key
 function createTable($conn, $table, $columns) {
     // Check if table exists
-    if (!checkTable($conn, $elements[1])) {
-        $output["err"][] = "db.queryContent: Table, " . $elements[0] . " , not found";
-        return $output;
+    if (!checkTable($conn, $table)) {
+        return = "db.queryContent: Table, " . $table . " , not found";
     }
     $sql = "CREATE TABLE $table (";
     $count = count($columns) - 1;
@@ -68,6 +67,7 @@ function getItem($config, $elements, $lang) {
         return $output;
     }
 
+    // Generate sql query
     $sql = "SELECT * FROM " . $elements[1] . " ";
     if(count($elements) > 2) {
         $sql .= "WHERE title=" . $elements[2] . " ";
@@ -76,30 +76,17 @@ function getItem($config, $elements, $lang) {
     }
     $sql .= "LIMIT 10";
 
+    // Query
     $results = $conn->query($sql);
-    // Results
+    // Check if query was a success
     if ($results === FALSE) {
         $output["err"][] = "db.queryContent: " . $conn->error;
         return $output;
     }
 
-    // If none found stop here
+    // If none found, report it
     if ($results->num_rows < 1) {
         $output["err"][] = "db.queryContent: Non found";
-        $results->free();
-        if (!isset($elements[0])) {
-            $sql = "SELECT * FROM " . $elements[0];
-            $sql .= " WHERE lang='en-US'";
-            $sql .= " LIMIT 10";
-            $results = $conn->query($sql);
-            // Results
-            if ($results === FALSE) {
-                $output["err"][] = "db.queryContent: " . $conn->error;
-                return $output;
-            }
-        } else {
-            return $output;
-        }
     }
 
     // Fetch each row in associative form and pass it to output.
