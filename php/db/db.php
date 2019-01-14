@@ -152,4 +152,25 @@ function getElement($conn, $element, $lang = "en-US") {
 	$results->free();
 	return $output;
 }
+
+// getItem uses cli to get data from mysql
+function getItem() {
+	$command = 'mysql --xml -u site site -e "select * from upload"';
+	$results = [];
+	$output = "";
+	exec(escapeshellarg($command), $results, $return_var);
+	switch ($return_var) {
+		case 0:
+
+			// code...
+			break;
+		case 1:
+			// code...
+			break;
+		default:
+			// code...
+			break;
+	}
+	return $output;
+}
 ?>
