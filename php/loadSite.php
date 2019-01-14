@@ -6,8 +6,8 @@ include_once "php/body/header.php";
 include_once "php/body/nav.php";
 include_once "php/body/body.php";
 include_once "php/body/footer.php";
-// Load database functions
-include_once "php/db/db.php";
+// Depending on database call specific library
+include_once "php/db/mysql.php";
 // Load initialise functions just in case
 include_once "php/miscellaneous/initialise.php";
 
@@ -17,22 +17,16 @@ function loadSite($config, $elements, $lang) {
     // Get database
     $databases = $config["data"];
     $database = $databases[$databases["Use"]];
-    // Connect to database
-    $conn = connect($database);
-    if (is_string($conn)) {
-        return "Could not connect to database: " . $conn;
-    }
     $config["err"][] = "Current site: " . $elements[1];
     // I should make this automatic in case of empty database.
     if ($elements[1] == "initialise") {
-        $str = initialise($conn, $elements, $lang);
-        $conn->close();
+        $str = initialise($config, $elements, $lang);
         return $str;
     }
 
     // get nav element
     foreach ($lang as $key => $value) {
-        $nav = getElement($conn, "nav", $value);
+        $nav = getItem($config, "nav", $value);
         if ($nav != "") {
             break;
         }
@@ -42,7 +36,7 @@ function loadSite($config, $elements, $lang) {
     $content = "";
     // query content based on URI
     foreach($lang as $l) {
-        $content = queryContent($conn, $elements, $l);
+        $content = queryContent($config, $elements, $l);
         $data = $content["data"];
         if($content["err"][0] != "") {
             $config["err"][] = $content["err"];
@@ -58,7 +52,7 @@ function loadSite($config, $elements, $lang) {
     }
 
     // get footer element
-    $footer = getElement($conn, "footer", $lang[0]);
+    $footer = getItem($config, "footer", $lang[0]);
     $config["err"][] = $footer['err'];
 
     // Stuff in head
@@ -71,11 +65,10 @@ function loadSite($config, $elements, $lang) {
         $banner = ($data[0])['title'];
     }
     $str .= loadHeader($banner);
-    $str .= loadNav($conn, $nav["data"]);
+    $str .= loadNav($config, $nav["data"]);
 
     //$str .= implode(" ",$elements);
-    // Print all errors. If you try to do it else where,
-    // it will break the html structure.
+    // Print all errors. 
     foreach($config["err"] as $val) {
         if ($val != "") {
             $str .= "$val <br>";
@@ -85,7 +78,6 @@ function loadSite($config, $elements, $lang) {
     $str .= loadBody($data);
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
-    $conn->close();
     return $str;
 }
 ?>

@@ -10,6 +10,16 @@
             "Items":"items"
             }
         },
+    "Tardigrade": {
+        "User":"site",
+        "Pass":"",
+        "Site":"tardigrade.ddns.net",
+        "Database":"site",
+        "Tables": {
+            "Users": "users",
+            "Items":"items"
+            }
+        },
     "Student": {
         "User":"site",
         "Pass":"",
