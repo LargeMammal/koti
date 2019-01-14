@@ -1,4 +1,4 @@
-<?php 
+<?php
 // TODO: This definintely needs more refactoring
 // Load footer
 function loadBody() {
@@ -10,20 +10,23 @@ function loadBody() {
                 Pikkusen minusta
             </h2>
             <p>
-                Olen toisen vuoden ohjelmistotekniikan opiskelija. Seuraan Arch Linuxin periaatteita. Pidän siis asiat simppeleinä ja tehokaina. Tykkään nikkaroida mikrokontrollerialustoilla ja IoT laitteilla. Olen mm. rakennellut 3D printteriä vanhasta tulostimesta.
-            </p>
+                Olen nejännen vuoden ohjelmistotekniikan opiskelija JAMKissa. Etsin harjoittelu paikkaa, jossa voisin enemmän tutustua yritys toimintaan. Olen tutustunut enemmän serveri puolen teknologioihin, mutta olen jonkin verran kokenut myös asiakas puolen teknologioissa.</p>
+            <h2>
+                Toiminta alue
+            </h2>
+            <ul>
+                <li>Jyväskylä ja lähiseutu</li>
+                <li>Tampere ja lähiseutu</li>
+            </ul>
             <h2>
                 Toivotut työtehtävät
             </h2>
             <ul>
+                <li>Front- ja Backend toiminta</li>
                 <li>Peli ohjelmointi</li>
-                <li>Sulatetut järjestelmät</li>
                 <li>Mobiili ohjelmointi</li>
-                <li>Front- tai back endien ohjelmointi</li>
+                <li>Sulatetut järjestelmät</li>
             </ul>
-            <p>
-    
-            </p>
             <h2>
                 Osaamisalueet
             </h2>
@@ -31,32 +34,14 @@ function loadBody() {
                 Taidot
             </h3>
             <ul>
-                <li>Tietokoneiden kasaus ja ylläpito</li>
+                <li>Ohjelmointi seuraavilla kielillä: C, C++, C#, Go,  JavaScript, HTML, CSS, PHP ja (my)SQL</li>
+                <li>Näillä teknologioilla olen pelleillyt: REST, jQuery, React, .NET, IoT laitteet ja LAMP</li>
+                <li>Vähän vahvemmat teknologiat: Docker, Kubernetes ja Google APIt</li>
                 <li>Windows, linux ja Mac käyttöjärjestelmien hallinta</li>
-                <li>Ohjelmointi seuraavilla kielillä: C, C++, C#, JavaScript, HTML, CSS, PHP ja (my)SQL</li>
-                <li>jQuery ja ajax on myös hallinnassa</li>
-                <li>Google API:en kanssa on tullut myös työkenneltyä</li>
-                <li>LAMP</li>
-                <li>Front ja Back endien ohjelmointi. Esimerkki: projektit -> ttms0500 -> tuo</li>
-                <li>Arduino pohjaisten mikro-ohjain/elektroniikkalaitteiden ohjelmointi</li>
+                <li>Tietokoneiden kasaus ja ylläpito</li>
             </ul>
             <h2>Mielenkiintoisia kursseja</h2>
-            <ul>
-                <li>Kyberturvallisuus(4)</li>
-                <li>Järjestelmätestaus(on going)
-                    <ul>
-                        <li>Järjestelmätestaus kurssilla opetellaan yksikkö ja hyäksymistestausta</li>
-                        <li><a style=\"width:auto;\" href=\"https://github.com/JAMK-IT/TTOS0900-Jarjestelmatestaus/wiki\">Jäjestelmätestauksen wiki</a> </li>
-                    </ul>
-                </li>
-                <li>Ohjelmistoprojekti(on going)
-                    <ul>
-                        <li>Ohjelmistoprojekti kurssilla harjoitellaan ohjelmistoprojektin läpivientiä ja ohjelmistoprojektin käsitteitä(sprint, etapit jne...).</li>
-                        <li><a style=\"width:auto;\" href=\"https://github.com/JAMK-IT/TTOS0800-Ohjelmistoprojekti/wiki\">Ohjelmistoprojektin wiki</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+            <p>Voin lähettää pyynnöstä tutkintotodistuksen</p>
             <h2>
                 Kielitaito
             </h2>
