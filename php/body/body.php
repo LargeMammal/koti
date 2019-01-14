@@ -40,8 +40,11 @@ function loadBody() {
                 <li>Windows, linux ja Mac käyttöjärjestelmien hallinta</li>
                 <li>Tietokoneiden kasaus ja ylläpito</li>
             </ul>
-            <h2>Mielenkiintoisia kursseja</h2>
-            <p>Voin lähettää pyynnöstä tutkintotodistuksen</p>
+            <h2>Opinnot ja aiempi kokemus</h2>
+            <p>Voin lähettää pyynnöstä opintosuoritusotteen</p>
+            <h3>Aiempi kokemus</h3>
+            <p>Olen ollut mukana kehittämässä Aurora Emotionin varausjärjestelmän serveripuolen ohjelmistoa. Siellä esimiehenäni toimi Ari Karjalainen.</p>
+            <p>Toinen suurempi projekti oli 2018 toimeksianto Cinialta. Tämä oli koulukurssi, joten ei oltu suoraan Cinian alaisina, mutta saimme tuotettua toimivan tuotteen, tarvittavan dokumentaation ja testit. Projektina oli kaivuulaitteen monitorointi- ja ohjausjärjestelmä. Olin tiimin johtaja ja sen lisäksi minun tehtävä oli REST rajapinnan luominen. Cinialla esimiehemme oli Riku Lindblad</p>
             <h2>
                 Kielitaito
             </h2>
