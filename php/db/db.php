@@ -65,6 +65,7 @@ function getItem($config, $lang,  $items, $item = "") {
         "err" => [],
         "data" => [],
 	];
+	$conn = connect($config);
 
 	// If table doesn't exist stop here
 	if (!checkTable($conn, $items)) {

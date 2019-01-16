@@ -1,26 +1,22 @@
 <?php
+/** server.php holds Server class
+* Server object will handle http methods
+*/
+// Depending on database call specific library
+include_once "php/db/db.php";
+include_once "php/loadSite.php";
 
 class Server {
-    public function serve() {
-        $uri = $_SERVER['REQUEST_URI'];
-        $method = $_SERVER['REQUEST_METHOD'];
-        $paths = explode('/', $this->paths($uri));
-        $resource = array_shift($paths);
-
-        if ($resource == 'clients') {
-            $name = array_shift($paths);
-            if (empty($name)) {
-                $this->handle_base($method);
-            } else {
-                $this->handle_name($method, $name);
-            }
+    public function serve($config, $method, $items, $langs) {
+        if (count($items) > 1) {
+            $this->handleItem($config, $method, $items, $langs);
         } else {
-            // We only handle resources under 'clients'
-            header('HTTP/1.1 404 Not Found');
+            $this->handleItems($config, $method, $items, $langs);
         }
     }
 
-    private function handle_base($method) {
+    private function handleItems($config, $method, $items, $langs) {
+        $output = loadSite();
         switch($method) {
         case 'GET':
             $this->result();
@@ -32,18 +28,18 @@ class Server {
         }
     }
 
-    private function handle_name($method, $name) {
+    private function handleItem($config, $method, $items, $langs) {
         switch($method) {
         case 'PUT':
-            $this->create_contact($name);
+            $this->createItem($items);
             break;
 
         case 'DELETE':
-            $this->delete_contact($name);
+            $this->deleteItem($items);
             break;
 
         case 'GET':
-            $this->display_contact($name);
+            $this->displayItem($items);
             break;
 
         default:
@@ -53,8 +49,8 @@ class Server {
         }
     }
 
-    private function create_contact($name){
-        if (isset($this->contacts[$name])) {
+    private function createItem($items){
+        if (isset($this->contacts[$items])) {
             header('HTTP/1.1 409 Conflict');
             return;
         }
@@ -68,22 +64,22 @@ class Server {
             $this->result();
             return;
         }
-        $this->contacts[$name] = $data;
+        $this->contacts[$items] = $data;
         $this->result();
     }
 
-    private function delete_contact($name) {
-        if (isset($this->contacts[$name])) {
-            unset($this->contacts[$name]);
+    private function deleteItem($items) {
+        if (isset($this->contacts[$items])) {
+            unset($this->contacts[$items]);
             $this->result();
         } else {
             header('HTTP/1.1 404 Not Found');
         }
     }
 
-    private function display_contact($name) {
-        if (array_key_exists($name, $this->contacts)) {
-            echo json_encode($this->contacts[$name]);
+    private function displayItem($items) {
+        if (array_key_exists($items, $this->contacts)) {
+            echo json_encode($this->contacts[$items]);
         } else {
 		 //           header('HTTP/1.1 404 Not Found');
 		header('HTTP/1.1 404 Not Found', true, 404);
@@ -99,7 +95,7 @@ class Server {
     /**
      * Displays a list of all contacts.
      */
-    private function result() {
+    private function result($input, $type) {
         header('Content-type: application/json');
         echo json_encode($this->contacts);
     }
@@ -107,7 +103,7 @@ class Server {
 
 function parseLang($str) {
     $output = [];
-    // Split the string ´
+    // Split the string
     $arr = explode(";", $str);
     foreach ($arr as $value) {
         // ignore q thingys

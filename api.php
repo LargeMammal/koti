@@ -1,18 +1,18 @@
 <?php
-include_once "php/loadSite.php";
-include_once "php/miscellaneous/file.php";
-include_once "php/miscellaneous/lang.php";
-include_once "php/miscellaneous/upload.php";
+include_once "php/server/server.php";
+include_once "php/server/file.php";
+include_once "php/server/upload.php";
 
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
 // Get language from browser
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
-$server = new Server;
-$server->serve();
+// Get values from URI
+$str = $_SERVER['REQUEST_URI'];
+$method = $_SERVER['REQUEST_METHOD'];
 
-// Listen to posts
+/* Listen for posts
 if (count($_POST) > 0) {
     $table = "";
     if (isset($_POST['table'])) {
@@ -34,14 +34,14 @@ if (count($_POST) > 0) {
         }
     }
 }
+//*/
 
-// Get values from URI
-$str = $_SERVER["REQUEST_URI"];
 // Remove slashes from both sides.
 $str = trim($str, "/");
-$site = explode("/", $str); // Explode path into variables
-// Upload site is a special case
-$str = loadSite($config, $site, $lang);
+$items = explode("/", $str); // Explode path into variables
+// Serve
+$server = new Server;
+$server->serve($config, $method, $items, $lang);
 // Do something with those variables
 echo $str;
 ?>

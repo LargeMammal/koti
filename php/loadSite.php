@@ -12,70 +12,68 @@ include_once "php/db/mysql.php";
 include_once "php/miscellaneous/initialise.php";
 
 // Load the whole page
-function loadSite($config, $elements, $lang) {
-    //$lang = ["en-US"];
+function loadSite($config, $items, $item, $langs) {
     // Get database
     $databases = $config["data"];
     $database = $databases[$databases["Use"]];
-    $config["err"][] = "Current site: " . $elements[1];
+    $config["err"][] = "Current site: " . $items;
     // I should make this automatic in case of empty database.
-    if ($elements[1] == "initialise") {
-        $str = initialise($config, $elements, $lang);
+    if ($items == "initialise") {
+        $str = initialise($database, $items, $langs);
         return $str;
     }
+    $data = [];
+    $head = [];
+    $nav = [];
+    $footer = [];
+    $lang = "";
 
-    // get nav element
-    foreach ($lang as $key => $value) {
-        $nav = getItem($database, $value, "nav");
-        if ($nav != "") {
-            break;
-        }
-    }
-    $config["err"][] = $nav['err'];
-
-    $content = "";
-    // query content based on URI
-    foreach($lang as $l) {
-        $content = queryContent($config, $elements, $l);
+    // Get items
+    foreach ($langs as $key => $l) {
+        $err = [];
+        $lang = $l;
+        $nav = getItem($database, $l, "nav");
+        $content = getItem($database, $l, $items, $item);
+        $footer = getItem($database, $l, "footer");
+        $err[] = $nav["err"];
+        $config["err"] = $content["err"];
+        $err[] = $footer["err"];
         $data = $content["data"];
-        if($content["err"][0] != "") {
-            $config["err"][] = $content["err"];
+        if(count($err[]) > 0) {
+            foreach ($err as $e) {
+                $config["err"][] = $e;
+            }
         } else {
             break;
         }
     }
-    $data = $content["data"];
-    $head = $data[0];
+
+    $head["title"] = $items;
+    $banner = $items;
     if (count($data) > 1) {
-        $head["title"] = $elements[1];
-        $head["description"] = $elements[1] . " top site";
+        $head["description"] = $item . " top site";
+    } else {
+        $banner = ($data[0])['title'];
     }
 
-    // get footer element
-    $footer = getItem($config, "footer", $lang[0]);
-    $config["err"][] = $footer['err'];
-
     // Stuff in head
-    $str = '<!doctype html><html lang="' . $lang[0] . '"><head>';
+    $str = '<!doctype html><html lang="' . $lang . '"><head>';
     $str .= loadHead($head);
     $str .= "</head><body>";
     // Stuff in body
-    $banner = $elements[1];
-    if (count($data) == 1) {
-        $banner = ($data[0])['title'];
-    }
     $str .= loadHeader($banner);
-    $str .= loadNav($config, $nav["data"]);
-
-    //$str .= implode(" ",$elements);
+    $str .= loadNav($nav["data"]);
+    // html apparently wants heading for sections.
+    $str = "<section><section>";
     // Print all errors.
     foreach($config["err"] as $val) {
         if ($val != "") {
             $str .= "$val <br>";
         }
     }
-
+    $str .= "</section>";
     $str .= loadBody($data);
+    $str .= "</section>";
     $str .= loadFooter($footer["data"]);
     $str .= "</body></html>";
     return $str;
