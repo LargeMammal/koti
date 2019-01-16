@@ -12,7 +12,7 @@ include_once "php/db/mysql.php";
 include_once "php/miscellaneous/initialise.php";
 
 // Load the whole page
-function loadSite($config, $items, $item, $langs) {
+function loadSite($config, $langs, $items, $item) {
     // Get database
     $databases = $config["data"];
     $database = $databases[$databases["Use"]];

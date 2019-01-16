@@ -7,15 +7,15 @@ include_once "php/db/db.php";
 include_once "php/loadSite.php";
 
 class Server {
-    public function serve($config, $method, $items, $langs) {
+    public function serve($config, $langs, $method, $items) {
         if (count($items) > 1) {
-            $this->handleItem($config, $method, $items, $langs);
+            $this->handleItem($config, $langs, $method, $items);
         } else {
-            $this->handleItems($config, $method, $items, $langs);
+            $this->handleItems($config, $langs, $method, $items);
         }
     }
 
-    private function handleItems($config, $method, $items, $langs) {
+    private function handleItems($config, $langs, $method, $items) {
         $output = loadSite();
         switch($method) {
         case 'GET':
@@ -28,18 +28,18 @@ class Server {
         }
     }
 
-    private function handleItem($config, $method, $items, $langs) {
+    private function handleItem($config, $langs, $method, $items) {
         switch($method) {
         case 'PUT':
-            $this->createItem($items);
+            $this->createItem($config, $langs, $items[0], $items[1]);
             break;
 
         case 'DELETE':
-            $this->deleteItem($items);
+            $this->deleteItem($config, $langs, $items[0], $items[1]);
             break;
 
         case 'GET':
-            $this->displayItem($items);
+            $this->displayItem($config, $langs, $items[0], $items[1]);
             break;
 
         default:
@@ -49,7 +49,7 @@ class Server {
         }
     }
 
-    private function createItem($items){
+    private function createItem($config, $langs, $items, $item){
         if (isset($this->contacts[$items])) {
             header('HTTP/1.1 409 Conflict');
             return;
@@ -68,7 +68,7 @@ class Server {
         $this->result();
     }
 
-    private function deleteItem($items) {
+    private function deleteItem($config, $langs, $items, $item) {
         if (isset($this->contacts[$items])) {
             unset($this->contacts[$items]);
             $this->result();
@@ -77,27 +77,13 @@ class Server {
         }
     }
 
-    private function displayItem($items) {
-        if (array_key_exists($items, $this->contacts)) {
-            echo json_encode($this->contacts[$items]);
-        } else {
-		 //           header('HTTP/1.1 404 Not Found');
-		header('HTTP/1.1 404 Not Found', true, 404);
-		echo "The file you're looking for does not exist.";
-        }
+    private function displayItem($config, $langs, $items, $item) {
+        echo loadSite($config, $langs, $items, $item);;
     }
 
     private function paths($url) {
         $uri = parse_url($url); // http://php.net/manual/en/function.parse-url.php
         return $uri['path'];
-    }
-
-    /**
-     * Displays a list of all contacts.
-     */
-    private function result($input, $type) {
-        header('Content-type: application/json');
-        echo json_encode($this->contacts);
     }
 }
 
