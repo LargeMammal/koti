@@ -1,6 +1,12 @@
 {
     "Use":"Localhost",
     "Localhost": {
+        "Local": "1",
+        "SSH": {
+            "Use_Key": "0",
+            "User": "site",
+            "Password": ""
+        },
         "User":"site",
         "Pass":"",
         "Site":"localhost",
@@ -11,6 +17,12 @@
             }
         },
     "Tardigrade": {
+        "Local": "1",
+        "SSH": {
+            "Use_Key": "0",
+            "User": "site",
+            "Password": ""
+        },
         "User":"site",
         "Pass":"",
         "Site":"tardigrade.ddns.net",
@@ -21,6 +33,12 @@
             }
         },
     "Student": {
+        "Local": "0",
+        "SSH": {
+            "Use_Key": "0",
+            "User": "site",
+            "Password": ""
+        },
         "User":"site",
         "Pass":"",
         "Site":"mysql.labranet.jamk.fi",

@@ -3,20 +3,20 @@
 #Action php-cgi /~K1729/cgi-bin/php-fastcgi
 
 AddDefaultCharset UTF-8
-# AddType is necessary because other rewriter doesn't understand to execute 
-AddType application/x-httpd-php .php 
+# AddType is necessary because other rewriter doesn't understand to execute
+AddType application/x-httpd-php .php
+
+<Limit GET POST PUT DELETE>
+    Allow from all
+</Limit>
 
 <IfModule mod_rewrite.c>
     RewriteEngine on
 
-    # redirect all api calls to api.php
-    RewriteRule ^api(.+)$ api\.php [L]
-
     # If the request is a file, folder or symlink that exists, serve it up
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
 
-    # otherwise, serve your index.php app
-    RewriteRule ^(.+)$ index.php [L]
+    # redirect all api calls to api.php
+    RewriteRule ^.* api.php [NC,L]
 </IfModule>
