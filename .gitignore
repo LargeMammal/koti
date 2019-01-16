@@ -4,6 +4,10 @@ cgi-bin/
 config/*
 /.htaccess # Need to study effects of this. Is needed for true REST API
 .htaccess
+<<<<<<< HEAD
+#test.php
+=======
+>>>>>>> 6fa65ceb6d2839922f7467189dd7d5eb43f06b78
 hackerman_hacktime*
 .well-known
 
