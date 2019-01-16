@@ -74,12 +74,13 @@ function getItem($config, $lang,  $items, $item = "") {
         "data" => [],
 	];
 
-	// Check if table exists
+	// If table doesn't exist stop here
 	if (!checkTable($conn, $items)) {
-		$output["err"][] = "db.queryContent: Table, " . $items . " , not found";
+		$output["err"][] = "db.getItem: Table, " . $items . " , not found";
 		return $output;
 	}
 
+	// Generate query
 	$sql = "SELECT * FROM " . $items . " WHERE lang='" . $lang . "' ";
 	if($item != "") {
 		$sql .= "AND WHERE title=" . $item . " ";
@@ -87,15 +88,15 @@ function getItem($config, $lang,  $items, $item = "") {
 	$sql .= "LIMIT 10";
 
 	$results = $conn->query($sql);
-	// Results
+	// If query fails stop here
 	if ($results === FALSE) {
-		$output["err"][] = "db.queryContent: " . $conn->error;
+		$output["err"][] = "db.getItem: " . $conn->error;
 		return $output;
 	}
 
 	// If none found stop here
 	if ($results->num_rows < 1) {
-		$output["err"][] = "db.queryContent: Non found";
+		$output["err"][] = "db.getItem: Non found";
 		$results->free();
 		return $output;
 	}
