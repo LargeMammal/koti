@@ -8,16 +8,8 @@
  * I really shouldn't call "mysqli(something)"
  * What if I use different db in future?
  * Code needs to be portable and agnostic.
- * Even the create* functions should be
- * like that. Pass table column names as
- * properties in arrays.
- */
-
-/** On create* functions below:
- * The follofing create* are not really necessary in future.
- * Well that statement is not strictly true. These functions
- * are hopefully used only once.
- *     Read the above on how they should be.
+ * In future I may need to create a seperate
+ * program to handle databases.
  */
 
  // This is here just to abstract the database layer
