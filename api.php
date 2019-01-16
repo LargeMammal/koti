@@ -4,6 +4,9 @@ include_once "php/miscellaneous/file.php";
 include_once "php/miscellaneous/lang.php";
 include_once "php/miscellaneous/upload.php";
 
+// Start logging into default
+logging();
+
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
 // Get language from browser

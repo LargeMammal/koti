@@ -29,7 +29,7 @@ function checkTable($conn, $table) {
 function createTable($conn, $table, $columns) {
     // Check if table exists
     if (!checkTable($conn, $table)) {
-        return = "db.queryContent: Table, " . $table . " , not found";
+        return "db.queryContent: Table, " . $table . " , not found";
     }
     $sql = "CREATE TABLE $table (";
     $count = count($columns) - 1;

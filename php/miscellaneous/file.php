@@ -2,8 +2,8 @@
 // TODO: Break the conditioning!!!
 
 // getRootDir gets the root directory of the app.
-// This is useful when you need to access files 
-// in highly refactored environment. 
+// This is useful when you need to access files
+// in highly refactored environment.
 function getRootDir() {
     // getcwd gives you the working directory
     $path = getcwd();
@@ -12,7 +12,7 @@ function getRootDir() {
     // initialize output and stop
     $output = array();
     $stop = false;
-    // check each value for 
+    // check each value for
     foreach ($arr as $value) {
         switch($value) {
             case "php":
@@ -50,9 +50,9 @@ function parseObject($obj, $i = 0) {
 
 // loadFile gets file and returns contents in an array
 function LoadJSON($file) {
-    $pwd = getRootDir() . "/" . $file; 
+    $pwd = getRootDir() . "/" . $file;
     $output = [
-        "err" => [], 
+        "err" => [],
         "data" => [],
     ];
     if (!file_exists($pwd)) {
@@ -63,5 +63,22 @@ function LoadJSON($file) {
     $data = json_decode($json); // turns json into php object
     $output["data"] = parseObject($data);
     return $output;
+}
+
+// logging saves everything into a specific file
+function logging($name = "koti_log.log") {
+    // Reports all errors
+    error_reporting(E_ALL);
+    // Do not display errors for the end-users (security issue)
+    ini_set('display_errors','Off');
+    // Set a logging file
+    ini_set('error_log',$name);
+
+
+    // Override the default error handler behavior
+    set_exception_handler(function($exception) {
+       error_log($exception);
+       error_page("Something went wrong!");
+    });
 }
 ?>

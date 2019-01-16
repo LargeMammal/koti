@@ -1,11 +1,10 @@
 <?php
 // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
-function loadNav($conn, $nav) {
+function loadNav($config, $nav) {
 	$output = "";
 	$sql = "SHOW TABLES";
 
-	// Results
-	$results = $conn->query($sql);
+	getItem();
 
 	// If none found stop here
 	if ($results->num_rows < 1) {
