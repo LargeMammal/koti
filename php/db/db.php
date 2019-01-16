@@ -83,6 +83,7 @@ function getItem($config, $lang,  $items, $item = "") {
 	// If query fails stop here
 	if ($results === FALSE) {
 		$output["err"][] = "db.getItem: " . $conn->error;
+		$results->free();
 		return $output;
 	}
 

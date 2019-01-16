@@ -9,6 +9,9 @@ $config = loadJSON("config/default-config.json");
 // Get language from browser
 $lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
+$server = new Server;
+$server->serve();
+
 // Listen to posts
 if (count($_POST) > 0) {
     $table = "";

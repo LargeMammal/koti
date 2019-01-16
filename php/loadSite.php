@@ -26,7 +26,7 @@ function loadSite($config, $elements, $lang) {
 
     // get nav element
     foreach ($lang as $key => $value) {
-        $nav = getItem($config, "nav", $value);
+        $nav = getItem($database, $value, "nav");
         if ($nav != "") {
             break;
         }
@@ -68,7 +68,7 @@ function loadSite($config, $elements, $lang) {
     $str .= loadNav($config, $nav["data"]);
 
     //$str .= implode(" ",$elements);
-    // Print all errors. 
+    // Print all errors.
     foreach($config["err"] as $val) {
         if ($val != "") {
             $str .= "$val <br>";
