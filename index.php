@@ -4,14 +4,14 @@ include_once "php/miscellaneous/file.php";
 include_once "php/miscellaneous/lang.php";
 
 // Get json array from json file
-$config = loadJSON("/config/default-config.json");
-// Get database
-$database = ($config["data"])["Localhost"];
+$config = loadJSON("config/default-config.json");
 // Get language from browser
-$lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+$langs = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 // Load index site with config data
-$site = ["not_index"];
+$items = "not_index";
+$item = "";
+
 // Upload site is a special case
-$str = loadSite($config, $site, $lang);
+$str = loadSite($config, $langs, $items, $item);
 echo $str;
 ?>

@@ -5,6 +5,7 @@ function loadBody($content) {
     $output .= '<source src="hackerman_hacktime.mp4" type="video/mp4">';
     $output .= '</video>'; */
     //$output .= '<iframe id="bgvid" src="https://www.youtube.com/embed/KEkrWRHCDQU?autoplay=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>';
+    $output = "";
     foreach ($content as $items) {
         $output .= "<section>";
         $output .= "<h2>" . $items['title'] . "</h2>";

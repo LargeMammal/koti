@@ -7,12 +7,12 @@ include_once "php/body/nav.php";
 include_once "php/body/body.php";
 include_once "php/body/footer.php";
 // Depending on database call specific library
-include_once "php/db/mysql.php";
+include_once "php/db/db.php";
 // Load initialise functions just in case
 include_once "php/miscellaneous/initialise.php";
 
 // Load the whole page
-function loadSite($config, $langs, $items, $item) {
+function loadSite($config, $langs, $items, $item = "") {
     // Get database
     $databases = $config["data"];
     $database = $databases[$databases["Use"]];
@@ -23,23 +23,22 @@ function loadSite($config, $langs, $items, $item) {
         return $str;
     }
     $data = [];
-    $head = [];
     $nav = [];
     $footer = [];
     $lang = "";
 
-    // Get items
-    foreach ($langs as $key => $l) {
+    //* Get items
+    foreach ($langs as $l) {
         $err = [];
         $lang = $l;
         $nav = getItem($database, $l, "nav");
         $content = getItem($database, $l, $items, $item);
         $footer = getItem($database, $l, "footer");
-        $err[] = $nav["err"];
-        $config["err"] = $content["err"];
-        $err[] = $footer["err"];
+        $err = $nav["err"];
+        $config["err"][] = implode($content["err"]);
+        foreach ($footer as $e) $err[] = implode($e);
         $data = $content["data"];
-        if(count($err[]) > 0) {
+        if(count($err) > 0) {
             foreach ($err as $e) {
                 $config["err"][] = $e;
             }
@@ -47,13 +46,13 @@ function loadSite($config, $langs, $items, $item) {
             break;
         }
     }
-
+    //*/
     $head["title"] = $items;
     $banner = $items;
     if (count($data) > 1) {
         $head["description"] = $item . " top site";
     } else {
-        $banner = ($data[0])['title'];
+        if (isset($data)) $banner = ($data[0])['title'];
     }
 
     // Stuff in head
@@ -62,13 +61,13 @@ function loadSite($config, $langs, $items, $item) {
     $str .= "</head><body>";
     // Stuff in body
     $str .= loadHeader($banner);
-    $str .= loadNav($nav["data"]);
+    $str .= loadNav($nav["data"][0]);
     // html apparently wants heading for sections.
     $str = "<section><section>";
     // Print all errors.
     foreach($config["err"] as $val) {
         if ($val != "") {
-            $str .= "$val <br>";
+            $str .= $val. "<br>";
         }
     }
     $str .= "</section>";

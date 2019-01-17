@@ -1,11 +1,21 @@
 <?php
 include_once "php/server/server.php";
 include_once "php/server/file.php";
-include_once "php/server/upload.php";
+/*
+// Start logging into default// Reports all errors
+error_reporting(E_ALL);
+// Do not display errors for the end-users (security issue)
+ini_set('display_errors','Off');
+// Set a logging file
+ini_set('error_log','my_file.log');
 
-// Start logging into default
-logging();
 
+// Override the default error handler behavior
+set_exception_handler(function($exception) {
+   error_log($exception);
+   error_page("Something went wrong!");
+});
+//*/
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
 // Get language from browser
@@ -43,6 +53,7 @@ if (count($_POST) > 0) {
 $str = trim($str, "/");
 $items = explode("/", $str); // Explode path into variables
 // Serve
+//echo implode($items);
 $server = new Server;
 $server->serve($config, $method, $items, $lang);
 // Do something with those variables

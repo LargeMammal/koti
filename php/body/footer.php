@@ -1,7 +1,7 @@
-<?php 
+<?php
 // TODO: Needs refactoring
 // Load footer
 function loadFooter($footer) {
-    return "<footer>" . $footer['footer'] . "</footer>";
+    return "<footer>" . implode($footer) . "</footer>";
 }
 ?>

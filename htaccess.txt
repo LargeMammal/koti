@@ -12,6 +12,7 @@ AddType application/x-httpd-php .php
 
 <IfModule mod_rewrite.c>
     RewriteEngine on
+    RewriteBase /
 
     # If the request is a file, folder or symlink that exists, serve it up
     RewriteCond %{REQUEST_FILENAME} !-d

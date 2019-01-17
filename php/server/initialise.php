@@ -1,4 +1,5 @@
 <?php
+include_once 'php/db/db.php';
 /** initialise.php:
  * Initialise database with the editor interface.
  * I should make it so that this file is only called once
@@ -12,13 +13,13 @@
  * footers and navigators. Navigator should also read what
  * categories exist from database.
  */
-function initialise($conn, $site, $lang) {
+function initialise($config, $site) {
     // I should try to create good looking UI for content editing
     // and managing. Especially managing side.
     $upload = [
         'title' => 'Upload',
         'description' => 'Upload page',
-        'lang' => $lang[0],
+        'lang' => 'en-US',
         'content' => '<section>
         <h1>Add content</h1>
         <form action="" method="POST">
@@ -29,27 +30,18 @@ function initialise($conn, $site, $lang) {
             <p>Content: </p><textarea name="content" required></textarea><br>
             <input type="submit">
         </form>
-        <h1>Add others</h1>
+        <h1>Add Language</h1>
         <form action="" method="POST">
-            <p>Head: </p><textarea name="head" required></textarea><br>
             <p>Lang: </p><input type="text" name="lang" required><br>
-            <input type="submit">
-        </form>
-        <form action="" method="POST">
             <p>Navigation: </p><textarea name="nav" required></textarea><br>
-            <p>Lang: </p><input type="text" name="lang" required><br>
-            <input type="submit">
-        </form>
-        <form action="" method="POST">
             <p>Footer: </p><textarea name="footer" required></textarea><br>
-            <p>Lang: </p><input type="text" name="lang" required><br>
             <input type="submit">
         </form>
     </section>',
     ];
 
     // Upload editor UI
-    $err = upload($conn, "upload", $upload);
+    $err = setItem($config, "en-US", "upload", $upload);
 
     // Stuff in head
     $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
@@ -72,5 +64,9 @@ function initialise($conn, $site, $lang) {
     $str .= loadFooter("Initialisation site");
     $str .= "</body></html>";
     return $str;
+}
+
+function init_lang($config, $site) {
+
 }
 ?>

@@ -78,7 +78,7 @@ class Server {
     }
 
     private function displayItem($config, $langs, $items, $item) {
-        echo loadSite($config, $langs, $items, $item);;
+        echo loadSite($config, $langs, $items, $item);
     }
 
     private function paths($url) {

@@ -1,8 +1,11 @@
 <?php
 // LoadHead returns meta-data stuff.
 function loadHead($content) {
-    $title = $content["title"];
-    $description = $content["description"];
+    $description = $title = "";
+    if (isset($content)) {
+        $title = $content["title"];
+        $description = $content["description"];
+    }
     $str = '';
     $str .= '<meta charset="UTF-8">';
     $str .= '<title>' . $title . '</title>';

@@ -13,9 +13,9 @@
  */
 
  // This is here just to abstract the database layer
-function connect($config) {
+function connect($database) {
 	// Create connection
-	$conn = new mysqli($config["Site"], $config["User"], $config["Pass"], $config["Database"]);
+	$conn = new mysqli($database["Site"], $database["User"], $database["Pass"], $database["Database"]);
 	// Check connection
 	if ($conn->connect_error) {
 		return "db.connect: " . $conn->connect_error;
@@ -36,8 +36,11 @@ function checkTable($conn, $table) {
 // createTitle creates table with given name and data.
 // First item in array will become primary key
 function createTable($conn, $table, $columns) {
-	$sql = "CREATE TABLE $table (";
-	$count = count($columns) - 1;
+	// If table doesn't exist stop here
+	if (!checkTable($conn, $items)) {
+		return "db.getItem: Table, " . $items . " , not found";
+	}
+	$sql = "CREATE TABLE ".$table." (";
 	$items = [];
 	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 	foreach($columns as $column) {
@@ -59,13 +62,13 @@ function createTable($conn, $table, $columns) {
 * getItem gets an item from database
 * Generate the code here and later turn it into a exterrior script
 */
-function getItem($config, $lang,  $items, $item = "") {
+function getItem($database, $lang,  $items, $item = ''){
 	// I should probably turn this into global class
     $output = [
         "err" => [],
         "data" => [],
 	];
-	$conn = connect($config);
+	$conn = connect($database);
 
 	// If table doesn't exist stop here
 	if (!checkTable($conn, $items)) {
@@ -101,5 +104,43 @@ function getItem($config, $lang,  $items, $item = "") {
 	}
 	$results->free();
 	return $output;
+}
+//*/
+
+// insert inserts data into table
+// Those using setItem should have special privileges
+function setItem($config, $table, $items) {
+   // I should probably turn this into global class
+   $output = [
+       "err" => [],
+       "data" => [],
+   ];
+
+    // Connect
+    $conn = connect($config);
+
+	$sql = "INSERT INTO". $table ."(";
+	$columns = [];
+	$values = [];
+	foreach ($items as $column=>$item) {
+		$columns[] = $column;
+		$values[] = "'" . $item . "'";
+	}
+    $error = createTable($conn, $table, $columns);
+    if ($error != "") {
+        $output["err"][] = "db.setItem: " . $error;
+    }
+	$sql .= implode(", ", $columns) . ") VALUES (" . implode(", ", $values) . ");";
+
+	// Query
+	if ($conn->query($sql) !== TRUE) {
+		$output["err"][] = "upload.insert: " . $sql . "<br>" . $conn->error;
+	}
+	return $output["err"];
+}
+
+// remove selected item
+function removeItem($config, $table, $item) {
+
 }
 ?>
