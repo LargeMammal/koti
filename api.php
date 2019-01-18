@@ -19,7 +19,7 @@ set_exception_handler(function($exception) {
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
 // Get language from browser
-$lang = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+$langs = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
 // Get values from URI
 $str = $_SERVER['REQUEST_URI'];
@@ -52,10 +52,13 @@ if (count($_POST) > 0) {
 // Remove slashes from both sides.
 $str = trim($str, "/");
 $items = explode("/", $str); // Explode path into variables
+if (count($items) < 1) {
+    $items[] = "not_index";
+}
 // Serve
 //echo implode($items);
 $server = new Server;
-$server->serve($config, $method, $items, $lang);
+$str = $server->serve($config, $langs, $method, $items);
 // Do something with those variables
 echo $str;
 ?>

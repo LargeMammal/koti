@@ -9,7 +9,7 @@ include_once "php/body/footer.php";
 // Depending on database call specific library
 include_once "php/db/db.php";
 // Load initialise functions just in case
-include_once "php/miscellaneous/initialise.php";
+include_once "php/server/initialise.php";
 
 // Load the whole page
 function loadSite($config, $langs, $items, $item = "") {
@@ -35,9 +35,8 @@ function loadSite($config, $langs, $items, $item = "") {
         $content = getItem($database, $l, $items, $item);
         $footer = getItem($database, $l, "footer");
         $err = $nav["err"];
-        $config["err"][] = implode($content["err"]);
         foreach ($footer as $e) $err[] = implode($e);
-        $data = $content["data"];
+        $data = $content;
         if(count($err) > 0) {
             foreach ($err as $e) {
                 $config["err"][] = $e;
@@ -46,13 +45,23 @@ function loadSite($config, $langs, $items, $item = "") {
             break;
         }
     }
+    foreach ($data["err"] as $value) {
+        $config["err"][] = $value;
+    }
+
+    if (!isset($nav["data"][0]["Content"])) {
+        initLang($database);
+        $nav["data"][0]["Content"] = '<a href="https://github.com/LargeMammal">Github</a><a href="https://gitlab.com/mammal">Gitlab</a><a href="https://www.linkedin.com/in/jari-loippo/">LinkedIn</a>';
+        $footer["data"][0]["Content"] = 'Made by me with PHP and trying to follow REST standard';
+    }
+
     //*/
-    $head["title"] = $items;
+    $head["Title"] = $items;
     $banner = $items;
     if (count($data) > 1) {
-        $head["description"] = $item . " top site";
+        $head["Description"] = $item . " top site";
     } else {
-        if (isset($data)) $banner = ($data[0])['title'];
+        if (isset($data)) $banner = $data["data"][0]['Title'];
     }
 
     // Stuff in head
@@ -61,19 +70,21 @@ function loadSite($config, $langs, $items, $item = "") {
     $str .= "</head><body>";
     // Stuff in body
     $str .= loadHeader($banner);
-    $str .= loadNav($nav["data"][0]);
+    $str .= loadNav($nav["data"][0]["Content"]);
     // html apparently wants heading for sections.
     $str = "<section><section>";
-    // Print all errors.
+    file_put_contents("error.log", $config["err"]);
+    /* Print all errors.
     foreach($config["err"] as $val) {
         if ($val != "") {
             $str .= $val. "<br>";
         }
     }
+    //*/
     $str .= "</section>";
-    $str .= loadBody($data);
+    $str .= loadBody($data["data"]);
     $str .= "</section>";
-    $str .= loadFooter($footer["data"]);
+    $str .= loadFooter($footer["data"][0]["Content"]);
     $str .= "</body></html>";
     return $str;
 }

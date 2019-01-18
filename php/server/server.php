@@ -8,23 +8,23 @@ include_once "php/loadSite.php";
 
 class Server {
     public function serve($config, $langs, $method, $items) {
+        $str = "";
         if (count($items) > 1) {
-            $this->handleItem($config, $langs, $method, $items);
+            $str = $this->handleItem($config, $langs, $method, $items);
         } else {
-            $this->handleItems($config, $langs, $method, $items);
+            $str = $this->handleItems($config, $langs, $method, $items);
         }
+        return $str;
     }
 
     private function handleItems($config, $langs, $method, $items) {
-        $output = loadSite();
         switch($method) {
         case 'GET':
-            $this->result();
-            break;
+            return loadSite($config, $langs, $items[0], $items[1]);
         default:
             header('HTTP/1.1 405 Method Not Allowed');
             header('Allow: GET');
-            break;
+            return "";
         }
     }
 
@@ -32,21 +32,20 @@ class Server {
         switch($method) {
         case 'PUT':
             $this->createItem($config, $langs, $items[0], $items[1]);
-            break;
+            return "";
 
         case 'DELETE':
             $this->deleteItem($config, $langs, $items[0], $items[1]);
-            break;
+            return "";
 
         case 'GET':
-            $this->displayItem($config, $langs, $items[0], $items[1]);
-            break;
+            return $this->displayItem($config, $langs, $items[0], $items[1]);
 
         default:
             header('HTTP/1.1 405 Method Not Allowed');
             header('Allow: GET, PUT, DELETE');
-            break;
         }
+        return "";
     }
 
     private function createItem($config, $langs, $items, $item){
@@ -78,7 +77,7 @@ class Server {
     }
 
     private function displayItem($config, $langs, $items, $item) {
-        echo loadSite($config, $langs, $items, $item);
+        return loadSite($config, $langs, $items, $item);
     }
 
     private function paths($url) {

@@ -24,8 +24,8 @@ function connect($database) {
 }
 
 // checkTable checks if table exists
-function checkTable($conn, $table) {
-	$result = $conn->query("SHOW TABLES LIKE '$table'");
+function checkTable($conn, $items = "") {
+	$result = $conn->query("SHOW TABLES LIKE '$items'");
 	if ($result->num_rows < 1) {
 		return false;
 	}
@@ -37,14 +37,14 @@ function checkTable($conn, $table) {
 // First item in array will become primary key
 function createTable($conn, $table, $columns) {
 	// If table doesn't exist stop here
-	if (!checkTable($conn, $items)) {
-		return "db.getItem: Table, " . $items . " , not found";
+	if (!checkTable($conn, $table)) {
+		return "db.getItem: Table, " . $table . " , not found";
 	}
 	$sql = "CREATE TABLE ".$table." (";
 	$items = [];
 	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 	foreach($columns as $column) {
-		if ($column == "title" || $column == "lang") {
+		if ($column == "Title" || $column == "Language") {
 			$items[] = "$column VARCHAR(191) NOT NULL";
 		} else {
 			$items[] = "$column LONGTEXT NOT NULL";
@@ -77,9 +77,9 @@ function getItem($database, $lang,  $items, $item = ''){
 	}
 
 	// Generate query
-	$sql = "SELECT * FROM " . $items . " WHERE lang='" . $lang . "' ";
+	$sql = "SELECT * FROM " . $items . " WHERE Language='" . $lang . "' ";
 	if($item != "") {
-		$sql .= "AND WHERE title=" . $item . " ";
+		$sql .= "AND WHERE Title=" . $item . " ";
 	}
 	$sql .= "LIMIT 10";
 
@@ -115,7 +115,6 @@ function setItem($config, $table, $items) {
        "err" => [],
        "data" => [],
    ];
-
     // Connect
     $conn = connect($config);
 
@@ -135,12 +134,14 @@ function setItem($config, $table, $items) {
 	// Query
 	if ($conn->query($sql) !== TRUE) {
 		$output["err"][] = "upload.insert: " . $sql . "<br>" . $conn->error;
+	} else {
+		$output["err"][] = "db.setItem: Upload successfull: " . $sql;
 	}
 	return $output["err"];
 }
 
 // remove selected item
-function removeItem($config, $table, $item) {
+function removeItem($config, $items, $item) {
 
 }
 ?>

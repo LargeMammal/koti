@@ -3,8 +3,8 @@
 function loadHead($content) {
     $description = $title = "";
     if (isset($content)) {
-        $title = $content["title"];
-        $description = $content["description"];
+        $title = $content["Title"];
+        $description = $content["Description"];
     }
     $str = '';
     $str .= '<meta charset="UTF-8">';

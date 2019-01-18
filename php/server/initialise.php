@@ -13,14 +13,14 @@ include_once 'php/db/db.php';
  * footers and navigators. Navigator should also read what
  * categories exist from database.
  */
-function initialise($config, $site) {
+function initialise($config) {
     // I should try to create good looking UI for content editing
     // and managing. Especially managing side.
     $upload = [
-        'title' => 'Upload',
-        'description' => 'Upload page',
-        'lang' => 'en-US',
-        'content' => '<section>
+        'Title' => 'Upload',
+        'Description' => 'Upload page',
+        'Language' => 'en-US',
+        'Content' => '<section>
         <h1>Add content</h1>
         <form action="" method="POST">
             <p>Table: </p><input type="text" name="table" required><br>
@@ -41,7 +41,7 @@ function initialise($config, $site) {
     ];
 
     // Upload editor UI
-    $err = setItem($config, "en-US", "upload", $upload);
+    $err = setItem($config, "upload", $upload);
 
     // Stuff in head
     $str = '<!DOCTYPE html><html lang="' . $lang[0] . '"><head>';
@@ -66,7 +66,28 @@ function initialise($config, $site) {
     return $str;
 }
 
-function init_lang($config, $site) {
+function initLang($config, $lang = "en-US", $footer_text='Made by me with PHP and trying to follow REST standard') {
+   // I should probably turn this into global class
+   $output = [
+       "err" => [],
+       "data" => [],
+   ];
+    // I should try to create good looking UI for content editing
+    // and managing. Especially managing side.
+    $nav = [
+        'Language' => $lang,
+        'Content' => '<a href="https://github.com/LargeMammal">Github</a><a href="https://gitlab.com/mammal">Gitlab</a><a href="https://www.linkedin.com/in/jari-loippo/">LinkedIn</a>',
+    ];
+    $footer = [
+        'Language' => $lang,
+        'Content' => $footer_text,
+    ];
 
+    // Upload language
+    $err = setItem($config, "nav", $nav);
+    foreach ($err as $e) $output["err"][] = "initialise.initLang".$e;
+    $err = setItem($config, "footer", $footer);
+    foreach ($err as $e) $output["err"][] = "initialise.initLang".$e;
+    return $output;
 }
 ?>
