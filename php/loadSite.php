@@ -69,14 +69,14 @@ function loadSite($config, $langs, $items, $item = "") {
     }
 
     // Stuff in head
-    $str = '<!doctype html><html lang="' . $lang . '"><head>';
+    $str = '<!DOCTYPE html><html lang="' . $lang . '"><head>';
     $str .= loadHead($head);
     $str .= "</head><body>";
     // Stuff in body
     $str .= loadHeader($banner);
-    $str .= loadNav($nav["data"][0]["Content"]);
+    $str .= "<nav>" . $nav["data"][0]["Content"] . "</nav>";
     // html apparently wants heading for sections.
-    $str = "<section><section>";
+    $str .= "<section>";
     //file_put_contents("error.log", $config["err"]);
     //* Print all errors.
     foreach($config["err"] as $val) {
@@ -87,7 +87,6 @@ function loadSite($config, $langs, $items, $item = "") {
     //*/
     $str .= "</section>";
     $str .= loadBody($data["data"]);
-    $str .= "</section>";
     $str .= loadFooter($footer["data"][0]["Content"]);
     $str .= "</body></html>";
     return $str;

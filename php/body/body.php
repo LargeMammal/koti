@@ -13,9 +13,9 @@ function loadBody($contents) {
         $content .= "</section>";
     }
     if ($content == "") {
-        $content = "Site came up empty!";
+        $content .= "Site came up empty!";
     }
-    $content = "</section>";
+    $content .= "</section>";
     return $content;
 }
 ?>
