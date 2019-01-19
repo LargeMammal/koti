@@ -6,8 +6,7 @@ function loadHead($content) {
         $title = $content["Title"];
         $description = $content["Description"];
     }
-    $str = '';
-    $str .= '<meta charset="UTF-8">';
+    $str = '<meta charset="UTF-8">';
     $str .= '<title>' . $title . '</title>';
     $str .= '<meta name="description" content="' . $description . '">';
     $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
