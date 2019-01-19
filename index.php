@@ -1,7 +1,7 @@
 <?php
 include_once "php/loadSite.php";
-include_once "php/miscellaneous/file.php";
-include_once "php/miscellaneous/lang.php";
+include_once "php/server/file.php";
+include_once "php/server/server.php";
 
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
