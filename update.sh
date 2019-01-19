@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-rsync -avz --exclude=".[!.]*" . /var/www/html/
+rsync -avz --exclude=".[!.]*" . /var/www/tardigrade.ddns.net/public_html
