@@ -16,10 +16,6 @@
 function connect($database) {
 	// Create connection
 	$conn = new mysqli($database["Site"], $database["User"], $database["Pass"], $database["Database"]);
-	// Check connection
-	if ($conn->connect_error) {
-		return "db.connect: " . $conn->connect_error;
-	}
 	return $conn;
 }
 
@@ -36,10 +32,6 @@ function checkTable($conn, $items = "") {
 // createTitle creates table with given name and data.
 // First item in array will become primary key
 function createTable($conn, $table, $columns) {
-	// If table doesn't exist stop here
-	if (!checkTable($conn, $table)) {
-		return "db.getItem: Table, " . $table . " , not found";
-	}
 	$sql = "CREATE TABLE ".$table." (";
 	$items = [];
 	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
@@ -53,7 +45,7 @@ function createTable($conn, $table, $columns) {
 	$sql .= implode(", ", $items);
 	$sql .= ")";
 	if ($conn->query($sql) !== TRUE) {
-		return "db.createTable: $sql " . $conn->error;
+		return "db.createTable: ". $sql. ": " . $conn->error;
 	}
 	return "";
 }
@@ -69,6 +61,10 @@ function getItem($database, $lang,  $items, $item = ''){
         "data" => [],
 	];
 	$conn = connect($database);
+	if (!$conn) {
+		$output["err"][] = mysqli_connect_error();
+		return $output;
+	}
 
 	// If table doesn't exist stop here
 	if (!checkTable($conn, $items)) {
@@ -117,19 +113,32 @@ function setItem($config, $table, $items) {
    ];
     // Connect
     $conn = connect($config);
+	if (!$conn) {
+		$output["err"][] = mysqli_connect_error();
+		return $output;
+	}
 
-	$sql = "INSERT INTO". $table ."(";
+	// Generate query
+	$sql = "INSERT INTO ". $table ."(";
 	$columns = [];
 	$values = [];
 	foreach ($items as $column=>$item) {
 		$columns[] = $column;
 		$values[] = "'" . $item . "'";
 	}
-    $error = createTable($conn, $table, $columns);
-    if ($error != "") {
-        $output["err"][] = "db.setItem: " . $error;
-    }
 	$sql .= implode(", ", $columns) . ") VALUES (" . implode(", ", $values) . ");";
+
+	// If table does exist
+	if (!checkTable($conn, $table)) {
+		$output["err"][] = "db.getItem: Table, " . $table . " , not found";
+		// Create the table
+		$error = createTable($conn, $table, $columns);
+		// If creation failed table stop here
+	    if ($error != "") {
+	        $output["err"][] = "db.setItem: " . $error;
+			return $output;
+	    }
+	}
 
 	// Query
 	if ($conn->query($sql) !== TRUE) {
