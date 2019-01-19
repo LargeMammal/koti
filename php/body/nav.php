@@ -1,6 +1,7 @@
 <?php
+// TODO:
 // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
-function loadNav($content = '') {
+function loadNav($content = ''){
     return "<nav>" . $content . "</nav>";
 }
 ?>

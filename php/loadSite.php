@@ -31,11 +31,12 @@ function loadSite($config, $langs, $items, $item = "") {
     foreach ($langs as $l) {
         $err = [];
         $lang = $l;
+        $config["err"][] = "loadSite.loadSite: Loading ".$lang;
         $nav = getItem($database, $l, "nav");
         $content = getItem($database, $l, $items, $item);
         $footer = getItem($database, $l, "footer");
         $err = $nav["err"];
-        foreach ($footer as $e) $err[] = implode($e);
+        foreach ($footer["err"] as $e) $err[] = $e;
         $data = $content;
         if(count($err) > 0) {
             foreach ($err as $e) {
@@ -50,9 +51,12 @@ function loadSite($config, $langs, $items, $item = "") {
     }
 
     if (!isset($nav["data"][0]["Content"])) {
-        initLang($database);
-        $nav["data"][0]["Content"] = '<a href="https://github.com/LargeMammal">Github</a><a href="https://gitlab.com/mammal">Gitlab</a><a href="https://www.linkedin.com/in/jari-loippo/">LinkedIn</a>';
-        $footer["data"][0]["Content"] = 'Made by me with PHP and trying to follow REST standard';
+        $err = initLang($database);
+        foreach ($err as $e) {
+            $config["err"][] = $e;
+        }
+        $nav["data"][0]["Content"] = 'Initializing';
+        $footer["data"][0]["Content"] = 'Initializing';
     }
 
     //*/

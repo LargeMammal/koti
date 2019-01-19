@@ -66,7 +66,7 @@ function initialise($config) {
     return $str;
 }
 
-function initLang($config, $lang = "en-US", $footer_text='Made by me with PHP and trying to follow REST standard') {
+function initLang($config, $lang = "fi", $footer_text='Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia') {
    // I should probably turn this into global class
    $output = [
        "err" => [],
@@ -85,9 +85,9 @@ function initLang($config, $lang = "en-US", $footer_text='Made by me with PHP an
 
     // Upload language
     $err = setItem($config, "nav", $nav);
-    foreach ($err as $e) $output["err"][] = "initialise.initLang".$e;
+    foreach ($err as $e) $output["err"][] = "initialise.initLang: ".$e;
     $err = setItem($config, "footer", $footer);
-    foreach ($err as $e) $output["err"][] = "initialise.initLang".$e;
-    return $output;
+    foreach ($err as $e) $output["err"][] = "initialise.initLang: ".$e;
+    return $output["err"];
 }
 ?>
