@@ -73,8 +73,8 @@ function loadSite($config, $langs, $items, $item = "") {
     $str .= loadNav($nav["data"][0]["Content"]);
     // html apparently wants heading for sections.
     $str = "<section><section>";
-    file_put_contents("error.log", $config["err"]);
-    /* Print all errors.
+    //file_put_contents("error.log", $config["err"]);
+    //* Print all errors.
     foreach($config["err"] as $val) {
         if ($val != "") {
             $str .= $val. "<br>";
