@@ -54,7 +54,7 @@ function createTable($conn, $table, $columns) {
 * getItem gets an item from database
 * Generate the code here and later turn it into a exterrior script
 */
-function getItem($database, $lang,  $items, $item = ''){
+function getItem($database, $lang,  $items, $item = NULL){
 	// I should probably turn this into global class
     $output = [
         "err" => [],
@@ -74,7 +74,7 @@ function getItem($database, $lang,  $items, $item = ''){
 
 	// Generate query
 	$sql = "SELECT * FROM " . $items . " WHERE Language='" . $lang . "' ";
-	if($item != "") {
+	if(!is_null($item)) {
 		$sql .= "AND WHERE Title=" . $item . " ";
 	}
 	$sql .= "LIMIT 10";
@@ -83,7 +83,6 @@ function getItem($database, $lang,  $items, $item = ''){
 	// If query fails stop here
 	if ($results === FALSE) {
 		$output["err"][] = "db.getItem: " . $conn->error;
-		$results->free();
 		return $output;
 	}
 

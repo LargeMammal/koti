@@ -1,21 +1,6 @@
 <?php
 include_once "php/server/server.php";
 include_once "php/server/file.php";
-/*
-// Start logging into default// Reports all errors
-error_reporting(E_ALL);
-// Do not display errors for the end-users (security issue)
-ini_set('display_errors','Off');
-// Set a logging file
-ini_set('error_log','my_file.log');
-
-
-// Override the default error handler behavior
-set_exception_handler(function($exception) {
-   error_log($exception);
-   error_page("Something went wrong!");
-});
-//*/
 // Get json array from json file
 $config = loadJSON("config/default-config.json");
 // Get language from browser
@@ -54,6 +39,10 @@ $str = trim($str, "/");
 $items = explode("/", $str); // Explode path into variables
 if (count($items) < 1) {
     $items[] = "not_index";
+} elseif (count($items) > 1) {
+    if ($items[0] == "api") {
+        $items = array_slice($items, 1);
+    }
 }
 // Serve
 //echo implode($items);

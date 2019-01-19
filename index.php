@@ -9,7 +9,7 @@ $config = loadJSON("config/default-config.json");
 $langs = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 // Load index site with config data
 $items = "not_index";
-$item = "";
+$item = NULL;
 
 // Upload site is a special case
 $str = loadSite($config, $langs, $items, $item);
