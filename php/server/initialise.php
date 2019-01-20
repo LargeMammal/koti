@@ -14,7 +14,49 @@ include_once 'php/db/db.php';
  * categories exist from database.
  */
 function initCategories($config) {
+    // I should probably turn this into global class
+    $output = [
+        "err" => [],
+        "data" => [],
+    ];
+    // I should try to create good looking UI for content editing
+    // and managing. Especially managing side.
+    $upload = [
+        'Title' => 'Upload',
+        'Content' => '<h1>Add content</h1>
+        <form action="" method="POST">
+            <p>Table: </p><input type="text" name="table" required><br>
+            <p>Title: </p><input type="text" name="title" required><br>
+            <p>Description: </p><input type="text" name="description" required><br>
+            <p>Language: </p><input type="text" name="lang" required><br>
+            <p>Content: </p><textarea name="content" required></textarea><br>
+            <input type="submit">
+        </form>
+        <h1>Add Language</h1>
+        <form action="" method="POST">
+            <p>Lang: </p><input type="text" name="lang" required><br>
+            <p>Navigation: </p><textarea name="nav" required></textarea><br>
+            <p>Footer: </p><textarea name="footer" required></textarea><br>
+            <input type="submit">
+        </form>',
+    ];
+    // I should try to create good looking UI for content editing
+    // and managing. Especially managing side.
+    $nav = [
+        'Language' => $lang,
+        'Content' => '<a href="https://github.com/LargeMammal">Github</a><a href="https://gitlab.com/mammal">Gitlab</a><a href="https://www.linkedin.com/in/jari-loippo/">LinkedIn</a>',
+    ];
+    $footer = [
+        'Language' => $lang,
+        'Content' => $footer_text,
+    ];
 
+    // Upload language
+    $err = setItem($config, "nav", $nav);
+    foreach ($err as $e) $output["err"][] = "initialise.initLang: ".$e;
+    $err = setItem($config, "footer", $footer);
+    foreach ($err as $e) $output["err"][] = "initialise.initLang: ".$e;
+    return $output["err"];
 }
 
 function initUpload($config, $lang = "fi-FI") {
