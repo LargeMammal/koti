@@ -26,10 +26,17 @@ function loadSite($config, $langs, $items, $item = NULL) {
     $nav = [];
     $footer = [];
     $lang = "";
+    $langs[] = "fi-FI"; // Add default language
 
     //* Get items
     foreach ($langs as $l) {
         $err = [];
+        $list = explode("-", $l);
+        // Reform the language into fi-FI format
+        if (count($list) < 2) {
+            $list[] = strtoupper($l);
+            $l = implode("-", $list);
+        }
         $lang = $l;
         $config["err"][] = "loadSite.loadSite: Loading ".$lang;
         $nav = getItem($database, $l, "nav");

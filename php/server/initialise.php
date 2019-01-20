@@ -13,15 +13,17 @@ include_once 'php/db/db.php';
  * footers and navigators. Navigator should also read what
  * categories exist from database.
  */
-function initialise($config) {
+function initCategories($config) {
+
+}
+
+function initUpload($config, $lang = "fi-FI") {
     // I should try to create good looking UI for content editing
     // and managing. Especially managing side.
     $upload = [
         'Title' => 'Upload',
-        'Description' => 'Upload page',
-        'Language' => 'en-US',
-        'Content' => '<section>
-        <h1>Add content</h1>
+        'Language' => $lang,
+        'Content' => '<h1>Add content</h1>
         <form action="" method="POST">
             <p>Table: </p><input type="text" name="table" required><br>
             <p>Title: </p><input type="text" name="title" required><br>
@@ -36,8 +38,7 @@ function initialise($config) {
             <p>Navigation: </p><textarea name="nav" required></textarea><br>
             <p>Footer: </p><textarea name="footer" required></textarea><br>
             <input type="submit">
-        </form>
-    </section>',
+        </form>',
     ];
 
     // Upload editor UI
@@ -66,7 +67,7 @@ function initialise($config) {
     return $str;
 }
 
-function initLang($config, $lang = "fi", $footer_text='Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia') {
+function initLang($config, $lang = "fi-FI", $footer_text='Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia') {
    // I should probably turn this into global class
    $output = [
        "err" => [],
