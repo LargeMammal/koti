@@ -13,6 +13,12 @@ include_once 'php/db/db.php';
  * footers and navigators. Navigator should also read what
  * categories exist from database.
  */
+// initLogin will be called if login screen is missing
+function initLogin() {
+
+}
+
+// initCategories will generate category table for database
 function initCategories($config) {
     // I should probably turn this into global class
     $output = [

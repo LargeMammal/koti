@@ -5,19 +5,20 @@
 AddDefaultCharset UTF-8
 # AddType is necessary because other rewriter doesn't understand to execute
 AddType application/x-httpd-php .php
-
+php_value session.cookie_httponly 1
+php_value session.cookie_secure 1
 <Limit GET POST PUT DELETE>
     Allow from all
 </Limit>
 
 <IfModule mod_rewrite.c>
     RewriteEngine on
-    RewriteBase /api/
+    RewriteBase /
 
     # If the request is a file, folder or symlink that exists, serve it up
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
 
-    # redirect all api calls to api.php
-    RewriteRule ^.* api.php [NC,L]
+    # redirect all api calls to index.php
+    RewriteRule ^.* index.php [NC,L]
 </IfModule>

@@ -1,17 +1,24 @@
 <?php
-include_once "php/loadSite.php";
-include_once "php/server/file.php";
-include_once "php/server/server.php";
+// api.php handles rest calls for now
+define("CONFIG", "config/default-config.json");
+//define("CONFIG", "config/test-config.json");
 
+function autoloader($class) {
+    require_once 'php/classes/' . $class . '.class.php';
+}
+
+spl_autoload_register('autoloader');
+// build variables
+$method = $_SERVER['REQUEST_METHOD'];
+$langs = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+$uri = $_SERVER['REQUEST_URI'];
+// Serve
+$server = new Server($method, $langs, $uri);
 // Get json array from json file
-$config = loadJSON("config/default-config.json");
+$server->LoadJSON(CONFIG);
 // Get language from browser
-$langs = parseLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-// Load index site with config data
-$items = "not_index";
-$item = NULL;
-
-// Upload site is a special case
-$str = loadSite($config, $langs, $items, $item);
+$server->GetLang($langs);
+$str = $server->Serve();
+// Do something with those variables
 echo $str;
 ?>
