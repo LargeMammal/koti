@@ -4,7 +4,7 @@ define("CONFIG", "config/default-config.json");
 //define("CONFIG", "config/test-config.json");
 
 function autoloader($class) {
-    require_once 'php/classes/' . $class . '.class.php';
+    require_once 'classes/' . $class . '.class.php';
 }
 
 spl_autoload_register('autoloader');
