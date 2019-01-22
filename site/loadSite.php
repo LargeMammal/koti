@@ -9,7 +9,7 @@ include_once "site/footer.php";
 // Depending on database call specific library
 include_once "db/db.php";
 // Load initialise functions just in case
-include_once "server/initialise.php";
+include_once "db/initialise.php";
 
 // Load the whole page
 function loadSite($config, $langs, $items, $item = NULL) {
