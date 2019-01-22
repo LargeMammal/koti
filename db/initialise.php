@@ -1,5 +1,5 @@
 <?php
-include_once 'php/db/db.php';
+include_once 'db/db.php';
 /** initialise.php:
  * Initialise database with the editor interface.
  * I should make it so that this file is only called once

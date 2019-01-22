@@ -1,15 +1,15 @@
 <?php
 // Load meta data
-include_once "php/head/head.php";
+include_once "site/head.php";
 // Load elements functions
-include_once "php/body/header.php";
-include_once "php/body/nav.php";
-include_once "php/body/body.php";
-include_once "php/body/footer.php";
+include_once "site/header.php";
+include_once "site/nav.php";
+include_once "site/body.php";
+include_once "site/footer.php";
 // Depending on database call specific library
-include_once "php/db/db.php";
+include_once "db/db.php";
 // Load initialise functions just in case
-include_once "php/server/initialise.php";
+include_once "server/initialise.php";
 
 // Load the whole page
 function loadSite($config, $langs, $items, $item = NULL) {

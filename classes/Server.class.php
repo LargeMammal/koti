@@ -3,8 +3,8 @@
 * Server object will handle http methods
 */
 // Depending on database call specific library
-include_once "php/db/db.php";
-include_once "php/loadSite.php";
+include_once "db/db.php";
+include_once "site/loadSite.php";
 
 class Server {
     protected $method;
@@ -134,8 +134,7 @@ class Server {
         return $items;
     }
     // getRootDir gets the root directory of the app.
-    // This is useful when you need to access files
-    // in highly refactored environment.
+    // This could be obsolete
     private function getRootDir() {
         // getcwd gives you the working directory
         $path = getcwd();
