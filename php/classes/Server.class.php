@@ -65,7 +65,7 @@ class Server {
     private function handleItems() {
         switch($this->method) {
         case 'GET':
-            return loadSite($this->config, $this->langs, $this->items[0], $items[1]);
+            return loadSite($this->config, $this->langs, $this->items[0]);
         default:
             header('HTTP/1.1 405 Method Not Allowed');
             header('Allow: GET');
@@ -122,20 +122,15 @@ class Server {
     }
 
     private function displayItem() {
-        return loadSite($this->config, $this->langs, $this->items[0], $items[1]);
+        return loadSite($this->config, $this->langs, $this->items[0], $this->items[1]);
     }
 
     private function paths($url) {
         // Remove slashes from both sides.
         $str = trim($url, "/");
-        $items = explode("/", $str); // Explode path into variables
-        if (count($items) < 1) {
-            $items[] = "not_index";
-        } elseif (count($items) > 1) {
-            if ($items[0] == "api") {
-                $items = array_slice($items, 1);
-            }
-        }
+        if ($str == "") $str = "not_index";
+        // Explode path into variables
+        $items = explode("/", $str);
         return $items;
     }
     // getRootDir gets the root directory of the app.
