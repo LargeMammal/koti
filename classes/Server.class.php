@@ -4,7 +4,6 @@
 */
 // Depending on database call specific library
 include_once "db/db.php";
-include_once "site/loadSite.php";
 
 class Server {
     protected $method;
@@ -19,6 +18,8 @@ class Server {
     }
 
     function __destruct() {
+        $this->method = NULL;
+        $this->items = NULL;
         $this->config = NULL;
         $this->langs = NULL;
     }
@@ -57,15 +58,15 @@ class Server {
         }
         $json = file_get_contents($pwd); // reads file into string
         $data = json_decode($json); // turns json into php object
-        $output["data"] = $this->parseObject($data);
-        $this->config = $output;
+        $this->config = $this->parseObject($data);
         return TRUE;
     }
 
     private function handleItems() {
         switch($this->method) {
         case 'GET':
-            return loadSite($this->config, $this->langs, $this->items[0]);
+            $site = new Site($this->config, $this->langs, $this->items);
+            return $site;
         default:
             header('HTTP/1.1 405 Method Not Allowed');
             header('Allow: GET');
@@ -122,7 +123,8 @@ class Server {
     }
 
     private function displayItem() {
-        return loadSite($this->config, $this->langs, $this->items[0], $this->items[1]);
+        $site = new Site($this->config, $this->langs, $this->items);
+        return $site;
     }
 
     private function paths($url) {
