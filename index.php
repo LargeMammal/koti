@@ -12,12 +12,15 @@ spl_autoload_register('autoloader');
 $method = $_SERVER['REQUEST_METHOD'];
 $langs = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 $uri = $_SERVER['REQUEST_URI'];
+$uid = $_SERVER['PHP_AUTH_USER'];
+$pw = $_SERVER['PHP_AUTH_PW'];
 // Serve
 $server = new Server($method, $langs, $uri);
 // Get json array from json file
 $server->LoadJSON(CONFIG);
 // Get language from browser
 $server->GetLang($langs);
+$server->Authorize($uid, $pw);
 $str = $server->Serve();
 // Do something with those variables
 echo $str;

@@ -34,10 +34,19 @@ function checkTable($conn, $items = "") {
 function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE ".$table." (";
 	$items = [];
-	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
+	if ($table == "users") { // Hax
+		$items[] = "uid VARCHAR(255) PRIMARY KEY";
+	} else {
+		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
+	}
+	// All this should be given in an array
 	foreach($columns as $column) {
-		if ($column == "Title" || $column == "Language") {
-			$items[] = "$column VARCHAR(191) NOT NULL";
+		if ($column == "Title" || $column == "Language" || $column == "PW") {
+			$items[] = "$column VARCHAR(255) NOT NULL";
+		} elseif ($column == "Auth" || $column == "Verified") {
+			$items[] = "$column TINYINT NOT NULL";
+		} elseif ($column == "Date") {
+			$items[] = "$column BIGINT NOT NULL";
 		} else {
 			$items[] = "$column LONGTEXT NOT NULL";
 		}
@@ -54,7 +63,7 @@ function createTable($conn, $table, $columns) {
 * getItem gets an item from database
 * Generate the code here and later turn it into a exterrior script
 */
-function getItem($database, $lang,  $items, $item = NULL){
+function getItem($database, $items, $lang = NULL){
 	// I should probably turn this into global class
     $output = [
         "err" => [],
@@ -67,29 +76,30 @@ function getItem($database, $lang,  $items, $item = NULL){
 	}
 
 	// If table doesn't exist stop here
-	if (!checkTable($conn, $items)) {
-		$output["err"][] = "db.getItem: Table, " . $items . " , not found";
+	if (!checkTable($conn, $items["Table"])) {
+		$output["err"][] = "db.getItem: Table, ".$items["Table"]." , not found";
 		return $output;
 	}
 
 	// Generate query
-	$sql = "SELECT * FROM " . $items . " WHERE Language='" . $lang . "' ";
-	if(!is_null($item)) {
-		$sql .= "AND WHERE Title=" . $item . " ";
+	// This is awesome
+	$sql = "SELECT * FROM ".$items["Table"]." WHERE";
+	$str = "";
+	if (isset($lang)) {
+	 	$str = " Language='" . $lang . "'";
 	}
-	$sql .= "LIMIT 10";
+	foreach ($items as $column=>$item) {
+		if ($column != "Table") {
+			if ($str != "") $sql .= " AND WHERE";
+			$sql .= " ".$column."='".$item."'";
+		}
+	}
+	$sql .= $str." LIMIT 10";
 
 	$results = $conn->query($sql);
 	// If query fails stop here
 	if ($results === FALSE) {
-		$output["err"][] = "db.getItem: " . $conn->error;
-		return $output;
-	}
-
-	// If none found stop here
-	if ($results->num_rows < 1) {
-		$output["err"][] = "db.getItem: Non found";
-		$results->free();
+		$output["err"][] = "db.getItem: ".$conn->error;
 		return $output;
 	}
 
@@ -129,7 +139,7 @@ function setItem($config, $table, $items) {
 
 	// If table does exist
 	if (!checkTable($conn, $table)) {
-		$output["err"][] = "db.getItem: Table, " . $table . " , not found";
+		$output["err"][] = "db.setItem: Table, " . $table . " , not found";
 		// Create the table
 		$error = createTable($conn, $table, $columns);
 		// If creation failed table stop here
@@ -141,7 +151,7 @@ function setItem($config, $table, $items) {
 
 	// Query
 	if ($conn->query($sql) !== TRUE) {
-		$output["err"][] = "upload.insert: " . $sql . "<br>" . $conn->error;
+		$output["err"][] = "db.setItem: " . $sql . "<br>" . $conn->error;
 	} else {
 		$output["err"][] = "db.setItem: Upload successfull: " . $sql;
 	}

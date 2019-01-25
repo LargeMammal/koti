@@ -11,7 +11,7 @@ include_once "db/initialise.php";
  * More later
  */
 class Site {
-    private $auth;
+    private $auth; // 0..3
     private $errors;
     private $lang; // first available language
     private $contents;
@@ -23,7 +23,11 @@ class Site {
         $this->config = $config[$config["Use"]];
         $this->langs = $langs;
         $this->langs[] = "fi-FI"; // Add the default language
-        $this->items = $items;
+        $this->items = [
+            "Table" => 'Content',
+            "Category" => $items[0],
+            "Title" => $items[1],
+    	];
     }
     function __destruct() {
         $this->auth = NULL;
@@ -32,10 +36,12 @@ class Site {
         $this->items = NULL;
     }
 
-    function __toString() {
+    function Build($uid = NULL, $pw = NULL) { // vaihda buildiks joka haluaa uid ja pw
+        authenticate($uid, $pw);
         $nav = [];
         $footer = [];
 
+        // You need to fix this
         foreach ($this->langs as $l) {
             $list = explode("-", $l);
             // Reform the language into xx-XX format
@@ -43,18 +49,25 @@ class Site {
                 $list[] = strtoupper($l);
                 $l = implode("-", $list);
             }
-            $nav = getItem($this->config, $l, "nav");
-            $footer = getItem($this->config, $l, "footer");
+            $nav = getItem($this->config, $this->items, $l);
+            $footer = getItem($this->config, $this->items, $l);
             $err = $nav["err"];
             foreach ($footer["err"] as $e) $err[] = $e;
             $i = count($err);
             if($i > 0) {
                 $this->getErrors($err);
             } else {
-                $body = getItem($this->config, $l, $this->items[0], $this->items[1]);
+                $this->lang = $l;
+                $body = getItem($this->config, $this->items, $this->lang);
+                foreach ($body['data'] as $value) {
+                    if ($auth < $value['Auth']) {
+                        header('WWW-Authenticate: Basic realm="My Realm"');
+                        header('HTTP/1.0 401 Unauthorized');
+                        return "Unauthorized user!";
+                    }
+                }
                 $this->contents = $body['data'];
                 $this->getErrors($body['err']);
-                $this->lang = $l;
                 break;
             }
         }
@@ -90,20 +103,26 @@ class Site {
         return $str;
     }
 
+    private function authenticate($uid = NULL, $pw = NULL) {
+        $query = [
+            "Table" => "users",
+            "User" => $uid,
+        ];
+        $query = getItem($this->config, $query);
+        $this->auth;
+    }
+
     /** loadHead
      * This function should generate the head elements.
      * Later I should add meta handling
      */
     private function loadHead() {
-        $title = $this->items[0];
-        $description = $this->items[0] . " | top site";
+        $title = $this->items['Title'];
         if (count($this->contents) == 1) {
             $title = $this->contents[0]['Title'];
-            $description = $this->contents[0]['Title'] . " | top site";
         }
         $str = '<meta charset="UTF-8">';
         $str .= '<title>' . $title . '</title>';
-        $str .= '<meta name="description" content="' . $description . '">';
         $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
         $str .= '<link rel="stylesheet" type="text/css" href="css/common.css" >';
         return $str;
@@ -111,12 +130,44 @@ class Site {
 
     // loadHeader will in future generate custom header
     private function loadHeader() {
-        $banner = $this->items[0];
+        $banner = $this->items['Table'];
         if (count($this->contents) == 1) {
             $banner = $this->contents[0]['Title'];
         }
         $output = "<h1>$banner</h1>";
         return $output;
+    }
+
+    // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
+    private function loadNav($content = 'Non-found'){
+        $query = [
+            'Table' => 'Content',
+            'Title' => NULL,
+        ];
+        $list = [];
+        $content = "";
+        $cats = getItem($this->config, $query, $this->lang);
+        if (isset($cats['data'])) {
+            initNav();
+        }
+        if (isset($cats['err'])) {
+
+        }
+        // Drop non-unique categories. Not suitable for large databases.
+        // Either fix in code or split databases along languages
+        foreach ($cats['data'] as $cat) {
+            $item = $cat['Category'];
+            $no = 0;
+            foreach ($list as $value) {
+                if ($item == $value) {
+                    $no = 1;
+                }
+            }
+            if ($no === 0) {
+                $list[] = $item;
+            }
+        }
+        return $content;
     }
 
     // loadBody will generate content section of the page
@@ -137,11 +188,6 @@ class Site {
     // loadFooter will in future generate custom footer
     private function loadFooter($footer = "Non-found") {
         return $footer;
-    }
-
-    // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
-    private function loadNav($content = 'Non-found'){
-        return $content;
     }
 
     // getErrors merges error array into main errors array

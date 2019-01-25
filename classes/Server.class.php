@@ -6,6 +6,8 @@
 include_once "db/db.php";
 
 class Server {
+    private $uid;
+    private $pw;
     protected $method;
     protected $items;
     protected $config;
@@ -18,6 +20,8 @@ class Server {
     }
 
     function __destruct() {
+        $this->uid = NULL;
+        $this->pw = NULL;
         $this->method = NULL;
         $this->items = NULL;
         $this->config = NULL;
@@ -32,6 +36,11 @@ class Server {
             $str = $this->handleItems();
         }
         return $str;
+    }
+
+    public function Authorize($uid, $pw) {
+        $this->uid = $uid;
+        $this->pw = $pw;
     }
 
     public function GetLang($str) {
@@ -67,9 +76,12 @@ class Server {
         case 'GET':
             $site = new Site($this->config, $this->langs, $this->items);
             return $site;
+        case 'POST':
+            $site = new Site($this->config, $this->langs, $this->items);
+            return $site;
         default:
             header('HTTP/1.1 405 Method Not Allowed');
-            header('Allow: GET');
+            header('Allow: GET POST');
             return "";
         }
     }
