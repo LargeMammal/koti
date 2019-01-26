@@ -140,6 +140,7 @@ class Site {
 
     // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
     private function loadNav($content = 'Non-found'){
+        // Get all data from content table
         $query = [
             'Table' => 'Content',
             'Title' => NULL,
@@ -147,13 +148,13 @@ class Site {
         $list = [];
         $content = "";
         $cats = getItem($this->config, $query, $this->lang);
-        if (isset($cats['data'])) {
-            initNav();
+        // If both outputs are null initialise base functions of the site.
+        if (is_null($cats['data']) && is_null($cats['err'])) {
+            $err = initEditor($config);
+            // re-do the search
+            $cats = getItem($this->config, $query, $this->lang);
         }
-        if (isset($cats['err'])) {
-
-        }
-        // Drop non-unique categories. Not suitable for large databases.
+        // Extract categories from data. Not suitable for large databases.
         // Either fix in code or split databases along languages
         foreach ($cats['data'] as $cat) {
             $item = $cat['Category'];

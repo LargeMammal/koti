@@ -66,19 +66,17 @@ function initEditor($config) {
     ];
     // A quick editor
     $register = [
-        'Title' => 'Editor',
-        'Content' => '<h1>Add content</h1>
+        'Title' => 'Rekisteröidy',
+        'Content' => '<h1>Rekisteröidy</h1>
         <form action="" method="POST">
-            <p>Table: </p><input type="text" name="table" required><br>
-            <p>Title: </p><input type="text" name="title" required><br>
-            <p>Description: </p><input type="text" name="description" required><br>
-            <p>Language: </p><input type="text" name="lang" required><br>
-            <p>Content: </p><textarea name="content" required></textarea><br>
+            <p><input type="text" name="uid" placeholder="Unique Username" required></p><br>
+            <p><input type="password" name="pw" placeholder="Password" required></p><br>
+            <p><input type="email" name="email" placeholder="Email" required></p><br>
             <input type="submit">
         </form>',
         'Category' => 'Käyttäjä',
         'Language' => 'fi-FI',
-        'Auth' => 2,
+        'Auth' => 0,
         'Date' => time(),
     ];
 
