@@ -57,15 +57,13 @@ class Site {
                 $this->getErrors($err);
             } else {
                 $this->lang = $l;
-                $str = urldecode($this->$items["Title"]);
-                $this->errors[] = $str;
                 $body = getItem($this->config, $this->items, $this->lang);
                 foreach ($body['data'] as $key => $value) {
                     // Drop un-authorized stuff
                     if ($this->auth < $value['Auth']) {
                         header('WWW-Authenticate: Basic realm="Tardiland"');
                         header('HTTP/1.0 401 Unauthorized');
-                        die("Unauthorized");
+                        die("Unauthorized: ".$uid." and ".$this->auth);
                         unset($body['data'][$key]);
                     }
                 }
@@ -90,9 +88,11 @@ class Site {
         $str .= "<nav>".$this->loadNav()."</nav>"."</header>";
         $str .= "<section>";
         //* Print all errors. This should be handled by logs
-        foreach($this->errors as $val) {
-            if ($val != "") {
-                $str .= $val. "<br>";
+        if (isset($this->errors)) {
+            foreach($this->errors as $val) {
+                if ($val != "") {
+                    $str .= $val. "<br>";
+                }
             }
         }
         //*/
@@ -106,14 +106,19 @@ class Site {
     private function authorize($uid = NULL, $pw = NULL) {
         $query = [
             "Table" => "users",
-            "User" => $uid,
+            "UID" => $uid,
         ];
         $auth = getItem($this->config, $query); // Get user data
         $this->getErrors($auth['err']);
-        if (!password_verify($pw, $auth['data'][0]["PW"])) {
-            $this->auth = $auth['data'][0]["Auth"];
+        $pwa = "non";
+        $autha = 0;
+        if (count($auth['data']) > 0) {
+            $pwa = $auth['data'][0]["PW"];
+            $autha = $auth['data'][0]["Auth"];
         }
-        $this->auth = 0;
+        if (!password_verify($pw, $pwa)) {
+            $this->auth = $autha;
+        }
     }
 
     /** loadHead

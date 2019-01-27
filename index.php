@@ -14,6 +14,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $langs = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 $uri = $_SERVER['REQUEST_URI'];
 $post = $_POST;
+//foreach ($_POST as $key => $value) echo $key.": ".$value;
 $uid = NULL;
 $pw = NULL;
 if (isset($_SERVER['PHP_AUTH_USER'])) $uid = $_SERVER['PHP_AUTH_USER'];

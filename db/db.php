@@ -34,14 +34,10 @@ function checkTable($conn, $items = "") {
 function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE ".$table." (";
 	$items = [];
-	if ($table == "users") { // Hax
-		$items[] = "uid VARCHAR(255) PRIMARY KEY";
-	} else {
-		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
-	}
+	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 	// All this should be given in an array
 	foreach($columns as $column) {
-		if ($column == "Title" || $column == "Language" || $column == "PW") {
+		if ($column == "Title" || $column == "Language" || $column == "PW" || $column == "UID") {
 			$items[] = "$column VARCHAR(255) NOT NULL";
 		} elseif ($column == "Auth" || $column == "Verified") {
 			$items[] = "$column TINYINT NOT NULL";

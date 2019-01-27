@@ -14,20 +14,11 @@ include_once 'db/db.php';
  * categories exist from database.
  */
 
-function initReg($uid, $pw, $mail, $name = NULL) {
+function initReg($config, $users) {
     // I should probably turn this into global class
     $output = [
         "err" => [],
         "data" => [],
-    ];
-    $users = [
-        'UID' => $uid,
-        'PW' => $pw,
-        'Mail' => $mail,
-        'Name' => $name,
-        'Date' => time(),
-        'Auth' => 0,
-        'Verified' => 0,
     ];
     $err = setItem($config, "users", $users);
     foreach ($err as $e) $output["err"][] = "initialise.initLogin: ".$e;
@@ -66,10 +57,11 @@ function initEditor($config) {
     $register = [
         'Title' => 'Rekisteröidy',
         'Content' => '<h1>Rekisteröidy</h1>
-        <form action="/user" method="POST">
-            <p><input type="text" name="uid" placeholder="Username" required></p><br>
-            <p><input type="password" name="pw" placeholder="Password" required></p><br>
-            <p><input type="email" name="email" placeholder="Email" required></p><br>
+        <form action="/users" method="POST">
+            <p><input type="text" name="uid" placeholder="Username" required></p>
+            <p><input type="password" name="pw" placeholder="Password" required></p>
+            <p><input type="text" name="name" placeholder="Your name(Not required)"></p>
+            <p><input type="email" name="email" placeholder="Email" required></p>
             <input type="submit">
         </form>',
         'Category' => 'user',

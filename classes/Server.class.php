@@ -4,6 +4,7 @@
 */
 // Depending on database call specific library
 include_once "db/db.php";
+include_once "db/initialise.php";
 
 class Server {
     private $uid;
@@ -88,31 +89,51 @@ class Server {
                 'Table' => $this->items[0],
                 'UID' => $this->uid,
             ];
+            $str = "";
             $level = 0;
             if ($this->items[0] == "content") {
                 // if content upload set auth level to 2
                 $level = 2;
             } elseif ($this->items[0] == "users") {
-                // if register then hash the password before saving
-                $this->post["pw"] = password_hash($this->post["pw"]);
+                if (isset($this->post["pw"])) $this->post["pw"] = password_hash($this->post["pw"], PASSWORD_DEFAULT);
+                else $this->post["pw"] = "";
             }
-            $auth = getItem($this->config, $query); // Get user data
-            if (!password_verify($this->pw, $auth[0]["PW"]) || $auth[0]["Auth"] < $level) {
+            $auth = getItem($this->config[$this->config["Use"]], $query); // Get user data
+            $authorization = 0;
+            $pw = "";
+            if(isset($auth["data"][0]["Auth"])) $authorization = $auth["data"][0]["Auth"];
+            if(isset($auth["data"][0]["PW"])) $pw = $auth["data"][0]["PW"];
+            // Fail if incorrect credentials or authorization
+            if (!password_verify($this->pw, $pw) && $authorization < $level) {
                     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
                     header('HTTP/1.0 401 Unauthorized');
-                break;
+                    die("Error: ".$this->post['uid']);
             }
-            // If ok, proceed with writing
-            $err = setItem($this->config, $this->items[0], $this->$post);
+            $err = [];
+            if (isset($this->post["uid"])) {
+                $users = [
+                    'UID' => $this->post['uid'],
+                    'PW' => $this->post['pw'],
+                    'Mail' => $this->post['email'],
+                    'Date' => time(),
+                    'Auth' => 0,
+                    'Verified' => 0,
+                ];
+                if (isset($this->post["name"])) $users['Name'] = $this->post['name'];
+                $err = initReg($this->config[$this->config["Use"]], $users);
+            } else {
+                // If ok, proceed with writing
+                $str .=$this->config["Use"]."<br>";
+                $err = setItem($this->config[$this->config["Use"]], $this->items[0], $this->post);
+            }
             if (isset($err)) {
-                $str = "";
                 foreach ($err as $e) {
                     $str .= $e."<br>";
                 }
-                http_response_code(500);
-                return $str;
+                //http_response_code(500);
+            } else {
+                http_response_code(201);
             }
-            http_response_code(201);
             break;
         default:
             header('HTTP/1.1 405 Method Not Allowed');
