@@ -42,24 +42,22 @@ function initEditor($config) {
    ];
    // A quick editor
    $editor = [
-        'Title' => 'Editor',
-        'Content' => '<h1>Add content</h1>
-        <form action="" method="POST">
-            <p>Table: </p><input type="text" name="table" required><br>
-            <p>Title: </p><input type="text" name="title" required><br>
-            <p>Description: </p><input type="text" name="description" required><br>
-            <p>Language: </p><input type="text" name="lang" required><br>
-            <p>Content: </p><textarea name="content" required></textarea><br>
+        'Title' => 'Editori',
+        'Content' => '<h1>Lisää </h1>
+        <form action="content" method="POST">
+            <p><input type="text" name="Title" placeholder="Title for the content" required></p><br>
+            <p><textarea name="Content" placeholder="Content in html form" required></textarea></p><br>
+            <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
+            <p>Required level of authorization(0min and 3max): <input type="number" name="auth" min="0" max="3" required></p><br>
             <input type="submit">
         </form>
         <h1>Add Language</h1>
-        <form action="" method="POST">
-            <p>Lang: </p><input type="text" name="lang" required><br>
-            <p>Navigation: </p><textarea name="nav" required></textarea><br>
-            <p>Footer: </p><textarea name="footer" required></textarea><br>
+        <form action="footer" method="POST">
+            <p><textarea name="Content" placeholder="Text in footer" required></textarea></p><br>
+            <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
             <input type="submit">
         </form>',
-        'Category' => 'Käyttäjä',
+        'Category' => 'content',
         'Language' => 'fi-FI',
         'Auth' => 2,
         'Date' => time(),
@@ -68,22 +66,22 @@ function initEditor($config) {
     $register = [
         'Title' => 'Rekisteröidy',
         'Content' => '<h1>Rekisteröidy</h1>
-        <form action="" method="POST">
-            <p><input type="text" name="uid" placeholder="Unique Username" required></p><br>
+        <form action="user" method="POST">
+            <p><input type="text" name="uid" placeholder="Username" required></p><br>
             <p><input type="password" name="pw" placeholder="Password" required></p><br>
             <p><input type="email" name="email" placeholder="Email" required></p><br>
             <input type="submit">
         </form>',
-        'Category' => 'Käyttäjä',
+        'Category' => 'user',
         'Language' => 'fi-FI',
         'Auth' => 0,
         'Date' => time(),
     ];
 
     // Upload editor UI
-    $err = setItem($config, "Content", $editor);
+    $err = setItem($config, "content", $editor);
     foreach ($err as $e) $output["err"][] = "initialise.initLang: ".$e;
-    $err = setItem($config, "Content", $register);
+    $err = setItem($config, "content", $register);
     foreach ($err as $e) $output["err"][] = "initialise.initLang: ".$e;
     return $output["err"];
 }

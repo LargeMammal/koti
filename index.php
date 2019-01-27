@@ -9,13 +9,17 @@ function autoloader($class) {
 
 spl_autoload_register('autoloader');
 // build variables
+$realm = "Tardiland";
 $method = $_SERVER['REQUEST_METHOD'];
 $langs = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 $uri = $_SERVER['REQUEST_URI'];
-$uid = $_SERVER['PHP_AUTH_USER'];
-$pw = $_SERVER['PHP_AUTH_PW'];
+$post = $_POST;
+$uid = NULL;
+$pw = NULL;
+if (isset($_SERVER['PHP_AUTH_USER'])) $uid = $_SERVER['PHP_AUTH_USER'];
+if (isset($_SERVER['PHP_AUTH_PW'])) $pw = $_SERVER['PHP_AUTH_PW'];
 // Serve
-$server = new Server($method, $langs, $uri);
+$server = new Server($realm, $method, $langs, $uri, $post);
 // Get json array from json file
 $server->LoadJSON(CONFIG);
 // Get language from browser

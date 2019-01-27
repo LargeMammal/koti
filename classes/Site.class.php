@@ -24,21 +24,21 @@ class Site {
         $this->langs = $langs;
         $this->langs[] = "fi-FI"; // Add the default language
         $this->items = [
-            "Table" => 'Content',
+            "Table" => 'content',
             "Category" => $items[0],
-            "Title" => $items[1],
     	];
+        if (isset($items[1])) $this->items["Title"] = $items[1];
     }
     function __destruct() {
         $this->auth = NULL;
-        $this->config = NULL;
+        $this->errors = NULL;
         $this->langs = NULL;
+        $this->config = NULL;
         $this->items = NULL;
     }
 
     function Build($uid = NULL, $pw = NULL) { // vaihda buildiks joka haluaa uid ja pw
-        authenticate($uid, $pw);
-        $nav = [];
+        $this->authorize($uid, $pw);
         $footer = [];
 
         // You need to fix this
@@ -49,21 +49,20 @@ class Site {
                 $list[] = strtoupper($l);
                 $l = implode("-", $list);
             }
-            $nav = getItem($this->config, $this->items, $l);
-            $footer = getItem($this->config, $this->items, $l);
-            $err = $nav["err"];
-            foreach ($footer["err"] as $e) $err[] = $e;
+            $footer = getItem($this->config, ["Table" => "footer"], $l);
+            $err = $footer["err"];
             $i = count($err);
             if($i > 0) {
                 $this->getErrors($err);
             } else {
                 $this->lang = $l;
                 $body = getItem($this->config, $this->items, $this->lang);
-                foreach ($body['data'] as $value) {
-                    if ($auth < $value['Auth']) {
-                        header('WWW-Authenticate: Basic realm="My Realm"');
+                foreach ($body['data'] as $key => $value) {
+                    // Drop un-authorized stuff
+                    if ($this->auth < $value['Auth']) {
+                        header('WWW-Authenticate: Basic realm="Tardiland"');
                         header('HTTP/1.0 401 Unauthorized');
-                        return "Unauthorized user!";
+                        unset($body['data'][$key]);
                     }
                 }
                 $this->contents = $body['data'];
@@ -72,12 +71,11 @@ class Site {
             }
         }
 
-        if (!isset($nav["data"][0]["Content"])) {
-            $err = initLang($database);
+        if (!isset($footer["data"])) {
+            $err = initLang($this->config);
             foreach ($err as $e) {
                 $this->errors[] = $e;
             }
-            $nav["data"][0]["Content"] = 'Initializing';
             $footer["data"][0]["Content"] = 'Initializing';
         }
 
@@ -86,8 +84,8 @@ class Site {
         $str .= $this->loadHead();
         $str .= "</head>";
         // Stuff in body
-        $str .= "<body><header>".$this->loadHeader()."</header>";
-        $str .= "<nav>".$this->loadNav($nav["data"][0]["Content"])."</nav>";
+        $str .= "<body><header>".$this->loadHeader();
+        $str .= "<nav>".$this->loadNav()."</nav>"."</header>";
         $str .= "<section>";
         //* Print all errors. This should be handled by logs
         foreach($this->errors as $val) {
@@ -103,13 +101,17 @@ class Site {
         return $str;
     }
 
-    private function authenticate($uid = NULL, $pw = NULL) {
+    private function authorize($uid = NULL, $pw = NULL) {
         $query = [
             "Table" => "users",
             "User" => $uid,
         ];
-        $query = getItem($this->config, $query);
-        $this->auth;
+        $auth = getItem($this->config, $query); // Get user data
+        $this->getErrors($auth['err']);
+        if (!password_verify($pw, $auth['data'][0]["PW"])) {
+            $this->auth = $auth['data'][0]["Auth"];
+        }
+        $this->auth = 0;
     }
 
     /** loadHead
@@ -117,9 +119,11 @@ class Site {
      * Later I should add meta handling
      */
     private function loadHead() {
-        $title = $this->items['Title'];
-        if (count($this->contents) == 1) {
-            $title = $this->contents[0]['Title'];
+        $title = $this->items['Category'];
+        if (isset($this->contents)) {
+            if (count($this->contents) == 1) {
+                $title = $this->contents[0]['Title'];
+            }
         }
         $str = '<meta charset="UTF-8">';
         $str .= '<title>' . $title . '</title>';
@@ -130,58 +134,62 @@ class Site {
 
     // loadHeader will in future generate custom header
     private function loadHeader() {
-        $banner = $this->items['Table'];
-        if (count($this->contents) == 1) {
-            $banner = $this->contents[0]['Title'];
+        $banner = $this->items['Category'];
+        if(isset($this->contents)) {
+            if (count($this->contents) == 1) {
+                $banner = $this->contents[0]['Title'];
+            }
         }
         $output = "<h1>$banner</h1>";
         return $output;
     }
 
     // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
-    private function loadNav($content = 'Non-found'){
+    private function loadNav(){
         // Get all data from content table
         $query = [
-            'Table' => 'Content',
-            'Title' => NULL,
+            'Table' => 'content',
         ];
         $list = [];
         $content = "";
         $cats = getItem($this->config, $query, $this->lang);
         // If both outputs are null initialise base functions of the site.
-        if (is_null($cats['data']) && is_null($cats['err'])) {
-            $err = initEditor($config);
+        if (is_null($cats['data'][0])) {
+            $this->getErrors(initEditor($this->config));
             // re-do the search
             $cats = getItem($this->config, $query, $this->lang);
         }
-        // Extract categories from data. Not suitable for large databases.
-        // Either fix in code or split databases along languages
+        if (isset($cats["err"])) $this->getErrors($cats["err"]);
+        // Organize items along categories
         foreach ($cats['data'] as $cat) {
-            $item = $cat['Category'];
-            $no = 0;
-            foreach ($list as $value) {
-                if ($item == $value) {
-                    $no = 1;
-                }
-            }
-            if ($no === 0) {
-                $list[] = $item;
-            }
+            $list[$cat["Category"]][] = $cat;
         }
+        // Generate dropdowns
+        foreach ($list as $key => $value) {
+            $content .= '<div class="dropdown">'.
+                        '<button class="dropbtn">'.$key.'</button>'.
+                        '<div class="dropdown-content">';
+            foreach ($value as $cat) {
+                $content .= '<a href="'.$cat["Title"].'/">'.$cat['Title'].'</a>';
+            }
+            $content .= '</div></div>';
+        }
+        if ($content == "") $content = "error";
         return $content;
     }
 
     // loadBody will generate content section of the page
     private function loadBody() {
         $content = "";
+        if (!isset($this->contents)) {
+            return "Site came up empty!";
+
+        }
         foreach ($this->contents as $items) {
             $content .= "<section>";
             $content .= "<h2>" . $items['Title'] . "</h2>";
             $content .= $items['Content'];
             $content .= "</section>";
-        }
-        if ($content == "") {
-            $content .= "Site came up empty!";
         }
         return $content;
     }

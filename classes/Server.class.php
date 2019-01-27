@@ -8,15 +8,20 @@ include_once "db/db.php";
 class Server {
     private $uid;
     private $pw;
+    protected $realm;
     protected $method;
     protected $items;
     protected $config;
     protected $langs;
+    protected $post;
 
-    function __construct($method, $langs, $uri) {
+    function __construct($realm, $method, $langs, $uri, $post) {
+        $this->realm = $realm;
         $this->method = $method;
         $this->langs = $this->GetLang($langs);
         $this->items = $this->paths($uri);
+        if (isset($post)) $post["Date"] = time();
+        $this->post = $post;
     }
 
     function __destruct() {
@@ -75,15 +80,46 @@ class Server {
         switch($this->method) {
         case 'GET':
             $site = new Site($this->config, $this->langs, $this->items);
-            return $site;
+            return $site->Build($this->uid, $this->pw);
         case 'POST':
-            $site = new Site($this->config, $this->langs, $this->items);
-            return $site;
+            // This should take the table element and push it strait to db if user is allowed.
+            // Authorize the user
+            $query = [
+                'Table' => $this->items[0],
+                'UID' => $this->uid,
+            ];
+            $level = 0;
+            if ($this->items[0] == "content") {
+                // if content upload set auth level to 2
+                $level = 2;
+            } elseif ($this->items[0] == "users") {
+                // if register then hash the password before saving
+                $this->post["pw"] = password_hash($this->post["pw"]);
+            }
+            $auth = getItem($this->config, $query); // Get user data
+            if (!password_verify($this->pw, $auth[0]["PW"]) || $auth[0]["Auth"] < $level) {
+                    header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
+                    header('HTTP/1.0 401 Unauthorized');
+                break;
+            }
+            // If ok, proceed with writing
+            $err = setItem($this->config, $this->items[0], $this->$post);
+            if (isset($err)) {
+                $str = "";
+                foreach ($err as $e) {
+                    $str .= $e."<br>";
+                }
+                http_response_code(500);
+                return $str;
+            }
+            http_response_code(201);
+            break;
         default:
             header('HTTP/1.1 405 Method Not Allowed');
             header('Allow: GET POST');
-            return "";
+            break;
         }
+        return "";
     }
 
     private function handleItem() {
@@ -136,7 +172,7 @@ class Server {
 
     private function displayItem() {
         $site = new Site($this->config, $this->langs, $this->items);
-        return $site;
+        return $site->Build($this->uid, $this->pw);
     }
 
     private function paths($url) {

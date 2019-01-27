@@ -63,7 +63,7 @@ function createTable($conn, $table, $columns) {
 * getItem gets an item from database
 * Generate the code here and later turn it into a exterrior script
 */
-function getItem($database, $items, $lang = NULL){
+function getItem($database, $inputs, $lang = NULL){
 	// I should probably turn this into global class
     $output = [
         "err" => [],
@@ -75,6 +75,13 @@ function getItem($database, $items, $lang = NULL){
 		return $output;
 	}
 
+	//* Sanitize input
+	$items = [];
+	foreach ($inputs as $key => $value) {
+		$items[$conn->escape_string($key)] = $conn->escape_string($value);
+	}
+	//*/
+
 	// If table doesn't exist stop here
 	if (!checkTable($conn, $items["Table"])) {
 		$output["err"][] = "db.getItem: Table, ".$items["Table"]." , not found";
@@ -82,7 +89,6 @@ function getItem($database, $items, $lang = NULL){
 	}
 
 	// Generate query
-	// This is awesome
 	$sql = "SELECT * FROM ".$items["Table"]." WHERE";
 	$str = "";
 	if (isset($lang)) {
@@ -90,8 +96,8 @@ function getItem($database, $items, $lang = NULL){
 	}
 	foreach ($items as $column=>$item) {
 		if ($column != "Table") {
-			if ($str != "") $sql .= " AND WHERE";
-			$sql .= " ".$column."='".$item."'";
+			if ($str != "") $str .= " AND WHERE";
+			$str .= " ".$column."='".$item."'";
 		}
 	}
 	$sql .= $str." LIMIT 10";
@@ -114,7 +120,7 @@ function getItem($database, $items, $lang = NULL){
 
 // insert inserts data into table
 // Those using setItem should have special privileges
-function setItem($config, $table, $items) {
+function setItem($config, $table, $inputs) {
    // I should probably turn this into global class
    $output = [
        "err" => [],
@@ -126,6 +132,13 @@ function setItem($config, $table, $items) {
 		$output["err"][] = mysqli_connect_error();
 		return $output;
 	}
+
+	//* Sanitize inputs
+	$items = [];
+	foreach ($inputs as $key => $value) {
+		$items[$conn->escape_string($key)] = $conn->escape_string($value);
+	}
+	//*/
 
 	// Generate query
 	$sql = "INSERT INTO ". $table ."(";
@@ -152,8 +165,6 @@ function setItem($config, $table, $items) {
 	// Query
 	if ($conn->query($sql) !== TRUE) {
 		$output["err"][] = "db.setItem: " . $sql . "<br>" . $conn->error;
-	} else {
-		$output["err"][] = "db.setItem: Upload successfull: " . $sql;
 	}
 	return $output["err"];
 }
