@@ -89,14 +89,15 @@ function getItem($database, $inputs, $lang = NULL){
 	}
 
 	// Generate query
-	$sql = "SELECT * FROM ".$items["Table"]." WHERE";
+	$sql = "SELECT * FROM ".$items["Table"];
 	$str = "";
 	if (isset($lang)) {
-	 	$str = " Language='" . $lang . "'";
+	 	$str = " WHERE Language='" . $lang . "'";
 	}
 	foreach ($items as $column=>$item) {
 		if ($column != "Table") {
-			if ($str != "") $str .= " AND WHERE";
+			if ($str != "") $str .= " AND";
+			else $str .= " WHERE";
 			$str .= " ".$column."='".$item."'";
 		}
 	}
@@ -105,7 +106,7 @@ function getItem($database, $inputs, $lang = NULL){
 	$results = $conn->query($sql);
 	// If query fails stop here
 	if ($results === FALSE) {
-		$output["err"][] = "db.getItem: ".$conn->error;
+		$output["err"][] = "db.getItem: ".$sql."; ".$conn->error;
 		return $output;
 	}
 

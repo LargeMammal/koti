@@ -25,9 +25,9 @@ class Site {
         $this->langs[] = "fi-FI"; // Add the default language
         $this->items = [
             "Table" => 'content',
-            "Category" => $items[0],
+            "Category" => urldecode($items[0]),
     	];
-        if (isset($items[1])) $this->items["Title"] = $items[1];
+        if (isset($items[1])) $this->items["Title"] = urldecode($items[1]);
     }
     function __destruct() {
         $this->auth = NULL;
@@ -37,6 +37,7 @@ class Site {
         $this->items = NULL;
     }
 
+    // Generate the site
     function Build($uid = NULL, $pw = NULL) { // vaihda buildiks joka haluaa uid ja pw
         $this->authorize($uid, $pw);
         $footer = [];
@@ -56,12 +57,15 @@ class Site {
                 $this->getErrors($err);
             } else {
                 $this->lang = $l;
+                $str = urldecode($this->$items["Title"]);
+                $this->errors[] = $str;
                 $body = getItem($this->config, $this->items, $this->lang);
                 foreach ($body['data'] as $key => $value) {
                     // Drop un-authorized stuff
                     if ($this->auth < $value['Auth']) {
                         header('WWW-Authenticate: Basic realm="Tardiland"');
                         header('HTTP/1.0 401 Unauthorized');
+                        die("Unauthorized");
                         unset($body['data'][$key]);
                     }
                 }
@@ -71,11 +75,9 @@ class Site {
             }
         }
 
-        if (!isset($footer["data"])) {
+        if (count($footer["data"]) < 1) {
             $err = initLang($this->config);
-            foreach ($err as $e) {
-                $this->errors[] = $e;
-            }
+            $this->getErrors($err);
             $footer["data"][0]["Content"] = 'Initializing';
         }
 
@@ -128,7 +130,7 @@ class Site {
         $str = '<meta charset="UTF-8">';
         $str .= '<title>' . $title . '</title>';
         $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-        $str .= '<link rel="stylesheet" type="text/css" href="css/common.css" >';
+        $str .= '<link rel="stylesheet" type="text/css" href="/css/common.css" >';
         return $str;
     }
 
@@ -170,7 +172,7 @@ class Site {
                         '<button class="dropbtn">'.$key.'</button>'.
                         '<div class="dropdown-content">';
             foreach ($value as $cat) {
-                $content .= '<a href="'.$cat["Title"].'/">'.$cat['Title'].'</a>';
+                $content .= '<a href="/'.$cat["Category"].'/'.$cat["Title"].'">'.$cat['Title'].'</a>';
             }
             $content .= '</div></div>';
         }

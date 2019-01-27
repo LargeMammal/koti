@@ -14,7 +14,7 @@ include_once 'db/db.php';
  * categories exist from database.
  */
 
-function initReg($uid, $pw, $name, $mail) {
+function initReg($uid, $pw, $mail, $name = NULL) {
     // I should probably turn this into global class
     $output = [
         "err" => [],
@@ -44,7 +44,7 @@ function initEditor($config) {
    $editor = [
         'Title' => 'Editori',
         'Content' => '<h1>Lisää </h1>
-        <form action="content" method="POST">
+        <form action="/content" method="POST">
             <p><input type="text" name="Title" placeholder="Title for the content" required></p><br>
             <p><textarea name="Content" placeholder="Content in html form" required></textarea></p><br>
             <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
@@ -52,7 +52,7 @@ function initEditor($config) {
             <input type="submit">
         </form>
         <h1>Add Language</h1>
-        <form action="footer" method="POST">
+        <form action="/footer" method="POST">
             <p><textarea name="Content" placeholder="Text in footer" required></textarea></p><br>
             <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
             <input type="submit">
@@ -66,7 +66,7 @@ function initEditor($config) {
     $register = [
         'Title' => 'Rekisteröidy',
         'Content' => '<h1>Rekisteröidy</h1>
-        <form action="user" method="POST">
+        <form action="/user" method="POST">
             <p><input type="text" name="uid" placeholder="Username" required></p><br>
             <p><input type="password" name="pw" placeholder="Password" required></p><br>
             <p><input type="email" name="email" placeholder="Email" required></p><br>
@@ -86,12 +86,14 @@ function initEditor($config) {
     return $output["err"];
 }
 
-function initLang($config, $lang = "fi-FI", $footer_text='Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia') {
-   // I should probably turn this into global class
-   $output = [
-       "err" => [],
-       "data" => [],
-   ];
+function initLang($config) {
+    $lang = "fi-FI";
+    $footer_text = 'Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia. Nämä sivut ovat minun testi sivut. https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.';
+    // I should probably turn this into global class
+    $output = [
+        "err" => [],
+        "data" => [],
+    ];
     $footer = [
         'Language' => $lang,
         'Content' => $footer_text,

@@ -178,7 +178,7 @@ class Server {
     private function paths($url) {
         // Remove slashes from both sides.
         $str = trim($url, "/");
-        if ($str == "") $str = "not_index";
+        if ($str == "") $str = "home";
         // Explode path into variables
         $items = explode("/", $str);
         return $items;
