@@ -135,6 +135,8 @@ class Site {
         $str = '<meta charset="UTF-8">';
         $str .= '<title>' . $title . '</title>';
         $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+        $str .= '<link rel="icon" type="image/png"
+ href="/image.png">';
         $str .= '<link rel="stylesheet" type="text/css" href="/css/common.css" >';
         return $str;
     }
@@ -172,16 +174,17 @@ class Site {
             $list[$cat["Category"]][] = $cat;
         }
         // Generate dropdowns
+        $content .= "<ul>";
         foreach ($list as $key => $value) {
-            $content .= '<div class="dropdown">'.
-                        '<button class="dropbtn">'.$key.'</button>'.
+            $content .= '<li class="dropdown">'.
+                        '<a href="javascript:void(0)" class="dropbtn">'.$key.'</a>'.
                         '<div class="dropdown-content">';
             foreach ($value as $cat) {
                 $content .= '<a href="/'.$cat["Category"].'/'.$cat["Title"].'">'.$cat['Title'].'</a>';
             }
-            $content .= '</div></div>';
+            $content .= '</div></li>';
         }
-        if ($content == "") $content = "error";
+        $content .= "<ul>";
         return $content;
     }
 

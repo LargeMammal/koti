@@ -36,9 +36,10 @@ function initEditor($config) {
         'Title' => 'Editori',
         'Content' => '<h1>Lisää </h1>
         <form action="/content" method="POST">
-            <p><input type="text" name="Title" placeholder="Title for the content" required></p><br>
-            <p><textarea name="Content" placeholder="Content in html form" required></textarea></p><br>
-            <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
+            <p><input type="text" name="Title" placeholder="Title for the content" required></p>
+            <p><textarea name="Content" placeholder="Content in html form" required></textarea></p>
+            <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p>
+            <p><input type="text" name="Category" placeholder="Set the category" required></p>
             <p>Required level of authorization(0min and 3max): <input type="number" name="auth" min="0" max="3" required></p><br>
             <input type="submit">
         </form>
@@ -80,8 +81,8 @@ function initEditor($config) {
 
 function initLang($config) {
     $lang = "fi-FI";
-    $footer_text = 'Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia. Nämä sivut ovat minun testi sivut. https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.';
-    // I should probably turn this into global class
+    $footer_text = '<p>Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia. Nämä sivut ovat minun testi sivut. https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.</p>';
+    // I should probably turn this into a seperate object
     $output = [
         "err" => [],
         "data" => [],
