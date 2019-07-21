@@ -29,6 +29,7 @@ class Site {
     	];
         if (isset($items[1])) $this->items["Title"] = urldecode($items[1]);
     }
+
     function __destruct() {
         $this->auth = NULL;
         $this->errors = NULL;
@@ -37,7 +38,9 @@ class Site {
         $this->items = NULL;
     }
 
-    // Generate the site
+    /** Build
+     * Generate the site
+     */
     function Build($uid = NULL, $pw = NULL) { // vaihda buildiks joka haluaa uid ja pw
         $this->authorize($uid, $pw);
         $footer = [];
@@ -59,7 +62,7 @@ class Site {
                 $this->lang = $l;
                 $body = getItem($this->config, $this->items, $this->lang);
                 foreach ($body['data'] as $key => $value) {
-                    // Drop un-authorized stuff
+                    // Drop unauthorized stuff
                     if ($this->auth < $value['Auth']) {
                         header('WWW-Authenticate: Basic realm="Tardiland"');
                         header('HTTP/1.0 401 Unauthorized');
@@ -103,6 +106,10 @@ class Site {
         return $str;
     }
 
+    /** authorize
+     * authorize queries db for user name and password hash.
+     * It then compares the two and returns authorization.
+     */
     private function authorize($uid = NULL, $pw = NULL) {
         $query = [
             "Table" => "users",
@@ -135,13 +142,14 @@ class Site {
         $str = '<meta charset="UTF-8">';
         $str .= '<title>' . $title . '</title>';
         $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-        $str .= '<link rel="icon" type="image/png"
- href="/image.png">';
+        $str .= '<link rel="icon" type="image/png" href="/image.png">';
         $str .= '<link rel="stylesheet" type="text/css" href="/css/common.css" >';
         return $str;
     }
 
-    // loadHeader will in future generate custom header
+    /** loadHeader
+     * loadHeader will in future generate custom header
+     */
     private function loadHeader() {
         $banner = $this->items['Category'];
         if(isset($this->contents)) {
@@ -153,7 +161,9 @@ class Site {
         return $output;
     }
 
-    // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
+    /** loadNav
+     * loadNav loads nav bar. I should use nav as settings bar like in google apps.
+     */
     private function loadNav(){
         // Get all data from content table
         $query = [
@@ -188,7 +198,9 @@ class Site {
         return $content;
     }
 
-    // loadBody will generate content section of the page
+    /** loadBody
+     * loadBody will generate content section of the page
+     */
     private function loadBody() {
         $content = "";
         if (!isset($this->contents)) {
@@ -204,12 +216,16 @@ class Site {
         return $content;
     }
 
-    // loadFooter will in future generate custom footer
+    /** loadFooter
+     * loadFooter will in future generate custom footer
+     */
     private function loadFooter($footer = "Non-found") {
         return $footer;
     }
 
-    // getErrors merges error array into main errors array
+    /** getErrors
+     * getErrors merges error array into main errors array
+     */
     private function getErrors($errs = []) {
         if (count($errs) > 0) {
             foreach($errs as $e) {
