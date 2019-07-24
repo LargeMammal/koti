@@ -14,20 +14,11 @@ include_once 'db/db.php';
  * categories exist from database.
  */
 
-function initReg($uid, $pw, $mail, $name) {
+function initReg($config, $users) {
     // I should probably turn this into global class
     $output = [
         "err" => [],
         "data" => [],
-    ];
-    $users = [
-        'UID' => $uid,
-        'PW' => $pw,
-        'Mail' => $mail,
-        'Name' => $name,
-        'Date' => time(),
-        'Auth' => 0,
-        'Verified' => 0,
     ];
     $err = setItem($config, "users", $users);
     foreach ($err as $e) $output["err"][] = "initialise.initLogin: ".$e;
@@ -44,15 +35,16 @@ function initEditor($config) {
    $editor = [
         'Title' => 'Editori',
         'Content' => '<h1>Lisää </h1>
-        <form action="content" method="POST">
-            <p><input type="text" name="Title" placeholder="Title for the content" required></p><br>
-            <p><textarea name="Content" placeholder="Content in html form" required></textarea></p><br>
-            <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
+        <form action="/content" method="POST">
+            <p><input type="text" name="Title" placeholder="Title for the content" required></p>
+            <p><textarea name="Content" placeholder="Content in html form" required></textarea></p>
+            <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p>
+            <p><input type="text" name="Category" placeholder="Set the category" required></p>
             <p>Required level of authorization(0min and 3max): <input type="number" name="auth" min="0" max="3" required></p><br>
             <input type="submit">
         </form>
         <h1>Add Language</h1>
-        <form action="footer" method="POST">
+        <form action="/footer" method="POST">
             <p><textarea name="Content" placeholder="Text in footer" required></textarea></p><br>
             <p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
             <input type="submit">
@@ -66,10 +58,11 @@ function initEditor($config) {
     $register = [
         'Title' => 'Rekisteröidy',
         'Content' => '<h1>Rekisteröidy</h1>
-        <form action="user" method="POST">
-            <p><input type="text" name="uid" placeholder="Username" required></p><br>
-            <p><input type="password" name="pw" placeholder="Password" required></p><br>
-            <p><input type="email" name="email" placeholder="Email" required></p><br>
+        <form action="/users" method="POST">
+            <p><input type="text" name="uid" placeholder="Username" required></p>
+            <p><input type="password" name="pw" placeholder="Password" required></p>
+            <p><input type="text" name="name" placeholder="Your name(Not required)"></p>
+            <p><input type="email" name="email" placeholder="Email" required></p>
             <input type="submit">
         </form>',
         'Category' => 'user',
@@ -86,12 +79,14 @@ function initEditor($config) {
     return $output["err"];
 }
 
-function initLang($config, $lang = "fi-FI", $footer_text='Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia') {
-   // I should probably turn this into global class
-   $output = [
-       "err" => [],
-       "data" => [],
-   ];
+function initLang($config) {
+    $lang = "fi-FI";
+    $footer_text = '<p>Tein nämä sivut PHP:llä, yrittäen noudattaa REST mallia. Nämä sivut ovat minun testi sivut. https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.</p>';
+    // I should probably turn this into a seperate object
+    $output = [
+        "err" => [],
+        "data" => [],
+    ];
     $footer = [
         'Language' => $lang,
         'Content' => $footer_text,

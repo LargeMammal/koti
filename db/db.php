@@ -11,11 +11,10 @@
  * In future I may need to create a seperate
  * program to handle databases.
  */
-
  // This is here just to abstract the database layer
 function connect($database) {
 	// Create connection
-	$conn = new mysqli($database["Site"], $database["User"], $database["Pass"], $database["Database"]);
+	$conn = new \mysqli($database["Site"], $database["User"], $database["Pass"], $database["Database"]);
 	return $conn;
 }
 
@@ -34,14 +33,10 @@ function checkTable($conn, $items = "") {
 function createTable($conn, $table, $columns) {
 	$sql = "CREATE TABLE ".$table." (";
 	$items = [];
-	if ($table == "users") { // Hax
-		$items[] = "uid VARCHAR(255) PRIMARY KEY";
-	} else {
-		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
-	}
+	$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 	// All this should be given in an array
 	foreach($columns as $column) {
-		if ($column == "Title" || $column == "Language" || $column == "PW") {
+		if ($column == "Title" || $column == "Language" || $column == "PW" || $column == "UID") {
 			$items[] = "$column VARCHAR(255) NOT NULL";
 		} elseif ($column == "Auth" || $column == "Verified") {
 			$items[] = "$column TINYINT NOT NULL";
@@ -89,14 +84,15 @@ function getItem($database, $inputs, $lang = NULL){
 	}
 
 	// Generate query
-	$sql = "SELECT * FROM ".$items["Table"]." WHERE";
+	$sql = "SELECT * FROM ".$items["Table"];
 	$str = "";
 	if (isset($lang)) {
-	 	$str = " Language='" . $lang . "'";
+	 	$str = " WHERE Language='" . $lang . "'";
 	}
 	foreach ($items as $column=>$item) {
 		if ($column != "Table") {
-			if ($str != "") $str .= " AND WHERE";
+			if ($str != "") $str .= " AND";
+			else $str .= " WHERE";
 			$str .= " ".$column."='".$item."'";
 		}
 	}
@@ -105,7 +101,7 @@ function getItem($database, $inputs, $lang = NULL){
 	$results = $conn->query($sql);
 	// If query fails stop here
 	if ($results === FALSE) {
-		$output["err"][] = "db.getItem: ".$conn->error;
+		$output["err"][] = "db.getItem: ".$sql."; ".$conn->error;
 		return $output;
 	}
 

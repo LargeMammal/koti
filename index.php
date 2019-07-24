@@ -4,7 +4,7 @@ define("CONFIG", "config/default-config.json");
 //define("CONFIG", "config/test-config.json");
 
 function autoloader($class) {
-    require_once 'classes/' . $class . '.class.php';
+    require_once __DIR__."/classes/" . $class . '.class.php';
 }
 
 spl_autoload_register('autoloader');
@@ -14,6 +14,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $langs = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 $uri = $_SERVER['REQUEST_URI'];
 $post = $_POST;
+//foreach ($_POST as $key => $value) echo $key.": ".$value;
 $uid = NULL;
 $pw = NULL;
 if (isset($_SERVER['PHP_AUTH_USER'])) $uid = $_SERVER['PHP_AUTH_USER'];

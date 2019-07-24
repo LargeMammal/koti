@@ -25,10 +25,11 @@ class Site {
         $this->langs[] = "fi-FI"; // Add the default language
         $this->items = [
             "Table" => 'content',
-            "Category" => $items[0],
+            "Category" => urldecode($items[0]),
     	];
-        if (isset($items[1])) $this->items["Title"] = $items[1];
+        if (isset($items[1])) $this->items["Title"] = urldecode($items[1]);
     }
+
     function __destruct() {
         $this->auth = NULL;
         $this->errors = NULL;
@@ -37,6 +38,9 @@ class Site {
         $this->items = NULL;
     }
 
+    /** Build
+     * Generate the site
+     */
     function Build($uid = NULL, $pw = NULL) { // vaihda buildiks joka haluaa uid ja pw
         $this->authorize($uid, $pw);
         $footer = [];
@@ -58,10 +62,11 @@ class Site {
                 $this->lang = $l;
                 $body = getItem($this->config, $this->items, $this->lang);
                 foreach ($body['data'] as $key => $value) {
-                    // Drop un-authorized stuff
+                    // Drop unauthorized stuff
                     if ($this->auth < $value['Auth']) {
                         header('WWW-Authenticate: Basic realm="Tardiland"');
                         header('HTTP/1.0 401 Unauthorized');
+                        die("Unauthorized: ".$uid." and ".$this->auth);
                         unset($body['data'][$key]);
                     }
                 }
@@ -71,11 +76,9 @@ class Site {
             }
         }
 
-        if (!isset($footer["data"])) {
+        if (count($footer["data"]) < 1) {
             $err = initLang($this->config);
-            foreach ($err as $e) {
-                $this->errors[] = $e;
-            }
+            $this->getErrors($err);
             $footer["data"][0]["Content"] = 'Initializing';
         }
 
@@ -88,9 +91,11 @@ class Site {
         $str .= "<nav>".$this->loadNav()."</nav>"."</header>";
         $str .= "<section>";
         //* Print all errors. This should be handled by logs
-        foreach($this->errors as $val) {
-            if ($val != "") {
-                $str .= $val. "<br>";
+        if (isset($this->errors)) {
+            foreach($this->errors as $val) {
+                if ($val != "") {
+                    $str .= $val. "<br>";
+                }
             }
         }
         //*/
@@ -101,17 +106,26 @@ class Site {
         return $str;
     }
 
+    /** authorize
+     * authorize queries db for user name and password hash.
+     * It then compares the two and returns authorization.
+     */
     private function authorize($uid = NULL, $pw = NULL) {
         $query = [
             "Table" => "users",
-            "User" => $uid,
+            "UID" => $uid,
         ];
         $auth = getItem($this->config, $query); // Get user data
         $this->getErrors($auth['err']);
-        if (!password_verify($pw, $auth['data'][0]["PW"])) {
-            $this->auth = $auth['data'][0]["Auth"];
+        $pwa = "non";
+        $autha = 0;
+        if (count($auth['data']) > 0) {
+            $pwa = $auth['data'][0]["PW"];
+            $autha = $auth['data'][0]["Auth"];
         }
-        $this->auth = 0;
+        if (!password_verify($pw, $pwa)) {
+            $this->auth = $autha;
+        }
     }
 
     /** loadHead
@@ -128,11 +142,14 @@ class Site {
         $str = '<meta charset="UTF-8">';
         $str .= '<title>' . $title . '</title>';
         $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-        $str .= '<link rel="stylesheet" type="text/css" href="css/common.css" >';
+        $str .= '<link rel="icon" type="image/png" href="/image.png">';
+        $str .= '<link rel="stylesheet" type="text/css" href="/css/common.css" >';
         return $str;
     }
 
-    // loadHeader will in future generate custom header
+    /** loadHeader
+     * loadHeader will in future generate custom header
+     */
     private function loadHeader() {
         $banner = $this->items['Category'];
         if(isset($this->contents)) {
@@ -144,7 +161,9 @@ class Site {
         return $output;
     }
 
-    // LoadNav loads nav bar. I should use nav as settings bar like in google apps.
+    /** loadNav
+     * loadNav loads nav bar. I should use nav as settings bar like in google apps.
+     */
     private function loadNav(){
         // Get all data from content table
         $query = [
@@ -165,20 +184,23 @@ class Site {
             $list[$cat["Category"]][] = $cat;
         }
         // Generate dropdowns
+        $content .= "<ul>";
         foreach ($list as $key => $value) {
-            $content .= '<div class="dropdown">'.
-                        '<button class="dropbtn">'.$key.'</button>'.
+            $content .= '<li class="dropdown">'.
+                        '<a href="javascript:void(0)" class="dropbtn">'.$key.'</a>'.
                         '<div class="dropdown-content">';
             foreach ($value as $cat) {
-                $content .= '<a href="'.$cat["Title"].'/">'.$cat['Title'].'</a>';
+                $content .= '<a href="/'.$cat["Category"].'/'.$cat["Title"].'">'.$cat['Title'].'</a>';
             }
-            $content .= '</div></div>';
+            $content .= '</div></li>';
         }
-        if ($content == "") $content = "error";
+        $content .= "<ul>";
         return $content;
     }
 
-    // loadBody will generate content section of the page
+    /** loadBody
+     * loadBody will generate content section of the page
+     */
     private function loadBody() {
         $content = "";
         if (!isset($this->contents)) {
@@ -194,12 +216,16 @@ class Site {
         return $content;
     }
 
-    // loadFooter will in future generate custom footer
+    /** loadFooter
+     * loadFooter will in future generate custom footer
+     */
     private function loadFooter($footer = "Non-found") {
         return $footer;
     }
 
-    // getErrors merges error array into main errors array
+    /** getErrors
+     * getErrors merges error array into main errors array
+     */
     private function getErrors($errs = []) {
         if (count($errs) > 0) {
             foreach($errs as $e) {
