@@ -19,6 +19,7 @@ $uid = NULL;
 $pw = NULL;
 if (isset($_SERVER['PHP_AUTH_USER'])) $uid = $_SERVER['PHP_AUTH_USER'];
 if (isset($_SERVER['PHP_AUTH_PW'])) $pw = $_SERVER['PHP_AUTH_PW'];
+echo "auth_uid:".$uid;
 // Serve
 $server = new Server($realm, $method, $langs, $uri, $post);
 // Get json array from json file
