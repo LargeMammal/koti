@@ -14,7 +14,7 @@ include_once 'db/db.php';
  * categories exist from database.
  */
 
-function initReg($uid, $pw, $name, $mail) {
+function initReg($uid, $pw, $mail, $name) {
     // I should probably turn this into global class
     $output = [
         "err" => [],
