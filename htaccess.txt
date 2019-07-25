@@ -2,11 +2,14 @@
 # Please be aware that PHP scripts will run under your credentials. See ~/instructions/ for further details
 #Action php-cgi /~K1729/cgi-bin/php-fastcgi
 
-AddDefaultCharset UTF-8
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
 # AddType is necessary because other rewriter doesn't understand to execute
-AddType application/x-httpd-php .php
-php_value session.cookie_httponly 1
-php_value session.cookie_secure 1
+#AddType application/x-httpd-php .php
+#php_value session.cookie_httponly 1
+#php_value session.cookie_secure 1
+
+AddDefaultCharset UTF-8
 <Limit GET POST PUT DELETE>
     Allow from all
 </Limit>

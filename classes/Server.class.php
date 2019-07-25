@@ -68,6 +68,7 @@ class Server {
     // loadFile gets file and returns contents in an array
     public function LoadJSON($file) {
         $pwd = $this->getRootDir() . "/" . $file;
+        //$pwd = __DIR__."/" . $file;
         if (!file_exists($pwd)) {
             return FALSE;
         }
@@ -75,6 +76,29 @@ class Server {
         $data = json_decode($json); // turns json into php object
         $this->config = $this->parseObject($data);
         return TRUE;
+    }
+
+    /**
+     * This should be removed later
+     */
+    private function handleItem() {
+        switch($this->method) {
+        case 'PUT':
+            $this->createItem();
+            return "";
+
+        case 'DELETE':
+            $this->deleteItem();
+            return "";
+
+        case 'GET':
+            return $this->displayItem();
+
+        default:
+            header('HTTP/1.1 405 Method Not Allowed');
+            header('Allow: GET, PUT, DELETE');
+        }
+        return "";
     }
 
     private function handleItems() {
@@ -139,26 +163,6 @@ class Server {
             header('HTTP/1.1 405 Method Not Allowed');
             header('Allow: GET POST');
             break;
-        }
-        return "";
-    }
-
-    private function handleItem() {
-        switch($this->method) {
-        case 'PUT':
-            $this->createItem();
-            return "";
-
-        case 'DELETE':
-            $this->deleteItem();
-            return "";
-
-        case 'GET':
-            return $this->displayItem();
-
-        default:
-            header('HTTP/1.1 405 Method Not Allowed');
-            header('Allow: GET, PUT, DELETE');
         }
         return "";
     }

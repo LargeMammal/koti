@@ -41,7 +41,7 @@ class Site {
     /** Build
      * Generate the site
      */
-    function Build($uid = NULL, $pw = NULL) { // vaihda buildiks joka haluaa uid ja pw
+    function Build($uid = NULL, $pw = NULL) { 
         $this->authorize($uid, $pw);
         $footer = [];
 
