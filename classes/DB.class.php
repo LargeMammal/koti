@@ -4,7 +4,6 @@
  */
 class DB {
     private $conn;
-    private $config;
     private $user;
     private $site;
     private $pass;
@@ -12,11 +11,10 @@ class DB {
     private $output;
 
     function __construct($config) {
-        $this->config = $config;
-        $this->$user = $this->config["User"];
-        $this->$site = $this->config["Site"];
-        $this->$pass = $this->config["Pass"];
-        $this->$database = $this->config["Database"];
+        $this->$user = $config["User"];
+        $this->$site = $config["Site"];
+        $this->$pass = $config["Pass"];
+        $this->$database = $config["Database"];
         $this->output = [
 			"err" => [],
 			"data" => [],
@@ -25,7 +23,6 @@ class DB {
 
     function __destruct() {
         $this->conn = NULL;
-        $this->config = NULL;
         $this->$user = NULL;
         $this->$site = NULL;
         $this->$pass = NULL;
@@ -137,7 +134,7 @@ class DB {
 	 * connect creates Connection
      * returns true if successful
 	 */
-	private function connect($database) {
+	private function connect() {
 		$this->conn = new \mysqli($this->Site, $this->user, $this->pass, $this->database);
 		if (!$this->conn) {
             $this->output["err"][] = mysqli_connect_error();
@@ -162,7 +159,7 @@ class DB {
      * createTitle creates table with given name and data.
      * First item in array will become primary key
      */
-	function createTable($conn, $table, $columns) {
+	private function createTable($conn, $table, $columns) {
 		$sql = "CREATE TABLE ".$table." (";
 		$items = [];
 		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";

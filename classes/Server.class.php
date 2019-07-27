@@ -2,7 +2,6 @@
 /** server.php holds Server class
 * Server object will handle http methods
 */
-// Depending on database call specific library
 include_once "db/db.php";
 include_once "db/initialise.php";
 
