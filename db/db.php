@@ -11,7 +11,6 @@
  * In future I may need to create a seperate
  * program to handle databases.
  */
- // This is here just to abstract the database layer
 function connect($database) {
 	// Create connection
 	$conn = new \mysqli($database["Site"], $database["User"], $database["Pass"], $database["Database"]);

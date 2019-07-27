@@ -41,7 +41,7 @@ class Site {
     /** Build
      * Generate the site
      */
-    function Build($uid = NULL, $pw = NULL) { 
+    public function Build($uid = NULL, $pw = NULL) {
         $this->authorize($uid, $pw);
         $footer = [];
 
@@ -66,7 +66,6 @@ class Site {
                     if ($this->auth < $value['Auth']) {
                         header('WWW-Authenticate: Basic realm="Tardiland"');
                         header('HTTP/1.0 401 Unauthorized');
-                        die("Unauthorized: ".$uid." and ".$this->auth);
                         unset($body['data'][$key]);
                     }
                 }
