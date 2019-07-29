@@ -34,8 +34,8 @@ class DB {
 	* getItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
 	*/
-	public function GetItem($database, $inputs, $lang = NULL){
-		if (connect()) return $this->output;
+	public function GetItem($inputs, $lang = NULL){
+		if (!connect()) return $this->output;
 	
 		//* Sanitize input
 		$items = [];
@@ -65,11 +65,11 @@ class DB {
 		}
 		$sql .= $str." LIMIT 10";
 	
-		$results = $conn->query($sql);
+		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
 			$output["err"][] = "db.getItem: ".$sql."; ".$conn->error;
-			return $output;
+			return $this->output;
 		}
 	
 		// Fetch each row in associative form and pass it to output.
@@ -77,7 +77,9 @@ class DB {
 			$output["data"][] = $row;
 		}
 		$results->free();
-		return $output;
+
+		$this->conn->close();
+		return $this->output;
 	}
     
     /** SetItem
@@ -120,6 +122,8 @@ class DB {
 		if ($conn->query($sql) !== TRUE) {
 			$output["err"][] = "db.setItem: " . $sql . "<br>" . $conn->error;
 		}
+
+		$this->conn->close();
 		return $output["err"];
 	}
 	
@@ -135,7 +139,7 @@ class DB {
      * returns true if successful
 	 */
 	private function connect() {
-		$this->conn = new \mysqli($this->Site, $this->user, $this->pass, $this->database);
+		$this->conn = new \mysqli($this->site, $this->user, $this->pass, $this->database);
 		if (!$this->conn) {
             $this->output["err"][] = mysqli_connect_error();
             return false;
