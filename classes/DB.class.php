@@ -34,7 +34,7 @@ class DB {
 	* getItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
 	*/
-	public function GetItem($database, $inputs, $lang = NULL){
+	public function GetItem($inputs, $lang = NULL){
 		if (connect()) return $this->output;
 	
 		//* Sanitize input
@@ -68,8 +68,8 @@ class DB {
 		$results = $conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			$output["err"][] = "db.getItem: ".$sql."; ".$conn->error;
-			return $output;
+			$this->output["err"][] = "db.getItem: ".$sql."; ".$conn->error;
+			return $this->output;
 		}
 	
 		// Fetch each row in associative form and pass it to output.
@@ -90,7 +90,7 @@ class DB {
 		//* Sanitize inputs
 		$items = [];
 		foreach ($inputs as $key => $value) {
-			$items[$conn->escape_string($key)] = $conn->escape_string($value);
+			$items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
 		}
 		//*/
 	
@@ -111,30 +111,30 @@ class DB {
 			$error = createTable($conn, $table, $columns);
 			// If creation failed table stop here
 			if ($error != "") {
-				$output["err"][] = "db.setItem: " . $error;
-				return $output;
+				$this->output["err"][] = "db.setItem: " . $error;
+				return $this->output;
 			}
 		}
 	
 		// Query
-		if ($conn->query($sql) !== TRUE) {
-			$output["err"][] = "db.setItem: " . $sql . "<br>" . $conn->error;
+		if ($this->conn->query($sql) !== TRUE) {
+			$this->output["err"][] = "db.setItem: " . $sql . "<br>" . $this->conn->error;
 		}
-		return $output["err"];
+		return $this->output["err"];
 	}
 	
 	/** RemoveItem
      * remove selected item
      */
-	public function RemoveItem($items, $item) {
-	
+	public function RemoveItem($table, $item) {
+		
 	}
 
 	/** connect
 	 * connect creates Connection
      * returns true if successful
 	 */
-	private function connect() {
+	private function connect(): bool {
 		$this->conn = new \mysqli($this->Site, $this->user, $this->pass, $this->database);
 		if (!$this->conn) {
             $this->output["err"][] = mysqli_connect_error();
@@ -159,7 +159,7 @@ class DB {
      * createTitle creates table with given name and data.
      * First item in array will become primary key
      */
-	private function createTable($conn, $table, $columns) {
+	private function createTable($table, $columns) {
 		$sql = "CREATE TABLE ".$table." (";
 		$items = [];
 		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
@@ -177,8 +177,8 @@ class DB {
 		}
 		$sql .= implode(", ", $items);
 		$sql .= ")";
-		if ($conn->query($sql) !== TRUE) {
-			return "db.createTable: ". $sql. ": " . $conn->error;
+		if ($this->conn->query($sql) !== TRUE) {
+			return "db.createTable: ". $sql. ": " . $this->conn->error;
 		}
 		return "";
 	}
