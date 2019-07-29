@@ -35,7 +35,7 @@ class DB {
 	* Generate the code here and later turn it into a exterrior script
 	*/
 	public function GetItem($inputs, $lang = NULL){
-		if (connect()) return $this->output;
+		if (!connect()) return $this->output;
 	
 		//* Sanitize input
 		$items = [];
@@ -65,7 +65,7 @@ class DB {
 		}
 		$sql .= $str." LIMIT 10";
 	
-		$results = $conn->query($sql);
+		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
 			$this->output["err"][] = "db.getItem: ".$sql."; ".$conn->error;
@@ -77,7 +77,9 @@ class DB {
 			$output["data"][] = $row;
 		}
 		$results->free();
-		return $output;
+
+		$this->conn->close();
+		return $this->output;
 	}
     
     /** SetItem
@@ -120,7 +122,9 @@ class DB {
 		if ($this->conn->query($sql) !== TRUE) {
 			$this->output["err"][] = "db.setItem: " . $sql . "<br>" . $this->conn->error;
 		}
-		return $this->output["err"];
+
+		$this->conn->close();
+		return $output["err"];
 	}
 	
 	/** RemoveItem
