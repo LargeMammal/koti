@@ -1,0 +1,17 @@
+{
+    "Local": 0,
+    "SSH": {
+        "Use_Key": 0,
+        "User": "site",
+        "Password": ""
+    },
+    "Realm": "Tardiland",
+    "User":"site",
+    "Pass":"",
+    "Site":"mysql.labranet.jamk.fi",
+    "Database":"site",
+    "Tables": {
+        "Users": "users",
+        "Items":"items"
+    }
+}

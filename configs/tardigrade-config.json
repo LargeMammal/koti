@@ -1,0 +1,17 @@
+{
+    "Local": 1,
+    "SSH": {
+        "Use_Key": 0,
+        "User": "site",
+        "Password": ""
+    },
+    "Realm": "Tardiland",
+    "User":"site",
+    "Pass":"",
+    "Site":"tardigrade.ddns.net",
+    "Database":"site",
+    "Tables": {
+        "Users": "users",
+        "Items":"items"
+    }
+}

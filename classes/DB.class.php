@@ -34,14 +34,13 @@ class DB {
 	* getItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
 	*/
-	public function GetItem($inputs, $lang = NULL){
+	public function GetItem($inputs, $lang = NULL): array{
 		if (!connect()) return $this->output;
 	
 		//* Sanitize input
 		$items = [];
-		foreach ($inputs as $key => $value) {
-			$items[$conn->escape_string($key)] = $conn->escape_string($value);
-		}
+		// Create assosiative array 
+		foreach ($inputs as $key => $value) $items[$conn->escape_string($key)] = $conn->escape_string($value);
 		//*/
 	
 		// If table doesn't exist stop here
@@ -73,9 +72,7 @@ class DB {
 		}
 	
 		// Fetch each row in associative form and pass it to output.
-		while($row = $results->fetch_assoc()) {
-			$output["data"][] = $row;
-		}
+		while($row = $results->fetch_assoc()) $output["data"][] = $row;
 		$results->free();
 
 		$this->conn->close();
@@ -87,13 +84,12 @@ class DB {
      * Those using setItem should have special privileges
      */
 	public function SetItem($table, $inputs) {
-        if (connect()) return $this->output;
+        if (!connect()) return $this->output;
 	
 		//* Sanitize inputs
 		$items = [];
-		foreach ($inputs as $key => $value) {
-			$items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
-		}
+		// Create assosiative array 
+		foreach ($inputs as $key => $value) $items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
 		//*/
 	
 		// Generate query
@@ -119,12 +115,10 @@ class DB {
 		}
 	
 		// Query
-		if ($this->conn->query($sql) !== TRUE) {
-			$this->output["err"][] = "db.setItem: " . $sql . "<br>" . $this->conn->error;
-		}
+		if ($this->conn->query($sql) !== TRUE) $this->output["err"][] = "db.setItem: ".$sql."<br>".$this->conn->error;
 
 		$this->conn->close();
-		return $output["err"];
+		return $output;
 	}
 	
 	/** RemoveItem
@@ -132,6 +126,14 @@ class DB {
      */
 	public function RemoveItem($table, $item) {
 		
+	}
+	
+	/** UpdateItem
+     * update selected item
+     */
+	public function UpdateItem($table, $item) {
+		$this->RemoveItem($table, $item);
+		$this->SetItem($table, $item);
 	}
 
 	/** connect

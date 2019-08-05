@@ -2,12 +2,13 @@
 /** server.php holds Server class
 * Server object will handle http methods
 */
-include_once "db/db.php";
 include_once "db/initialise.php";
 
 class Server {
     private $uid;
     private $pw;
+    private $db;
+    private $errors;
     protected $realm;
     protected $method;
     protected $items;
@@ -15,9 +16,9 @@ class Server {
     protected $langs;
     protected $post;
 
-    function __construct($realm, $method, $langs, $uri, $post) {
-        $this->realm = $realm;
+    function __construct($db, $config, $method, $langs, $uri, $post) {
         $this->method = $method;
+        $this->db = $db;
         $this->langs = $this->GetLang($langs);
         $this->items = $this->paths($uri);
         if (isset($post)) $post["Date"] = time();
@@ -64,19 +65,6 @@ class Server {
         return $output;
     }
 
-    // loadFile gets file and returns contents in an array
-    public function LoadJSON($file) {
-        $pwd = $this->getRootDir() . "/" . $file;
-        //$pwd = __DIR__."/" . $file;
-        if (!file_exists($pwd)) {
-            return FALSE;
-        }
-        $json = file_get_contents($pwd); // reads file into string
-        $data = json_decode($json); // turns json into php object
-        $this->config = $this->parseObject($data);
-        return TRUE;
-    }
-
     /**
      * This should be removed later
      */
@@ -114,10 +102,8 @@ class Server {
             ];
             $str = "";
             $level = 0;
-            if ($this->items[0] == "content") {
-                // if content upload set auth level to 2
-                $level = 2;
-            } elseif ($this->items[0] == "users") {
+            if ($this->items[0] == "content") $level = 2; // if content upload set auth level to 2
+            elseif ($this->items[0] == "users") {
                 if (isset($this->post["pw"])) $this->post["pw"] = password_hash($this->post["pw"], PASSWORD_DEFAULT);
                 else $this->post["pw"] = "";
             }
@@ -150,9 +136,7 @@ class Server {
                 $err = setItem($this->config[$this->config["Use"]], $this->items[0], $this->post);
             }
             if (isset($err)) {
-                foreach ($err as $e) {
-                    $str .= $e."<br>";
-                }
+                foreach ($err as $e) $str .= $e."<br>";
                 //http_response_code(500);
             } else {
                 http_response_code(201);
@@ -206,51 +190,6 @@ class Server {
         // Explode path into variables
         $items = explode("/", $str);
         return $items;
-    }
-    // getRootDir gets the root directory of the app.
-    // This could be obsolete
-    private function getRootDir() {
-        // getcwd gives you the working directory
-        $path = getcwd();
-        // split the path into an array
-        $arr = explode("/", $path);
-        // initialize output and stop
-        $output = array();
-        $stop = false;
-        // check each value for
-        foreach ($arr as $value) {
-            switch($value) {
-                case "php":
-                case "projects":
-                    $stop = true;
-                default:
-                    array_push($output, $value);
-            }
-            if ($stop == true) { // stop when root is found
-                break;
-            }
-        }
-        // implode the array back into string
-        return implode("/", $output);
-    }
-
-    // parseObject recursively reads through object vars
-    // and returns them in an array. Runs only 20 layers deep.
-    // Recursiot on perseestä. Koita muuttaa iteratiiviseksi.
-    private function parseObject($obj, $i = 0) {
-        $output = [];
-        // Don't go deeper than 20
-        if ($i > 20) {
-            return $output;
-        }
-        foreach ($obj as $key=>$val) {
-            if (is_object($val)) {
-                $output[$key] = $this->parseObject($val, ($i+1));
-            } else {
-                $output[$key] = $val;
-            }
-        }
-        return $output;
     }
 
     // logging saves everything into a specific file

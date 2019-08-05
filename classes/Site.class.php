@@ -88,17 +88,17 @@ class Site {
         // Stuff in body
         $str .= "<body><header>".$this->loadHeader();
         $str .= "<nav>".$this->loadNav()."</nav>"."</header>";
-        $str .= "<section>";
         //* Print all errors. This should be handled by logs
         if (isset($this->errors)) {
+            $str .= "<section>";
             foreach($this->errors as $val) {
                 if ($val != "") {
                     $str .= $val. "<br>";
                 }
             }
+            $str .= "</section>";
         }
         //*/
-        $str .= "</section>";
         $str .= "<section>".$this->loadBody()."</section>";
         $str .= "<footer>".$this->loadFooter($footer["data"][0]["Content"]."</footer>");
         $str .= "</body></html>";
@@ -165,9 +165,7 @@ class Site {
      */
     private function loadNav(){
         // Get all data from content table
-        $query = [
-            'Table' => 'content',
-        ];
+        $query = [ 'Table' => 'content' ];
         $list = [];
         $content = "";
         $cats = getItem($this->config, $query, $this->lang);
@@ -183,7 +181,7 @@ class Site {
             $list[$cat["Category"]][] = $cat;
         }
         // Generate dropdowns
-        $content .= "<ul>";
+        $content .= '<ul><a href="/" class="dropdown">home</a>';
         foreach ($list as $key => $value) {
             $content .= '<li class="dropdown">'.
                         '<a href="javascript:void(0)" class="dropbtn">'.$key.'</a>'.
