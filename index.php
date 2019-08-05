@@ -32,11 +32,12 @@ function loadJSON($file) {
     return parseObject($data);
 }
 
+error_reporting(E_STRICT);
 spl_autoload_register('autoloader');
 $config = loadJSON(CONFIG);
 $DB = new DB($config);
 $errors = new Error($DB);
-set_error_handler($errors->LogError, E_STRICT);
+set_error_handler($errors->LogError);
 // build variables
 $method = $_SERVER['REQUEST_METHOD'];
 $langs = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
