@@ -23,6 +23,8 @@ class Server {
         $this->items = $this->paths($uri);
         if (isset($post)) $post["Date"] = time();
         $this->post = $post;
+        $this->uid = NULL;
+        $this->pw = NULL;
     }
 
     function __destruct() {
@@ -116,6 +118,7 @@ class Server {
             if (!password_verify($this->pw, $pw) && $authorization < $level) {
                     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
                     header('HTTP/1.0 401 Unauthorized');
+                    trigger_error("Error: ".$this->post['uid']);
                     die("Error: ".$this->post['uid']);
             }
             $err = [];
