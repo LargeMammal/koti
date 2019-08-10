@@ -35,6 +35,7 @@ function loadJSON($file) {
 error_reporting(E_STRICT);
 spl_autoload_register('autoloader');
 $config = loadJSON(CONFIG);
+die(var_dump($config));
 $DB = new DB($config);
 $errors = new Error($DB);
 set_error_handler($errors->LogError);
