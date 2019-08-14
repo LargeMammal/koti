@@ -5,26 +5,28 @@
 include_once "db/initialise.php";
 
 class Server {
-    private $uid;
-    private $pw;
+    private $config;
     private $db;
     private $errors;
-    protected $realm;
-    protected $method;
-    protected $items;
-    protected $config;
-    protected $langs;
-    protected $post;
+    private $items;
+    private $langs;
+    private $method;
+    private $post;
+    private $pw;
+    private $realm;
+    private $uid;
 
-    function __construct($db, $config, $method, $langs, $uri, $post) {
-        $this->method = $method;
-        $this->db = $db;
-        $this->langs = $this->GetLang($langs);
+    function __construct($config, $method, $langs, $uri, $post) {
+        $this->config = $this->loadJSON($config);
+        $this->db = new DB($this->config);
+        $this->errors = new Error($this->db);
         $this->items = $this->paths($uri);
+        $this->langs = $this->getLang($langs);
+        $this->method = $method;
         if (isset($post)) $post["Date"] = time();
         $this->post = $post;
-        $this->uid = NULL;
         $this->pw = NULL;
+        $this->uid = NULL;
     }
 
     function __destruct() {
@@ -51,7 +53,7 @@ class Server {
         $this->pw = $pw;
     }
 
-    public function GetLang($str) {
+    public function getLang($str) {
         $output = [];
         // Split the string
         $arr = explode(";", $str);
@@ -65,6 +67,37 @@ class Server {
             }
         }
         return $output;
+    }
+
+    /**
+     * parseObject recursively reads through object vars
+     * and returns them in an array. Runs only 20 layers deep.
+     */
+    function parseObject($obj, $i = 0) {
+        $output = [];
+        // Don't go deeper than 20
+        if ($i > 20) {
+            return $output;
+        }
+        foreach ($obj as $key=>$val) {
+            if (is_object($val)) {
+                $output[$key] = $this->parseObject($val, ($i+1));
+            } else {
+                $output[$key] = $val;
+            }
+        }
+        return $output;
+    }
+    
+    /**
+     * loadFile gets file and returns contents in an array
+     */
+    function loadJSON($file) {
+        $pwd = $file;
+        if (!file_exists($pwd)) return FALSE;
+        $json = file_get_contents($pwd); // reads file into string
+        $data = json_decode($json); // turns json into php object
+        return $this->parseObject($data);
     }
 
     /**
