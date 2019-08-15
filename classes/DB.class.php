@@ -11,22 +11,23 @@ class DB {
     private $output;
 
     function __construct($config) {
-        $this->$user = $config["User"];
-        $this->$site = $config["Site"];
-        $this->$pass = $config["Pass"];
-        $this->$database = $config["Database"];
+        $this->user = $config["User"];
+        $this->site = $config["Site"];
+        $this->pass = $config["Pass"];
+        $this->database = $config["Database"];
         $this->output = [
 			"err" => [],
 			"data" => [],
 		];
+		echo "constructed";
     }
 
     function __destruct() {
         $this->conn = NULL;
-        $this->$user = NULL;
-        $this->$site = NULL;
-        $this->$pass = NULL;
-        $this->$database = NULL;
+        $this->user = NULL;
+        $this->site = NULL;
+        $this->pass = NULL;
+        $this->database = NULL;
         $this->output = NULL;
     }
 	

@@ -19,7 +19,9 @@ class Server {
     function __construct($config, $method, $langs, $uri, $post) {
         $this->config = $this->loadJSON($config);
         $this->db = new DB($this->config);
-        $this->errors = new Error($this->db);
+        echo "step 2 ";
+        //$this->errors = new Error($this->db);
+        echo "step 3 ";
         $this->items = $this->paths($uri);
         $this->langs = $this->getLang($langs);
         $this->method = $method;
@@ -27,6 +29,7 @@ class Server {
         $this->post = $post;
         $this->pw = NULL;
         $this->uid = NULL;
+        echo "success";
     }
 
     function __destruct() {

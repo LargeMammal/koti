@@ -20,7 +20,7 @@ class Site {
     protected $items;
 
     function __construct($config, $langs, $items) {
-        $this->config = $config[$config["Use"]];
+        $this->config = $config;
         $this->langs = $langs;
         if (count($this->langs) < 1) $this->langs[] = "fi-FI"; // Add the default language
         $this->items = [

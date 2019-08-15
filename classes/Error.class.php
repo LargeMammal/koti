@@ -9,6 +9,7 @@ class Error {
 
     function __construct($db) {
         $this->DB = $db;
+        echo "errors";
     }
 
     function __destruct() {
