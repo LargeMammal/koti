@@ -2,7 +2,6 @@
 /** server.php holds Server class
 * Server object will handle http methods
 */
-include_once "db/initialise.php";
 
 class Server {
     private $config;
@@ -23,10 +22,15 @@ class Server {
         //* Override the default error handler behavior
         $this->oldErrorHandler = set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
             $this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
+            return true;
         });
         //*/
-        //echo "Triggering error: ".$newError;
-        //trigger_error("Test notice");
+        set_exception_handler(function($exception) {
+            echo "<b>Exception:</b> ", $exception->getMessage();
+            //$this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
+            return true;
+        });
+        //throw new Exception("Test exception!");
         $this->items = $this->paths($uri);
         $this->langs = $this->getLang($langs);
         $this->method = $method;

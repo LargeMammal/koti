@@ -3,8 +3,6 @@
  * Site class hold data and functions needed to
  * generate a website.
  */
-// These too should be merged into one class file
-include_once "db/initialise.php";
 
 /** Site class
  * More later

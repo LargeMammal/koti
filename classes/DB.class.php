@@ -104,7 +104,7 @@ class DB {
 		if (!$this->checkTable($table)) {
 			trigger_error("db.setItem: Table, " . $table . " , not found");
 			// Create the table
-			$error = $this->createTable($this->conn, $table, $columns);
+			$error = $this->createTable($table, $columns);
 			// If creation failed table stop here
 			if ($error != "") {
 				trigger_error("db.setItem: " . $error);
@@ -140,29 +140,30 @@ class DB {
 	/**
 	 * LogError saves errors to database
 	 */
-	public function LogError($errLvl, $errMsg, $errFile, $errLine, $errCon) {
+	public function LogError($errno, $errstr, $errfile, $errline, $errcontext) {
 		$table = "errors";
 		$items = [
-			"Level" => $errLvl,
-			"Message" => $errMsg,
-			"File" => $errFile,
-			"Line" => $errLine,
-			"Context" => $errCon,
+			"Level" => $errno,
+			"Message" => $errstr,
+			"File" => $errfile,
+			"Line" => $errline,
+			"Context" => $errcontext,
 		];
 		ob_start();
-		var_dump($errCon);
+		var_dump($errcontext);
 		$dump = ob_get_clean();
 		ob_start();
 		debug_print_backtrace();
 		$trace = ob_get_clean();
-		if ($errLvl == E_ERROR || $errLvl == E_USER_ERROR) {
-			echo "<b>Fatal Error: </b> [$errLvl] '$errMsg' in $errFile line $errLine with values: <pre>".$dump."</pre><br>";
+		if ($errno == E_ERROR || $errno == E_USER_ERROR) {
+			echo "<b>Fatal Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
 			die("Backtrace:<br><pre>$trace</pre>");
 		} else {
-			echo "<b>Error: </b> [$errLvl] '$errMsg' in $errFile line $errLine with values: <pre>".$dump."</pre><br>";
+			echo "<b>Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
 			echo "Backtrace:<br><pre>$trace</pre>";
 		}
 		if (!$this->SetItem($table, $items)) echo "Saving failed";
+		return true;
 	}
 
 	/** connect
