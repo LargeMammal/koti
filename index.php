@@ -15,10 +15,10 @@ function myErrorHandler($errLvl, $errMsg, $errFile, $errLine, $errCon) {
      */
 }
 
-error_reporting(E_STRICT);
+error_reporting(E_ALL | E_STRICT);
 set_error_handler("myErrorHandler");
 if (!spl_autoload_register('autoloader')) 
-    trigger_error("Autoloader error", E_USER_NOTICE);
+    trigger_error("Autoloader error");
 define("CONFIG", __DIR__."/configs/localhost-config.json");
 
 // build variables

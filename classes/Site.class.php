@@ -4,7 +4,6 @@
  * generate a website.
  */
 // These too should be merged into one class file
-include_once "db/db.php";
 include_once "db/initialise.php";
 
 /** Site class
@@ -12,15 +11,16 @@ include_once "db/initialise.php";
  */
 class Site {
     private $auth; // 0..3
-    private $errors;
-    private $lang; // first available language
     private $contents;
-    protected $config;
-    protected $langs; // all client languages
-    protected $items;
+    private $db;
+    private $footer;
+    private $errors;
+    private $items;
+    private $lang; // first available language
+    private $langs; // all client languages
 
-    function __construct($config, $langs, $items) {
-        $this->config = $config;
+    function __construct($db, $langs, $items) {
+        $this->db = $db;
         $this->langs = $langs;
         if (count($this->langs) < 1) $this->langs[] = "fi-FI"; // Add the default language
         $this->items = [
@@ -34,7 +34,7 @@ class Site {
         $this->auth = NULL;
         $this->errors = NULL;
         $this->langs = NULL;
-        $this->config = NULL;
+        $this->db = NULL;
         $this->items = NULL;
     }
 
@@ -42,44 +42,41 @@ class Site {
      * Generate the site
      */
     public function Build($uid = NULL, $pw = NULL) {
+        $this->auth = NULL; // Purge previous authentication
         $this->authorize($uid, $pw);
-        $footer = [];
+        $this->footer = NULL;
+        $this->contents = NULL;
 
-        // You need to fix this
         foreach ($this->langs as $l) {
+            // Go through every language selection
             $list = explode("-", $l);
-            // Reform the language into xx-XX format
             if (count($list) < 2) {
                 $list[] = strtoupper($l);
                 $l = implode("-", $list);
             }
-            $footer = getItem($this->config, ["Table" => "footer"], $l);
-            $err = $footer["err"];
-            $i = count($err);
-            if($i > 0) {
-                $this->getErrors($err);
-            } else {
-                $this->lang = $l;
-                $body = getItem($this->config, $this->items, $this->lang);
-                foreach ($body['data'] as $key => $value) {
-                    // Drop unauthorized stuff
-                    if ($this->auth < $value['Auth']) {
-                        header('WWW-Authenticate: Basic realm="Tardiland"');
-                        header('HTTP/1.0 401 Unauthorized');
-                        unset($body['data'][$key]);
-                    }
+
+            if (is_null($this->footer)) {
+                $footer = $this->db->getItem(["Table" => "footer"], $l);
+                $this->footer = $footer[0]["Content"];
+            }
+            $this->contents = $this->db->getItem($this->items, $l);
+            if (!is_null($this->contents)) {
+                // Drop unauthorized stuff
+                foreach ($this->contents as $key => $value) {
+                    if ($this->auth < $value['Auth']) unset($body[$key]);
                 }
-                $this->contents = $body['data'];
-                $this->getErrors($body['err']);
+                if (count($this->contents) < 1) $this->contents = NULL;
+                $this->lang = $l;
                 break;
             }
         }
 
-        if (count($footer["data"]) < 1) {
-            $err = initLang($this->config);
-            $this->getErrors($err);
-            $footer["data"][0]["Content"] = 'Initializing';
+        //*
+        if (is_null($this->footer)) {
+            $this->db->initLang();
+            $this->footer = 'Initializing';
         }
+        //*/
 
         // Stuff in head
         $str = '<!DOCTYPE html><html lang="' . $this->lang . '"><head>';
@@ -88,19 +85,8 @@ class Site {
         // Stuff in body
         $str .= "<body><header>".$this->loadHeader();
         $str .= "<nav>".$this->loadNav()."</nav>"."</header>";
-        //* Print all errors. This should be handled by logs
-        if (isset($this->errors)) {
-            $str .= "<section>";
-            foreach($this->errors as $val) {
-                if ($val != "") {
-                    $str .= $val. "<br>";
-                }
-            }
-            $str .= "</section>";
-        }
-        //*/
         $str .= "<section>".$this->loadBody()."</section>";
-        $str .= "<footer>".$this->loadFooter($footer["data"][0]["Content"]."</footer>");
+        $str .= "<footer>".$this->footer."</footer>";
         $str .= "</body></html>";
         return $str;
     }
@@ -114,13 +100,12 @@ class Site {
             "Table" => "users",
             "UID" => $uid,
         ];
-        $auth = getItem($this->config, $query); // Get user data
-        $this->getErrors($auth['err']);
+        $auth = $this->db->getItem($query); // Get user data
         $pwa = "non";
         $autha = 0;
-        if (count($auth['data']) > 0) {
-            $pwa = $auth['data'][0]["PW"];
-            $autha = $auth['data'][0]["Auth"];
+        if (count($auth) > 0) {
+            $pwa = $auth[0]["PW"];
+            $autha = $auth[0]["Auth"];
         }
         if (!password_verify($pw, $pwa)) {
             $this->auth = $autha;
@@ -139,7 +124,7 @@ class Site {
             }
         }
         $str = '<meta charset="UTF-8">';
-        $str .= '<title>' . $title . '</title>';
+        $str .= "<title>$title</title>";
         $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
         $str .= '<link rel="icon" type="image/png" href="/image.png">';
         $str .= '<link rel="stylesheet" type="text/css" href="/css/common.css" >';
@@ -168,16 +153,15 @@ class Site {
         $query = [ 'Table' => 'content' ];
         $list = [];
         $content = "";
-        $cats = getItem($this->config, $query, $this->lang);
+        $cats = $this->db->getItem($query, $this->lang);
         // If both outputs are null initialise base functions of the site.
-        if (is_null($cats['data'][0])) {
-            $this->getErrors(initEditor($this->config));
+        if (is_null($cats)) {
+            $this->db->initEditor();
             // re-do the search
-            $cats = getItem($this->config, $query, $this->lang);
+            $cats = $this->db->getItem($query, $this->lang);
         }
-        if (isset($cats["err"])) $this->getErrors($cats["err"]);
         // Organize items along categories
-        foreach ($cats['data'] as $cat) {
+        foreach ($cats as $cat) {
             $list[$cat["Category"]][] = $cat;
         }
         // Generate dropdowns
@@ -201,8 +185,7 @@ class Site {
     private function loadBody() {
         $content = "";
         if (!isset($this->contents)) {
-            return "Site came up empty!";
-
+            return "<h1>Site came up empty!</h1>";
         }
         foreach ($this->contents as $items) {
             $content .= "<section>";
@@ -211,24 +194,6 @@ class Site {
             $content .= "</section>";
         }
         return $content;
-    }
-
-    /** loadFooter
-     * loadFooter will in future generate custom footer
-     */
-    private function loadFooter($footer = "Non-found") {
-        return $footer;
-    }
-
-    /** getErrors
-     * getErrors merges error array into main errors array
-     */
-    private function getErrors($errs = []) {
-        if (count($errs) > 0) {
-            foreach($errs as $e) {
-                $this->errors[] = $e;
-            }
-        }
     }
 }
 ?>

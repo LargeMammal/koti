@@ -22,12 +22,9 @@ a:hover, a:active {
 
 body {
     margin:0px;
+    padding: 6em 0em 0em 0em;
     font-family:"DejaVu Sans", sans-serif;
     background-color: #DCD0C0;
-}
-
-body section {
-    margin: 8em 0em 0em 0em;
 }
 
 footer {

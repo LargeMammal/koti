@@ -7,7 +7,8 @@ include_once "db/initialise.php";
 class Server {
     private $config;
     private $db;
-    private $errors;
+    private $oldErrorHandler;
+
     private $items;
     private $langs;
     private $method;
@@ -19,9 +20,13 @@ class Server {
     function __construct($config, $method, $langs, $uri, $post) {
         $this->config = $this->loadJSON($config);
         $this->db = new DB($this->config);
-        echo "step 2 ";
-        //$this->errors = new Error($this->db);
-        echo "step 3 ";
+        //* Override the default error handler behavior
+        $this->oldErrorHandler = set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
+            $this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
+        });
+        //*/
+        //echo "Triggering error: ".$newError;
+        //trigger_error("Test notice");
         $this->items = $this->paths($uri);
         $this->langs = $this->getLang($langs);
         $this->method = $method;
@@ -29,7 +34,6 @@ class Server {
         $this->post = $post;
         $this->pw = NULL;
         $this->uid = NULL;
-        echo "success";
     }
 
     function __destruct() {
@@ -83,11 +87,8 @@ class Server {
             return $output;
         }
         foreach ($obj as $key=>$val) {
-            if (is_object($val)) {
-                $output[$key] = $this->parseObject($val, ($i+1));
-            } else {
-                $output[$key] = $val;
-            }
+            if (is_object($val)) $output[$key] = $this->parseObject($val, ($i+1));
+            else $output[$key] = $val;
         }
         return $output;
     }
@@ -129,7 +130,7 @@ class Server {
     private function handleItems() {
         switch($this->method) {
         case 'GET':
-            $site = new Site($this->config, $this->langs, $this->items);
+            $site = new Site($this->db, $this->langs, $this->items);
             return $site->Build($this->uid, $this->pw);
         case 'POST':
             // This should take the table element and push it strait to db if user is allowed.
@@ -145,7 +146,7 @@ class Server {
                 if (isset($this->post["pw"])) $this->post["pw"] = password_hash($this->post["pw"], PASSWORD_DEFAULT);
                 else $this->post["pw"] = "";
             }
-            $auth = getItem($this->config[$this->config["Use"]], $query); // Get user data
+            $auth = getItem($this->config, $query); // Get user data
             $authorization = 0;
             $pw = "";
             if(isset($auth["data"][0]["Auth"])) $authorization = $auth["data"][0]["Auth"];
@@ -167,11 +168,11 @@ class Server {
                     'Verified' => 0,
                 ];
                 if (isset($this->post["name"])) $users['Name'] = $this->post['name'];
-                $err = initReg($this->config[$this->config["Use"]], $users);
+                $err = initReg($this->config, $users);
             } else {
                 // If ok, proceed with writing
                 $str .=$this->config["Use"]."<br>";
-                $err = setItem($this->config[$this->config["Use"]], $this->items[0], $this->post);
+                $err = setItem($this->items[0], $this->post);
             }
             if (isset($err)) {
                 foreach ($err as $e) $str .= $e."<br>";
@@ -228,23 +229,6 @@ class Server {
         // Explode path into variables
         $items = explode("/", $str);
         return $items;
-    }
-
-    // logging saves everything into a specific file
-    private function logging($name = "koti_log.log") {
-        // Reports all errors
-        error_reporting(E_ALL);
-        // Do not display errors for the end-users (security issue)
-        ini_set('display_errors','Off');
-        // Set a logging file
-        ini_set('error_log',$name);
-
-
-        // Override the default error handler behavior
-        set_exception_handler(function($exception) {
-           error_log($exception);
-           error_page("Something went wrong!");
-        });
     }
 }
 ?>
