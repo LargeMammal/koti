@@ -9,6 +9,7 @@
  */
 class Site {
     private $auth; // 0..3
+    private $categories;
     private $contents;
     private $db;
     private $footer;
@@ -30,17 +31,21 @@ class Site {
 
     function __destruct() {
         $this->auth = NULL;
-        $this->errors = NULL;
-        $this->langs = NULL;
+        $this->categories = NULL;
+        $this->contents = NULL;
         $this->db = NULL;
+        $this->footer = NULL;
+        $this->errors = NULL;
         $this->items = NULL;
+        $this->lang = NULL;
+        $this->langs = NULL;
     }
 
     /** Build
      * Generate the site
      */
     public function Build($uid = NULL, $pw = NULL) {
-        $this->auth = NULL; // Purge previous authentication
+        $this->auth = 0; // Purge previous authentication
         $this->authorize($uid, $pw);
         $this->footer = NULL;
         $this->contents = NULL;
@@ -54,14 +59,21 @@ class Site {
             }
 
             if (is_null($this->footer)) {
-                $footer = $this->db->getItem(["Table" => "footer"], $l);
-                $this->footer = $footer[0]["Content"];
+                $footer = $this->db->GetItem(["Table" => "footer"], $l);
+                // Skip empty
+                if (count($footer) > 0) 
+                    $this->footer = $footer[0]["Content"];
             }
-            $this->contents = $this->db->getItem($this->items, $l);
-            if (!is_null($this->contents)) {
+            $this->contents = $this->db->GetItem($this->items, $l);
+            if (count($this->contents) < 1) {
                 // Drop unauthorized stuff
                 foreach ($this->contents as $key => $value) {
-                    if ($this->auth < $value['Auth']) unset($body[$key]);
+                    if ($this->auth < $value['Auth']) {
+                        header('WWW-Authenticate: Basic realm="Tardiland"');
+                        header('HTTP/1.0 401 Unauthorized');
+                        unset($contents[$key]);
+                        die("Unauthorized");
+                    }
                 }
                 if (count($this->contents) < 1) $this->contents = NULL;
                 $this->lang = $l;
@@ -71,7 +83,7 @@ class Site {
 
         //*
         if (is_null($this->footer)) {
-            $this->db->initLang();
+            //$this->db->initLang();
             $this->footer = 'Initializing';
         }
         //*/
@@ -82,7 +94,7 @@ class Site {
         $str .= "</head>";
         // Stuff in body
         $str .= "<body><header>".$this->loadHeader();
-        $str .= "<nav>".$this->loadNav()."</nav>"."</header>";
+        $str .= "<nav>".$this->loadNav()."</nav></header>";
         $str .= "<section>".$this->loadBody()."</section>";
         $str .= "<footer>".$this->footer."</footer>";
         $str .= "</body></html>";
@@ -98,7 +110,7 @@ class Site {
             "Table" => "users",
             "UID" => $uid,
         ];
-        $auth = $this->db->getItem($query); // Get user data
+        $auth = $this->db->GetItem($query); // Get user data
         $pwa = "non";
         $autha = 0;
         if (count($auth) > 0) {
@@ -133,12 +145,9 @@ class Site {
      * loadHeader will in future generate custom header
      */
     private function loadHeader() {
-        $banner = $this->items['Category'];
-        if(isset($this->contents)) {
-            if (count($this->contents) == 1) {
-                $banner = $this->contents[0]['Title'];
-            }
-        }
+        $banner = "";
+        if (!isset($this->contents)) return "<h1>".$this->items['Category']."</h1>";
+        if (count($this->contents) == 1) $banner = $this->contents[0]['Title'];
         $output = "<h1>$banner</h1>";
         return $output;
     }
@@ -151,23 +160,22 @@ class Site {
         $query = [ 'Table' => 'content' ];
         $list = [];
         $content = "";
-        $cats = $this->db->getItem($query, $this->lang);
+        $cats = $this->db->GetItem($query, $this->lang);
         // If both outputs are null initialise base functions of the site.
         if (is_null($cats)) {
             $this->db->initEditor();
             // re-do the search
-            $cats = $this->db->getItem($query, $this->lang);
+            $cats = $this->db->GetItem($query, $this->lang);
         }
         // Organize items along categories
-        foreach ($cats as $cat) {
-            $list[$cat["Category"]][] = $cat;
-        }
+        foreach ($cats as $cat) $list[$cat["Category"]][] = $cat;
+
         // Generate dropdowns
         $content .= '<ul><a href="/" class="dropdown">home</a>';
         foreach ($list as $key => $value) {
-            $content .= '<li class="dropdown">'.
-                        '<a href="javascript:void(0)" class="dropbtn">'.$key.'</a>'.
-                        '<div class="dropdown-content">';
+            $content .= "<li class='dropdown'>
+                        <a href='javascript:void(0)' class='dropbtn'>$key</a>
+                        <div class='dropdown-content'>";
             foreach ($value as $cat) {
                 $content .= '<a href="/'.$cat["Category"].'/'.$cat["Title"].'">'.$cat['Title'].'</a>';
             }
@@ -182,9 +190,7 @@ class Site {
      */
     private function loadBody() {
         $content = "";
-        if (!isset($this->contents)) {
-            return "<h1>Site came up empty!</h1>";
-        }
+        if (!isset($this->contents)) return "<h1>Site came up empty!</h1>";
         foreach ($this->contents as $items) {
             $content .= "<section>";
             $content .= "<h2>" . $items['Title'] . "</h2>";

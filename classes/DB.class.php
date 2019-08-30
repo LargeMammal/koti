@@ -27,8 +27,8 @@ class DB {
         $this->output = NULL;
     }
 	
-	/** getItem
-	* getItem gets an item from database
+	/** GetItem
+	* GetItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
 	*/
 	public function GetItem($inputs, $lang = NULL): array {
@@ -38,12 +38,13 @@ class DB {
 		//* Sanitize input
 		$items = [];
 		// Create assosiative array
-		foreach ($inputs as $key => $value) $items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
+		foreach ($inputs as $key => $value) 
+			$items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
 		//*/
 	
 		// If table doesn't exist stop here
 		if (!$this->checkTable($items["Table"])) {
-			trigger_error("db.getItem: Table, ".$items["Table"]." , not found");
+			trigger_error("db.GetItem: Table, ".$items["Table"]." , not found");
 			return $this->output;
 		}
 	
@@ -65,7 +66,7 @@ class DB {
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			trigger_error("db.getItem: ".$sql."; ".$this->conn->error);
+			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error);
 			return $this->output;
 		}
 	
@@ -79,7 +80,7 @@ class DB {
     
     /** SetItem
      * SetItem inserts data into a table.
-     * Those using setItem should have special privileges
+     * Those using SetItem should have special privileges
      */
 	public function SetItem($table, $inputs) : bool{
         if (!$this->connect()) return false;
@@ -102,19 +103,19 @@ class DB {
 	
 		// If table does exist
 		if (!$this->checkTable($table)) {
-			trigger_error("db.setItem: Table, " . $table . " , not found");
+			trigger_error("db.SetItem: Table, " . $table . " , not found");
 			// Create the table
 			$error = $this->createTable($table, $columns);
 			// If creation failed table stop here
 			if ($error != "") {
-				trigger_error("db.setItem: " . $error);
+				trigger_error("db.SetItem: " . $error);
 				return false;
 			}
 		}
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			trigger_error("db.setItem: ".$sql."<br>".$this->conn->error);
+			trigger_error("db.SetItem: ".$sql."<br>".$this->conn->error);
 			return false;
 		}
 
@@ -142,28 +143,26 @@ class DB {
 	 */
 	public function LogError($errno, $errstr, $errfile, $errline, $errcontext) {
 		$table = "errors";
+		ob_start();
+		var_dump($errcontext);
+		$dump = ob_get_clean();
 		$items = [
 			"Level" => $errno,
 			"Message" => $errstr,
 			"File" => $errfile,
 			"Line" => $errline,
-			"Context" => $errcontext,
+			"Context" => $dump,
+			"Time" => time(),
 		];
-		ob_start();
-		var_dump($errcontext);
-		$dump = ob_get_clean();
-		ob_start();
-		debug_print_backtrace();
-		$trace = ob_get_clean();
+
 		if ($errno == E_ERROR || $errno == E_USER_ERROR) {
+			ob_start();
+			debug_print_backtrace();
+			$trace = ob_get_clean();
 			echo "<b>Fatal Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
 			die("Backtrace:<br><pre>$trace</pre>");
-		} else {
-			echo "<b>Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
-			echo "Backtrace:<br><pre>$trace</pre>";
 		}
-		if (!$this->SetItem($table, $items)) echo "Saving failed";
-		return true;
+		return $this->SetItem($table, $items);
 	}
 
 	/** connect
@@ -218,31 +217,26 @@ class DB {
 		}
 		return "";
 	}
-
-	private function initReg($users) {
-		if ($this->setItem("users", $users)) return false;
-		return true;
-	}
 	
 	private function initEditor() {
 	   // A quick editor
 	   $editor = [
 			'Title' => 'Editori',
-			'Content' => '<h1>Lisää </h1>
-			<form action="/content" method="POST">
-				<p><input type="text" name="Title" placeholder="Title for the content" required></p>
-				<p><textarea name="Content" placeholder="Content in html form" required></textarea></p>
-				<p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p>
-				<p><input type="text" name="Category" placeholder="Set the category" required></p>
-				<p>Required level of authorization(0min and 3max): <input type="number" name="auth" min="0" max="3" required></p><br>
-				<input type="submit">
+			'Content' => "<h1>Lisää </h1>
+			<form action='/content' method='POST'>
+				<p><input type='text' name='Title' placeholder='Title for the content' required></p>
+				<p><textarea name='Content' placeholder='Content in html form' required></textarea></p>
+				<p><input type='text' name='Language' placeholder='Language in xx-XX form' required></p>
+				<p><input type='text' name='Category' placeholder='Set the category' required></p>
+				<p>Required level of authorization(0min and 3max): <input type='number' name='auth' min='0' max='3' required></p><br>
+				<input type='submit'>
 			</form>
 			<h1>Add Language</h1>
-			<form action="/footer" method="POST">
-				<p><textarea name="Content" placeholder="Text in footer" required></textarea></p><br>
-				<p><input type="text" name="Language" placeholder="Language in xx-XX form" required></p><br>
-				<input type="submit">
-			</form>',
+			<form action='/footer' method='POST'>
+				<p><textarea name='Content' placeholder='Text in footer' required></textarea></p><br>
+				<p><input type='text' name='Language' placeholder='Language in xx-XX form' required></p><br>
+				<input type='submit'>
+			</form>",
 			'Category' => 'content',
 			'Language' => 'fi-FI',
 			'Auth' => 2,
@@ -266,22 +260,22 @@ class DB {
 		];
 	
 		// Upload editor UI
-		if ($this->setItem("content", $editor) || $this->setItem("content", $register)) return false;
+		if ($this->SetItem("content", $editor) || $this->SetItem("content", $register)) return false;
 		return true;
 	}
 	
 	private function initLang() {
 		$lang = "fi-FI";
-		$footer_text = '<p>Tein nämä sivut PHP:llä, '.
-						'yrittäen noudattaa REST mallia. '.
-						'Nämä sivut ovat minun testi sivut. '.
-						'https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.</p>';
+		$footer_text = "<p>Tein nämä sivut PHP:llä, 
+						yrittäen noudattaa REST mallia. 
+						Nämä sivut ovat minun testi sivut. 
+						https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.</p>";
 		$footer = [
 			'Language' => $lang,
 			'Content' => $footer_text,
 		];
 	
-		if ($this->setItem("footer", $footer)) return false;
+		if ($this->SetItem("footer", $footer)) return false;
 		return true;
 	}
 }

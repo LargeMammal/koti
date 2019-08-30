@@ -16,52 +16,109 @@ class Server {
     private $realm;
     private $uid;
 
-    function __construct($config, $method, $langs, $uri, $post) {
+    function __construct($config, $server, $post = NULL) {
         $this->config = $this->loadJSON($config);
         $this->db = new DB($this->config);
-        //* Override the default error handler behavior
         $this->oldErrorHandler = set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
-            $this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
-            return true;
+            return $this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
         });
-        //*/
         set_exception_handler(function($exception) {
             echo "<b>Exception:</b> ", $exception->getMessage();
             //$this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
             return true;
         });
+        //trigger_error("Test error");
         //throw new Exception("Test exception!");
-        $this->items = $this->paths($uri);
-        $this->langs = $this->getLang($langs);
-        $this->method = $method;
+        $this->items = $this->paths($server['REQUEST_URI']);
+        if (isset($server['HTTP_ACCEPT_LANGUAGE'])) {
+            $this->langs = $this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
+        } else {
+            $this->langs = [];
+            $this->langs[] = "fi-FI";
+        }
+        $this->method = $server['REQUEST_METHOD'];
         if (isset($post)) $post["Date"] = time();
         $this->post = $post;
         $this->pw = NULL;
         $this->uid = NULL;
+        if (isset($server['PHP_AUTH_USER']) && isset($server['PHP_AUTH_PW'])) {
+            $this->pw = $server['PHP_AUTH_PW'];
+            $this->uid = $server['PHP_AUTH_USER'];
+        }
     }
 
     function __destruct() {
-        $this->uid = NULL;
-        $this->pw = NULL;
-        $this->method = NULL;
-        $this->items = NULL;
         $this->config = NULL;
+        $this->db = NULL;
+        $this->oldErrorHandler = NULL;
+        $this->items = NULL;
         $this->langs = NULL;
+        $this->method = NULL;
+        $this->post = NULL;
+        $this->pw = NULL;
+        $this->realm = NULL;
+        $this->uid = NULL;
     }
 
     public function Serve() {
-        $str = "";
-        if (count($this->items) > 1) {
-            $str = $this->handleItem();
-        } else {
-            $str = $this->handleItems();
+        switch($this->method) {
+        case 'GET':
+            $site = new Site($this->db, $this->langs, $this->items);
+            return $site->Build($this->uid, $this->pw);
+        case 'POST':
+            // This should take the table element and push it strait to db if user is allowed.
+            // Authorize the user
+            $query = [
+                'Table' => $this->items[0],
+                'UID' => $this->uid,
+            ];
+            $str = "";
+            $level = 0;
+            if ($this->items[0] == "content") $level = 2; // if content upload set auth level to 2
+            elseif ($this->items[0] == "users") {
+                if (isset($this->post["pw"])) $this->post["pw"] = password_hash($this->post["pw"], PASSWORD_DEFAULT);
+                else $this->post["pw"] = "";
+            }
+            $auth = $this->db->GetItem($query); // Get user data
+            $authorization = 0;
+            $pw = "";
+            if(isset($auth[0]["Auth"])) $authorization = $auth[0]["Auth"];
+            if(isset($auth[0]["PW"])) $pw = $auth[0]["PW"];
+            // Fail if incorrect credentials or authorization
+            if (!password_verify($this->pw, $pw) && $authorization < $level) {
+                    header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    trigger_error("User: ".$this->post['uid']." unauthorized", E_USER_ERROR);
+            }
+            if (isset($this->post["uid"])) {
+                $users = [
+                    'UID' => $this->post['uid'],
+                    'PW' => $this->post['pw'],
+                    'Mail' => $this->post['email'],
+                    'Date' => time(),
+                    'Auth' => 0,
+                    'Verified' => 0,
+                ];
+                if (isset($this->post["name"])) $users['Name'] = $this->post['name'];
+                $this->db->SetItem("users", $users);
+            } else {
+                // If ok, proceed with writing
+                $str .= $this->config["Use"]."<br>";
+                $this->db->SetItem($this->items[0], $this->post);
+            }
+            if (isset($err)) {
+                foreach ($err as $e) $str .= $e."<br>";
+                //http_response_code(500);
+            } else {
+                http_response_code(201);
+            }
+            break;
+        default:
+            header('HTTP/1.1 405 Method Not Allowed');
+            header('Allow: GET POST');
+            break;
         }
-        return $str;
-    }
-
-    public function Authorize($uid, $pw) {
-        $this->uid = $uid;
-        $this->pw = $pw;
+        return "";
     }
 
     public function getLang($str) {
@@ -108,91 +165,6 @@ class Server {
         return $this->parseObject($data);
     }
 
-    /**
-     * This should be removed later
-     */
-    private function handleItem() {
-        switch($this->method) {
-        case 'PUT':
-            $this->createItem();
-            return "";
-
-        case 'DELETE':
-            $this->deleteItem();
-            return "";
-
-        case 'GET':
-            return $this->displayItem();
-
-        default:
-            header('HTTP/1.1 405 Method Not Allowed');
-            header('Allow: GET, PUT, DELETE');
-        }
-        return "";
-    }
-
-    private function handleItems() {
-        switch($this->method) {
-        case 'GET':
-            $site = new Site($this->db, $this->langs, $this->items);
-            return $site->Build($this->uid, $this->pw);
-        case 'POST':
-            // This should take the table element and push it strait to db if user is allowed.
-            // Authorize the user
-            $query = [
-                'Table' => $this->items[0],
-                'UID' => $this->uid,
-            ];
-            $str = "";
-            $level = 0;
-            if ($this->items[0] == "content") $level = 2; // if content upload set auth level to 2
-            elseif ($this->items[0] == "users") {
-                if (isset($this->post["pw"])) $this->post["pw"] = password_hash($this->post["pw"], PASSWORD_DEFAULT);
-                else $this->post["pw"] = "";
-            }
-            $auth = getItem($this->config, $query); // Get user data
-            $authorization = 0;
-            $pw = "";
-            if(isset($auth["data"][0]["Auth"])) $authorization = $auth["data"][0]["Auth"];
-            if(isset($auth["data"][0]["PW"])) $pw = $auth["data"][0]["PW"];
-            // Fail if incorrect credentials or authorization
-            if (!password_verify($this->pw, $pw) && $authorization < $level) {
-                    header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
-                    header('HTTP/1.0 401 Unauthorized');
-                    trigger_error("User: ".$this->post['uid']." unauthorized", E_USER_ERROR);
-            }
-            $err = [];
-            if (isset($this->post["uid"])) {
-                $users = [
-                    'UID' => $this->post['uid'],
-                    'PW' => $this->post['pw'],
-                    'Mail' => $this->post['email'],
-                    'Date' => time(),
-                    'Auth' => 0,
-                    'Verified' => 0,
-                ];
-                if (isset($this->post["name"])) $users['Name'] = $this->post['name'];
-                $err = initReg($this->config, $users);
-            } else {
-                // If ok, proceed with writing
-                $str .=$this->config["Use"]."<br>";
-                $err = setItem($this->items[0], $this->post);
-            }
-            if (isset($err)) {
-                foreach ($err as $e) $str .= $e."<br>";
-                //http_response_code(500);
-            } else {
-                http_response_code(201);
-            }
-            break;
-        default:
-            header('HTTP/1.1 405 Method Not Allowed');
-            header('Allow: GET POST');
-            break;
-        }
-        return "";
-    }
-
     private function createItem(){
         if (isset($this->contacts[$items])) {
             header('HTTP/1.1 409 Conflict');
@@ -219,11 +191,6 @@ class Server {
         } else {
             header('HTTP/1.1 404 Not Found');
         }
-    }
-
-    private function displayItem() {
-        $site = new Site($this->config, $this->langs, $this->items);
-        return $site->Build($this->uid, $this->pw);
     }
 
     private function paths($url) {
