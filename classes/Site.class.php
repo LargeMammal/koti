@@ -1,9 +1,4 @@
 <?php
-/** Site.class.php
- * Site class hold data and functions needed to
- * generate a website.
- */
-
 /** Site class
  * More later
  */
@@ -117,9 +112,7 @@ class Site {
             $pwa = $auth[0]["PW"];
             $autha = $auth[0]["Auth"];
         }
-        if (!password_verify($pw, $pwa)) {
-            $this->auth = $autha;
-        }
+        if (!password_verify($pw, $pwa)) $this->auth = $autha;
     }
 
     /** loadHead

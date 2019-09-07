@@ -19,6 +19,7 @@ class Server {
     function __construct($config, $server, $post = NULL) {
         $this->config = $this->loadJSON($config);
         $this->db = new DB($this->config);
+        // Exception and error handling
         $this->oldErrorHandler = set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
             return $this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
         });
@@ -30,12 +31,10 @@ class Server {
         //trigger_error("Test error");
         //throw new Exception("Test exception!");
         $this->items = $this->paths($server['REQUEST_URI']);
-        if (isset($server['HTTP_ACCEPT_LANGUAGE'])) {
+        if (isset($server['HTTP_ACCEPT_LANGUAGE']))
             $this->langs = $this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
-        } else {
-            $this->langs = [];
-            $this->langs[] = "fi-FI";
-        }
+        else $this->langs = ["fi-FI"];
+        
         $this->method = $server['REQUEST_METHOD'];
         if (isset($post)) $post["Date"] = time();
         $this->post = $post;
@@ -126,7 +125,7 @@ class Server {
         // Split the string
         $arr = explode(";", $str);
         foreach ($arr as $value) {
-            // ignore q thingys
+            // Ignore q thingys
             foreach (explode(",", $value) as $val) {
                 if (false === strpos($val, "q=")) {
                     $output[] = $val;
