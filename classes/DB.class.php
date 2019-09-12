@@ -139,12 +139,14 @@ class DB {
 	}
 
 	/**
-	 * LogError saves errors to database
+	 * LogEvent saves the event to database
+	 * This is supposed to handle exceptions, errors and benchmarking.
 	 */
-	public function LogError($errno, $errstr, $errfile, $errline, $errcontext) {
+	public function LogEvent($errno, $errstr, $errfile = "empty", $errline = 0, $errcontext = NULL) {
 		$table = "errors";
 		ob_start();
-		var_dump($errcontext);
+		//var_dump($errcontext);
+		debug_print_backtrace();
 		$dump = ob_get_clean();
 		$items = [
 			"Level" => $errno,
@@ -156,11 +158,8 @@ class DB {
 		];
 
 		if ($errno == E_ERROR || $errno == E_USER_ERROR) {
-			ob_start();
-			debug_print_backtrace();
-			$trace = ob_get_clean();
 			echo "<b>Fatal Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
-			die("Backtrace:<br><pre>$trace</pre>");
+			die();
 		}
 		return $this->SetItem($table, $items);
 	}

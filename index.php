@@ -4,6 +4,7 @@
  * Everything is directed right here and 
  * request is then built here
  */
+$time = round(microtime(true) * 1000);
 define("CONFIG", __DIR__."/configs/localhost-config.json");
 
 function autoloader($class) {
@@ -16,7 +17,10 @@ function autoloader($class) {
  */
 error_reporting(E_ALL | E_STRICT);
 set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
-    echo "<b>Error: </b> [$errLvl] '$errMsg' in $errFile line $errLine with values: $errCon<br>";
+    ob_start();
+    var_dump($errCon);
+    $dump = ob_get_clean();
+    echo "<b>Error: </b> [$errLvl] '$errMsg' in $errFile line $errLine with values: $dump<br>";
     die();
 });
 set_exception_handler(function($exception) {
@@ -25,6 +29,6 @@ set_exception_handler(function($exception) {
 if (!spl_autoload_register('autoloader')) trigger_error("Autoloader error");
 
 // Serve
-$server = new Server(CONFIG, $_SERVER, $_POST);
+$server = new Server(CONFIG, $time, $_SERVER, $_POST);
 echo $server->Serve();
 ?>

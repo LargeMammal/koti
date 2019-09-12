@@ -7,6 +7,7 @@ class Server {
     private $config;
     private $db;
     private $oldErrorHandler;
+    private $startTime;
 
     private $items;
     private $langs;
@@ -16,17 +17,19 @@ class Server {
     private $realm;
     private $uid;
 
-    function __construct($config, $server, $post = NULL) {
+    function __construct($config, $time, $server, $post = NULL) {
+        $this->startTime = $time;
+        $timer = round(microtime(true) * 1000); // Start time for benchmarking
         $this->config = $this->loadJSON($config);
         $this->db = new DB($this->config);
+        //$t = time()-$time;
+        $this->db->LogEvent(E_USER_NOTICE, "Benchmark: Initialisation took ".(round(microtime(true) * 1000)-$time)." milliseconds", "non", 0, 0);
         // Exception and error handling
         $this->oldErrorHandler = set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
-            return $this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
+            return $this->db->LogEvent($errLvl, $errMsg, $errFile, $errLine, $errCon);
         });
         set_exception_handler(function($exception) {
-            echo "<b>Exception:</b> ", $exception->getMessage();
-            //$this->db->LogError($errLvl, $errMsg, $errFile, $errLine, $errCon);
-            return true;
+            return $this->db->LogEvent($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), "exception");
         });
         //trigger_error("Test error");
         //throw new Exception("Test exception!");
@@ -36,14 +39,15 @@ class Server {
         else $this->langs = ["fi-FI"];
         
         $this->method = $server['REQUEST_METHOD'];
-        if (isset($post)) $post["Date"] = time();
         $this->post = $post;
+        if (count($post) < 1) $post["Date"] = time();
         $this->pw = NULL;
         $this->uid = NULL;
         if (isset($server['PHP_AUTH_USER']) && isset($server['PHP_AUTH_PW'])) {
             $this->pw = $server['PHP_AUTH_PW'];
             $this->uid = $server['PHP_AUTH_USER'];
         }
+        $this->db->LogEvent(E_USER_NOTICE, "Benchmark: Server construction took ". (round(microtime(true) * 1000)-$timer)." milliseconds");
     }
 
     function __destruct() {
@@ -60,15 +64,19 @@ class Server {
     }
 
     public function Serve() {
+        $timer = round(microtime(true) * 1000);
+        $output = "";
         switch($this->method) {
         case 'GET':
             $site = new Site($this->db, $this->langs, $this->items);
-            return $site->Build($this->uid, $this->pw);
+            $output = $site->Build($this->uid, $this->pw);
+            break;
         case 'POST':
+            if (count($this->post) < 1) break;
             // This should take the table element and push it strait to db if user is allowed.
             // Authorize the user
             $query = [
-                'Table' => $this->items[0],
+                'Table' => 'users',
                 'UID' => $this->uid,
             ];
             $str = "";
@@ -102,8 +110,7 @@ class Server {
                 $this->db->SetItem("users", $users);
             } else {
                 // If ok, proceed with writing
-                $str .= $this->config["Use"]."<br>";
-                $this->db->SetItem($this->items[0], $this->post);
+                $this->db->SetItem('content', $this->post);
             }
             if (isset($err)) {
                 foreach ($err as $e) $str .= $e."<br>";
@@ -117,7 +124,8 @@ class Server {
             header('Allow: GET POST');
             break;
         }
-        return "";
+        $this->db->LogEvent(E_USER_NOTICE, "Benchmark: Serve method took ". (round(microtime(true) * 1000)-$timer)." milliseconds");
+        return $output;
     }
 
     public function getLang($str) {

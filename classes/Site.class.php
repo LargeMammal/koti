@@ -17,11 +17,14 @@ class Site {
         $this->db = $db;
         $this->langs = $langs;
         if (count($this->langs) < 1) $this->langs[] = "fi-FI"; // Add the default language
-        $this->items = [
-            "Table" => 'content',
-            "Category" => urldecode($items[0]),
-    	];
-        if (isset($items[1])) $this->items["Title"] = urldecode($items[1]);
+        $this->items = [];
+        $rows = ["Table", "Category", "Title", "Extras"];
+        if (count($items) < 1) $items = ["content", "home"];
+        foreach ($rows as $key => $val) {
+            if (!isset($items[$key])) break;
+            if ($key < 3) $this->items[$val] = $items[$key];
+            else $this->items["Extras"] = $items[$key];
+        }
     }
 
     function __destruct() {
@@ -43,7 +46,7 @@ class Site {
         $this->auth = 0; // Purge previous authentication
         $this->authorize($uid, $pw);
         $this->footer = NULL;
-        $this->contents = NULL;
+        $this->contents = [];
 
         foreach ($this->langs as $l) {
             // Go through every language selection
@@ -183,12 +186,31 @@ class Site {
      */
     private function loadBody() {
         $content = "";
-        if (!isset($this->contents)) return "<h1>Site came up empty!</h1>";
-        foreach ($this->contents as $items) {
-            $content .= "<section>";
-            $content .= "<h2>" . $items['Title'] . "</h2>";
-            $content .= $items['Content'];
-            $content .= "</section>";
+        if (count($this->contents) < 1) return "<h1>Site came up empty!</h1>";
+        if ($this->items['Table'] === 'errors') {
+            $content .= "<section><table>";
+            $rows = [];
+            $columns = [];
+            foreach ($this->contents as $key => $val) {
+                $rows[] = $key;
+                $columns[] = $val;
+            }
+            $content .= '<tr>';
+            foreach ($rows as $val) $content .= "<th>$val</th>";
+            $content .= '</tr>';
+            foreach ($this->contents as $item) {
+                $content .= '<tr>';
+                foreach ($item as $val) $content .= "<td>$item</td>";
+                $content .= '</tr>';
+            }
+            $content .= "</table></section>";
+        } else {
+            foreach ($this->contents as $items) {
+                $content .= "<section>";
+                $content .= "<h2>" . $items['Title'] . "</h2>";
+                $content .= $items['Content'];
+                $content .= "</section>";
+            }
         }
         return $content;
     }
