@@ -51,9 +51,7 @@ class DB {
 		// Generate query
 		$sql = "SELECT * FROM ".$items["Table"];
 		$str = "";
-		if (isset($lang)) {
-			 $str = " WHERE Language='" . $lang . "'";
-		}
+		if (isset($lang)) $str = " WHERE Language='" . $lang . "'";
 		foreach ($items as $column=>$item) {
 			if ($column != "Table") {
 				if ($str != "") $str .= " AND";
@@ -82,13 +80,14 @@ class DB {
      * SetItem inserts data into a table.
      * Those using SetItem should have special privileges
      */
-	public function SetItem($table, $inputs) : bool{
+	public function SetItem($table, $inputs, $die = 0) : bool{
         if (!$this->connect()) return false;
 	
 		//* Sanitize inputs
 		$items = [];
 		// Create assosiative array 
-		foreach ($inputs as $key => $value) $items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
+		foreach ($inputs as $key => $value) 
+			$items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
 		//*/
 	
 		// Generate query
@@ -103,19 +102,22 @@ class DB {
 	
 		// If table does exist
 		if (!$this->checkTable($table)) {
-			trigger_error("db.SetItem: Table, " . $table . " , not found");
+			if ($die != 0) die("db.SetItem: Table, " . $table . " , not found");
+			else trigger_error("db.SetItem: Table, " . $table . " , not found");
 			// Create the table
 			$error = $this->createTable($table, $columns);
 			// If creation failed table stop here
 			if ($error != "") {
-				trigger_error("db.SetItem: " . $error);
+				if ($die != 0) die("db.SetItem: " . $error);
+				else trigger_error("db.SetItem: " . $error);
 				return false;
 			}
 		}
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			trigger_error("db.SetItem: ".$sql."<br>".$this->conn->error);
+			if ($die != 0) die("db.SetItem: ".$sql."<br>".$this->conn->error);
+			else trigger_error("db.SetItem: ".$sql."<br>".$this->conn->error);
 			return false;
 		}
 
@@ -161,7 +163,7 @@ class DB {
 			echo "<b>Fatal Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
 			die();
 		}
-		return $this->SetItem($table, $items);
+		return $this->SetItem($table, $items, 1); // Set item cannot fail
 	}
 
 	/** connect
