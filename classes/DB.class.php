@@ -80,7 +80,7 @@ class DB {
      * SetItem inserts data into a table.
      * Those using SetItem should have special privileges
      */
-	public function SetItem($table, $inputs, $die = 0) : bool{
+	public function SetItem($table, $inputs, $die = 0) : bool {
         if (!$this->connect()) return false;
 	
 		//* Sanitize inputs
@@ -102,21 +102,29 @@ class DB {
 	
 		// If table does exist
 		if (!$this->checkTable($table)) {
-			if ($die != 0) die("db.SetItem: Table, " . $table . " , not found");
-			else trigger_error("db.SetItem: Table, " . $table . " , not found");
+			trigger_error("db.SetItem: Table, " . $table . " , not found");
 			// Create the table
 			$error = $this->createTable($table, $columns);
 			// If creation failed table stop here
 			if ($error != "") {
-				if ($die != 0) die("db.SetItem: " . $error);
-				else trigger_error("db.SetItem: " . $error);
+				if ($die != 0) {
+					ob_start();
+					debug_print_backtrace();
+					$dump = ob_get_clean();
+					die("db.SetItem: $error.<br><pre>$dump</pre>");
+				} else trigger_error("db.SetItem: " . $error);
 				return false;
 			}
 		}
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			if ($die != 0) die("db.SetItem: ".$sql."<br>".$this->conn->error);
+			if ($die != 0) {
+				ob_start();
+				debug_print_backtrace();
+				$dump = ob_get_clean();
+				die("db.SetItem: $sql<br>".$this->conn->error."<br><pre>$dump</pre>");
+			} 
 			else trigger_error("db.SetItem: ".$sql."<br>".$this->conn->error);
 			return false;
 		}
@@ -182,11 +190,9 @@ class DB {
 	/** checkTable
      * checkTable returns true if table exists
      */
-	private function checkTable($items = "") {
+	private function checkTable($items = "") : bool {
 		$result = $this->conn->query("SHOW TABLES LIKE '$items'");
-		if ($result->num_rows < 1) {
-			return false;
-		}
+		if ($result->num_rows < 1) return false;
 		$result->free();
 		return true;
 	}
@@ -219,23 +225,42 @@ class DB {
 		return "";
 	}
 	
-	private function initEditor() {
+	public function InitEditor() {
 	   // A quick editor
 	   $editor = [
 			'Title' => 'Editori',
 			'Content' => "<h1>Lisää </h1>
-			<form action='/content' method='POST'>
-				<p><input type='text' name='Title' placeholder='Title for the content' required></p>
-				<p><textarea name='Content' placeholder='Content in html form' required></textarea></p>
-				<p><input type='text' name='Language' placeholder='Language in xx-XX form' required></p>
-				<p><input type='text' name='Category' placeholder='Set the category' required></p>
-				<p>Required level of authorization(0min and 3max): <input type='number' name='auth' min='0' max='3' required></p><br>
+				<form action='/content' method='POST'>
+				<p><input type='text' 
+					name='Title' 
+					placeholder='Title for the content' 
+					required></p>
+				<p><textarea name='Content' 
+					placeholder='Content in html form' 
+					required></textarea></p>
+				<p><input type='text' 
+					name='Language' 
+					placeholder='Language in xx-XX form' 
+					required></p>
+				<p><input type='text' 
+					name='Category' 
+					placeholder='Set the category' 
+					required></p>
+				<p>Required level of 
+					authorization(0min and 3max): 
+					<input type='number' 
+					name='auth' 
+					min='0' max='3' required></p><br>
 				<input type='submit'>
-			</form>
-			<h1>Add Language</h1>
-			<form action='/footer' method='POST'>
-				<p><textarea name='Content' placeholder='Text in footer' required></textarea></p><br>
-				<p><input type='text' name='Language' placeholder='Language in xx-XX form' required></p><br>
+				</form>
+				<h1>Add Language</h1>
+				<form action='/footer' method='POST'>
+				<p><textarea name='Content' 
+					placeholder='Text in footer' 
+					required></textarea></p><br>
+				<p><input type='text' name='Language' 
+					placeholder='Language in xx-XX form' 
+					required></p><br>
 				<input type='submit'>
 			</form>",
 			'Category' => 'content',
@@ -248,11 +273,17 @@ class DB {
 			'Title' => 'Rekisteröidy',
 			'Content' => '<h1>Rekisteröidy</h1>
 			<form action="/users" method="POST">
-				<p><input type="text" name="uid" placeholder="Username" required></p>
-				<p><input type="password" name="pw" placeholder="Password" required></p>
-				<p><input type="text" name="name" placeholder="Your name(Not required)"></p>
-				<p><input type="email" name="email" placeholder="Email" required></p>
-				<input type="submit">
+			<p><input type="text" name="uid" 
+				placeholder="Username" 
+				required></p>
+			<p><input type="password" 
+				name="pw" placeholder="Password" 
+				required></p>
+			<p><input type="text" name="name" 
+				placeholder="Your name(Not required)"></p>
+			<p><input type="email" name="email" 
+				placeholder="Email" required></p>
+			<input type="submit">
 			</form>',
 			'Category' => 'user',
 			'Language' => 'fi-FI',

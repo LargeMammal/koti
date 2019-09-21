@@ -23,16 +23,41 @@ class Server {
         $this->config = $this->loadJSON($config);
         $this->db = new DB($this->config);
         //$t = time()-$time;
-        $this->db->LogEvent(E_USER_NOTICE, "Benchmark: Initialisation took ".(round(microtime(true) * 1000)-$time)." milliseconds", "non", 0, 0);
+        $this->db->LogEvent(
+            E_USER_NOTICE, 
+            "Benchmark: Initialisation took ".
+                (round(microtime(true) * 1000)-$time).
+                " milliseconds", 
+            "non", 
+            0, 
+            0
+        );
         // Exception and error handling
-        $this->oldErrorHandler = set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
-            return $this->db->LogEvent($errLvl, $errMsg, $errFile, $errLine, $errCon);
+        $this->oldErrorHandler = set_error_handler(
+                function(
+                    $errLvl, 
+                    $errMsg, 
+                    $errFile, 
+                    $errLine, 
+                    $errCon
+                    ) {
+                    return $this->db->LogEvent(
+                        $errLvl, 
+                        $errMsg, 
+                        $errFile, 
+                        $errLine, 
+                        $errCon
+                    );
         });
         set_exception_handler(function($exception) {
-            return $this->db->LogEvent($exception->getCode(), $exception->getMessage(), $exception->getFile(), $exception->getLine(), "exception");
+            return $this->db->LogEvent(
+                $exception->getCode(), 
+                $exception->getMessage(), 
+                $exception->getFile(), 
+                $exception->getLine(), 
+                "exception"
+            );
         });
-        //trigger_error("Test error");
-        //throw new Exception("Test exception!");
         $this->items = $this->paths($server['REQUEST_URI']);
         if (isset($server['HTTP_ACCEPT_LANGUAGE']))
             $this->langs = $this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
@@ -47,7 +72,11 @@ class Server {
             $this->pw = $server['PHP_AUTH_PW'];
             $this->uid = $server['PHP_AUTH_USER'];
         }
-        $this->db->LogEvent(E_USER_NOTICE, "Benchmark: Server construction took ". (round(microtime(true) * 1000)-$timer)." milliseconds");
+        $this->db->LogEvent(
+            E_USER_NOTICE, 
+            "Benchmark: Server construction took ". 
+                (round(microtime(true) * 1000)-$timer).
+                " milliseconds");
     }
 
     function __destruct() {
@@ -73,17 +102,22 @@ class Server {
             break;
         case 'POST':
             if (count($this->post) < 1) break;
-            // This should take the table element and push it strait to db if user is allowed.
-            // Authorize the user
+            // This should take the table element and push it strait to db
+            // if user is allowed.
             $query = [
                 'Table' => 'users',
                 'UID' => $this->uid,
             ];
             $str = "";
             $level = 0;
-            if ($this->items[0] == "content") $level = 2; // if content upload set auth level to 2
+            if ($this->items[0] == "content") $level = 2;
             elseif ($this->items[0] == "users") {
-                if (isset($this->post["pw"])) $this->post["pw"] = password_hash($this->post["pw"], PASSWORD_DEFAULT);
+                if (isset($this->post["pw"])) {
+                    $this->post["pw"] = password_hash(
+                        $this->post["pw"], 
+                        PASSWORD_DEFAULT
+                    );
+                }
                 else $this->post["pw"] = "";
             }
             $auth = $this->db->GetItem($query); // Get user data
@@ -95,7 +129,10 @@ class Server {
             if (!password_verify($this->pw, $pw) && $authorization < $level) {
                     header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
                     header('HTTP/1.0 401 Unauthorized');
-                    trigger_error("User: ".$this->post['uid']." unauthorized", E_USER_ERROR);
+                    trigger_error(
+                        "User: ".$this->post['uid']." unauthorized", 
+                        E_USER_ERROR
+                    );
             }
             if (isset($this->post["uid"])) {
                 $users = [
@@ -106,7 +143,8 @@ class Server {
                     'Auth' => 0,
                     'Verified' => 0,
                 ];
-                if (isset($this->post["name"])) $users['Name'] = $this->post['name'];
+                if (isset($this->post["name"])) 
+                    $users['Name'] = $this->post['name'];
                 $this->db->SetItem("users", $users);
             } else {
                 // If ok, proceed with writing
@@ -124,7 +162,12 @@ class Server {
             header('Allow: GET POST');
             break;
         }
-        $this->db->LogEvent(E_USER_NOTICE, "Benchmark: Serve method took ". (round(microtime(true) * 1000)-$timer)." milliseconds");
+        $this->db->LogEvent(
+            E_USER_NOTICE, 
+            "Benchmark: Serve method took ". 
+                (round(microtime(true) * 1000)-$timer).
+                " milliseconds"
+            );
         return $output;
     }
 
@@ -155,7 +198,8 @@ class Server {
             return $output;
         }
         foreach ($obj as $key=>$val) {
-            if (is_object($val)) $output[$key] = $this->parseObject($val, ($i+1));
+            if (is_object($val)) 
+                $output[$key] = $this->parseObject($val, ($i+1));
             else $output[$key] = $val;
         }
         return $output;
