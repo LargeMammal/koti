@@ -74,12 +74,13 @@ class Site
                         if (count($this->contents) < 1) {
                                 // Drop unauthorized stuff
                                 foreach ($this->contents as $key => $value) {
-                                        if ($this->auth < $value['Auth']) {
-                                                header('WWW-Authenticate: Basic realm="Tardiland"');
-                                                header('HTTP/1.0 401 Unauthorized');
-                                                unset($contents[$key]);
-                                                die("Unauthorized");
-                                        }
+                                        if ($this->auth >= $value['Auth']) 
+                                                continue;
+                                        header('WWW-Authenticate: 
+                                                Basic realm="Tardiland"');
+                                        http_response_code(401);
+                                        unset($contents[$key]);
+                                        die("Unauthorized");
                                 }
                                 if (count($this->contents) < 1) 
                                         $this->contents = NULL;
@@ -142,9 +143,11 @@ class Site
                 }
                 $str = '<meta charset="UTF-8">';
                 $str .= "<title>$title</title>";
-                $str .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+                $str .= '<meta name="viewport" 
+                        content="width=device-width, initial-scale=1.0">';
                 $str .= '<link rel="icon" type="image/png" href="/image.png">';
-                $str .= '<link rel="stylesheet" type="text/css" href="/css/common.css" >';
+                $str .= '<link rel="stylesheet" type="text/css" 
+                        href="/css/common.css" >';
                 return $str;
         }
 
@@ -163,7 +166,7 @@ class Site
         }
 
         /** loadNav
-         * loadNav loads nav bar. I should use nav as settings bar like in google apps.
+         * loadNav loads nav bar. 
          */
         private function loadNav()
         {
@@ -172,7 +175,7 @@ class Site
                 $list = [];
                 $content = "";
                 $cats = $this->db->GetItem($query, $this->lang);
-                // If both outputs are null initialise base functions of the site.
+                // If both outputs are null initialise database
                 if (is_null($cats)) {
                         $this->db->InitEditor();
                         // re-do the search

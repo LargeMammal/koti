@@ -3,31 +3,31 @@
  * DB class
  */
 class DB {
-    private $conn;
-    private $database;
-    private $output;
-    private $pass;
-    private $site;
-    private $user;
+	private $conn;
+	private $database;
+	private $output;
+	private $pass;
+	private $site;
+	private $user;
 
-    function __construct($config) {
-        $this->user = $config["User"];
-        $this->site = $config["Site"];
-        $this->pass = $config["Pass"];
-        $this->database = $config["Database"];
-        $this->output = [];
-    }
+	function __construct($config) {
+		$this->user = $config["User"];
+		$this->site = $config["Site"];
+		$this->pass = $config["Pass"];
+		$this->database = $config["Database"];
+		$this->output = [];
+	}
 
-    function __destruct() {
-        $this->conn = NULL;
-        $this->user = NULL;
-        $this->site = NULL;
-        $this->pass = NULL;
-        $this->database = NULL;
-        $this->output = NULL;
-    }
+	function __destruct() {
+		$this->conn = NULL;
+		$this->user = NULL;
+		$this->site = NULL;
+		$this->pass = NULL;
+		$this->database = NULL;
+		$this->output = NULL;
+	}
 	
-	/** GetItem
+	/** 
 	* GetItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
 	*/
@@ -38,13 +38,16 @@ class DB {
 		//* Sanitize input
 		$items = [];
 		// Create assosiative array
-		foreach ($inputs as $key => $value) 
-			$items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
+		foreach ($inputs as $key => $value) {
+			$var = $this->conn->escape_string($value);
+			$items[$this->conn->escape_string($key)] = $var;
+		}
 		//*/
 	
 		// If table doesn't exist stop here
 		if (!$this->checkTable($items["Table"])) {
-			trigger_error("db.GetItem: Table, ".$items["Table"]." , not found");
+			trigger_error("db.GetItem: Table, ".$items["Table"].
+				" , not found");
 			return $this->output;
 		}
 	
@@ -76,18 +79,20 @@ class DB {
 		return $this->output;
 	}
     
-    /** SetItem
-     * SetItem inserts data into a table.
-     * Those using SetItem should have special privileges
-     */
+	/** 
+	 * SetItem inserts data into a table.
+	 * Those using SetItem should have special privileges
+	 */
 	public function SetItem($table, $inputs, $die = 0) : bool {
         if (!$this->connect()) return false;
 	
 		//* Sanitize inputs
 		$items = [];
 		// Create assosiative array 
-		foreach ($inputs as $key => $value) 
-			$items[$this->conn->escape_string($key)] = $this->conn->escape_string($value);
+		foreach ($inputs as $key => $value) {
+			$var = $this->conn->escape_string($value);
+			$items[$this->conn->escape_string($key)] = $var;
+		}
 		//*/
 	
 		// Generate query
@@ -98,11 +103,13 @@ class DB {
 			$columns[] = $column;
 			$values[] = "'" . $item . "'";
 		}
-		$sql .= implode(", ", $columns) . ") VALUES (" . implode(", ", $values) . ");";
+		$sql .= implode(", ", $columns) . ") 
+			VALUES (" . implode(", ", $values) . ");";
 	
 		// If table does exist
 		if (!$this->checkTable($table)) {
-			trigger_error("db.SetItem: Table, " . $table . " , not found");
+			trigger_error("db.SetItem: Table, " .
+				$table . " , not found");
 			// Create the table
 			$error = $this->createTable($table, $columns);
 			// If creation failed table stop here
@@ -111,7 +118,8 @@ class DB {
 					ob_start();
 					debug_print_backtrace();
 					$dump = ob_get_clean();
-					die("db.SetItem: $error.<br><pre>$dump</pre>");
+					die("db.SetItem: $error.<br>
+						<pre>$dump</pre>");
 				} else trigger_error("db.SetItem: " . $error);
 				return false;
 			}
@@ -123,9 +131,11 @@ class DB {
 				ob_start();
 				debug_print_backtrace();
 				$dump = ob_get_clean();
-				die("db.SetItem: $sql<br>".$this->conn->error."<br><pre>$dump</pre>");
+				die("db.SetItem: $sql<br>".$this->conn->error.
+					"<br><pre>$dump</pre>");
 			} 
-			else trigger_error("db.SetItem: ".$sql."<br>".$this->conn->error);
+			else trigger_error("db.SetItem: ".$sql.
+				"<br>".$this->conn->error);
 			return false;
 		}
 
@@ -133,16 +143,18 @@ class DB {
 		return true;
 	}
 	
-	/** RemoveItem
-     * remove selected item
-     */
+	/** 
+	 * RemoveItem
+	 * remove selected item
+	 */
 	public function RemoveItem($table, $items) {
 		
 	}
 	
-	/** UpdateItem
-     * update selected item
-     */
+	/** 
+	 * UpdateItem
+	 * update selected item
+	 */
 	public function UpdateItem($table, $item) {
 		$this->RemoveItem($table, $item);
 		$this->SetItem($table, $item);
@@ -152,10 +164,15 @@ class DB {
 	 * LogEvent saves the event to database
 	 * This is supposed to handle exceptions, errors and benchmarking.
 	 */
-	public function LogEvent($errno, $errstr, $errfile = "empty", $errline = 0, $errcontext = NULL) {
+	public function LogEvent(
+			$errno, 
+			$errstr, 
+			$errfile = "empty", 
+			$errline = 0, 
+			$errcontext = NULL
+		) {
 		$table = "errors";
 		ob_start();
-		//var_dump($errcontext);
 		debug_print_backtrace();
 		$dump = ob_get_clean();
 		$items = [
@@ -168,28 +185,35 @@ class DB {
 		];
 
 		if ($errno == E_ERROR || $errno == E_USER_ERROR) {
-			echo "<b>Fatal Error: </b> [$errno] '$errstr' in $errfile line $errline with values: <pre>".$dump."</pre><br>";
+			echo "<b>Fatal Error: </b> [$errno] '$errstr' 
+				in $errfile line $errline with values: 
+				<pre>".$dump."</pre><br>";
 			die();
 		}
-		return $this->SetItem($table, $items, 1); // Set item cannot fail
+		return $this->SetItem($table, $items, 1); 
 	}
 
-	/** connect
+	/** 
 	 * connects to database
-     * returns true if successful
+	 * returns true if successful
 	 */
 	private function connect(): bool {
-		$this->conn = new \mysqli($this->site, $this->user, $this->pass, $this->database);
+		$this->conn = new \mysqli(
+			$this->site, 
+			$this->user, 
+			$this->pass, 
+			$this->database
+		);
 		if (!$this->conn) {
-            $this->output["err"][] = mysqli_connect_error();
-            return false;
+			$this->output["err"][] = mysqli_connect_error();
+			return false;
 		}
 		return true;
 	}
 
-	/** checkTable
-     * checkTable returns true if table exists
-     */
+	/** 
+	 * checkTable returns true if table exists
+	 */
 	private function checkTable($items = "") : bool {
 		$result = $this->conn->query("SHOW TABLES LIKE '$items'");
 		if ($result->num_rows < 1) return false;
@@ -197,17 +221,20 @@ class DB {
 		return true;
 	}
     
-    /** createTable
-     * createTitle creates table with given name and data.
-     * First item in array will become primary key
-     */
+	/** 
+	 * createTitle creates table with given name and data.
+	 * First item in array will become primary key
+	 */
 	private function createTable($table, $columns) {
 		$sql = "CREATE TABLE ".$table." (";
 		$items = [];
 		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 		// All this should be given in an array
 		foreach($columns as $column) {
-			if ($column == "Title" || $column == "Language" || $column == "PW" || $column == "UID") {
+			if ($column == "Title" || 
+				$column == "Language" || 
+				$column == "PW" || 
+				$column == "UID") {
 				$items[] = "$column VARCHAR(255) NOT NULL";
 			} elseif ($column == "Auth" || $column == "Verified") {
 				$items[] = "$column TINYINT NOT NULL";
@@ -219,9 +246,8 @@ class DB {
 		}
 		$sql .= implode(", ", $items);
 		$sql .= ")";
-		if ($this->conn->query($sql) !== TRUE) {
-			return "db.createTable: ". $sql. ": " . $this->conn->error;
-		}
+		if ($this->conn->query($sql) !== TRUE) 
+			return "db.createTable: ".$sql.": ".$this->conn->error;
 		return "";
 	}
 	
@@ -292,16 +318,19 @@ class DB {
 		];
 	
 		// Upload editor UI
-		if ($this->SetItem("content", $editor) || $this->SetItem("content", $register)) return false;
+		if ($this->SetItem("content", $editor) || 
+			$this->SetItem("content", $register)) 
+			return false;
 		return true;
 	}
 	
 	private function initLang() {
 		$lang = "fi-FI";
 		$footer_text = "<p>Tein nämä sivut PHP:llä, 
-						yrittäen noudattaa REST mallia. 
-						Nämä sivut ovat minun testi sivut. 
-						https://student.labranet.jamk.fi/~K1729 toimii minun CV:nä.</p>";
+				yrittäen noudattaa REST mallia. 
+				Nämä sivut ovat minun testi sivut. 
+				https://student.labranet.jamk.fi/~K1729 
+				toimii minun CV:nä.</p>";
 		$footer = [
 			'Language' => $lang,
 			'Content' => $footer_text,
