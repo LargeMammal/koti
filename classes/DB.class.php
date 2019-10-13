@@ -35,19 +35,17 @@ class DB {
 		$this->output = [];
 		if (!$this->connect()) return $this->output;
 	
-		//* Sanitize input
 		$items = [];
 		// Create assosiative array
 		foreach ($inputs as $key => $value) {
 			$var = $this->conn->escape_string($value);
 			$items[$this->conn->escape_string($key)] = $var;
 		}
-		//*/
 	
 		// If table doesn't exist stop here
 		if (!$this->checkTable($items["Table"])) {
 			trigger_error("db.GetItem: Table, ".$items["Table"].
-				" , not found");
+				", not found"); // TODO: db.GetItem: Table, footer+content, not found
 			return $this->output;
 		}
 	
@@ -67,7 +65,7 @@ class DB {
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error);
+			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error); // TODO: db.GetItem: SELECT * FROM errors WHERE Language='fi-FI' LIMIT 10; Unknown column 'Language' in 'where clause' 
 			return $this->output;
 		}
 	
@@ -325,6 +323,22 @@ class DB {
 	}
 	
 	private function initLang() {
+		$lang = "fi-FI";
+		$footer_text = "<p>Tein nämä sivut PHP:llä, 
+				yrittäen noudattaa REST mallia. 
+				Nämä sivut ovat minun testi sivut. 
+				https://student.labranet.jamk.fi/~K1729 
+				toimii minun CV:nä.</p>";
+		$footer = [
+			'Language' => $lang,
+			'Content' => $footer_text,
+		];
+	
+		if ($this->SetItem("footer", $footer)) return false;
+		return true;
+	}
+	
+	public function InitFooter() {
 		$lang = "fi-FI";
 		$footer_text = "<p>Tein nämä sivut PHP:llä, 
 				yrittäen noudattaa REST mallia. 

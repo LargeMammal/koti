@@ -19,7 +19,7 @@ class Site
                 $this->db = $db;
                 $this->langs = $langs;
                 if (count($this->langs) < 1) 
-                        $this->langs[] = "fi-FI"; // Add the default language
+                        $this->langs[] = "fi-FI"; // default language
                 $this->items = [];
                 $rows = ["Table", "Category", "Title", "Extras"];
                 if (count($items) < 1) $items = ["content", "home"];
@@ -53,6 +53,22 @@ class Site
                 $this->footer = NULL;
                 $this->contents = [];
 
+                $footers = $this->db->GetItem(["Table" => "footer"]);
+                if (count($footers) < 1) {
+                        $this->db->InitFooter();
+                        $footers = $this->db->GetItem(["Table" => "footer"]);
+                }
+                // TODO: check for fitting footer in language list
+                foreach ($this->langs as $lang) {
+                        foreach ($footers as $footer) {
+                                if ($lang == $footer['Language']) continue;
+                                $this->footer = $footer["Content"];
+                                break;
+                        }
+                        if (is_null($this->footer)) continue;
+                        break;
+                }
+
                 foreach ($this->langs as $l) {
                         // Go through every language selection
                         $list = explode("-", $l);
@@ -61,15 +77,6 @@ class Site
                                 $l = implode("-", $list);
                         }
 
-                        if (is_null($this->footer)) {
-                                $footer = $this->db->GetItem(
-                                        ["Table" => "footer"], 
-                                        $l
-                                );
-                                // Skip empty
-                                if (count($footer) > 0) 
-                                        $this->footer = $footer[0]["Content"];
-                        }
                         $this->contents = $this->db->GetItem($this->items, $l);
                         if (count($this->contents) < 1) {
                                 // Drop unauthorized stuff
@@ -88,13 +95,6 @@ class Site
                                 break;
                         }
                 }
-
-                //*
-                if (is_null($this->footer)) {
-                        //$this->db->initLang();
-                        $this->footer = 'Initializing';
-                }
-                //*/
 
                 // Stuff in head
                 $str = '<!DOCTYPE html><html lang="'.$this->lang.'"><head>';
@@ -130,17 +130,17 @@ class Site
                         $this->auth = $autha;
         }
 
-        /** loadHead
-         * This function should generate the head elements.
+        /** 
+         * loadHead function should generate the head elements.
          * Later I should add meta handling
          */
         private function loadHead() 
         {
-                $title = $this->items['Category'];
-                if (isset($this->contents)) {
+                $title = $this->items['Category']; // TODO: Undefined index: Category
+                if (isset($this->contents))
                         if (count($this->contents) == 1)
                                 $title = $this->contents[0]['Title'];
-                }
+                                
                 $str = '<meta charset="UTF-8">';
                 $str .= "<title>$title</title>";
                 $str .= '<meta name="viewport" 
@@ -151,14 +151,14 @@ class Site
                 return $str;
         }
 
-        /** loadHeader
+        /** 
          * loadHeader will in future generate custom header
          */
         private function loadHeader() 
         {
                 $banner = "";
                 if (!isset($this->contents)) 
-                        return "<h1>".$this->items['Category']."</h1>";
+                        return "<h1>".$this->items['Category']."</h1>"; // TODO: Undefined index: Category
                 if (count($this->contents) == 1) 
                         $banner = $this->contents[0]['Title'];
                 $output = "<h1>$banner</h1>";
@@ -209,7 +209,7 @@ class Site
         private function loadBody() 
         {
                 $content = "";
-                if (count($this->contents) < 1) 
+                if (count($this->contents) < 1) // TODO: count(): Parameter must be an array or an object that implements Countable
                         return "<h1>Site came up empty!</h1>";
                 if ($this->items['Table'] === 'errors') {
                         $content .= "<section><table>";

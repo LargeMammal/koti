@@ -1,6 +1,6 @@
 <?php
 /** 
- * server.php holds Server class
+ * Server.class.php holds Server class
  * Server object will handle http methods
  */
 
@@ -23,7 +23,6 @@ class Server {
                 $timer = round(microtime(true) * 1000); // Start benchmark
                 $this->config = $this->loadJSON($config);
                 $this->db = new DB($this->config);
-                //$t = time()-$time;
                 $this->db->LogEvent(
                         E_USER_NOTICE, 
                         "Benchmark: Initialisation took ".
@@ -100,7 +99,7 @@ class Server {
                 $output = "";
                 switch($this->method) {
                 case 'GET':
-                        $site = new Site($this->db, $this->langs, $this->items);
+                        $site = new Site($this->db,$this->langs,$this->items);
                         $output = $site->Build($this->uid, $this->pw);
                         break;
                 case 'POST':
@@ -208,7 +207,7 @@ class Server {
                 }
                 foreach ($obj as $key=>$val) {
                         if (is_object($val)) 
-                                $output[$key] = $this->parseObject($val,($i+1));
+                                $output[$key] =$this->parseObject($val,($i+1));
                         else $output[$key] = $val;
                 }
                 return $output;
