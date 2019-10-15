@@ -46,10 +46,9 @@ class Site
         /** Build
          * Generate the site
          */
-        public function Build($uid = NULL, $pw = NULL) 
+        public function Build($auth = 0) 
         {
-                $this->auth = 0; // Purge previous authentication
-                $this->authorize($uid, $pw);
+                $this->auth = $auth; 
                 $this->footer = NULL;
                 $this->contents = [];
 
@@ -58,10 +57,10 @@ class Site
                         $this->db->InitFooter();
                         $footers = $this->db->GetItem(["Table" => "footer"]);
                 }
-                // TODO: check for fitting footer in language list
+                // check for fitting footer in language list
                 foreach ($this->langs as $lang) {
                         foreach ($footers as $footer) {
-                                if ($lang == $footer['Language']) continue;
+                                if ($lang != $footer['Language']) continue;
                                 $this->footer = $footer["Content"];
                                 break;
                         }
@@ -79,8 +78,14 @@ class Site
 
                         $this->contents = $this->db->GetItem($this->items, $l);
                         if (count($this->contents) < 1) {
+                                $this->db->InitEditor();
+                                $this->contents = $this->db->GetItem($this->items, $l);
+                        }
+                        if (count($this->contents) > 0) {
                                 // Drop unauthorized stuff
                                 foreach ($this->contents as $key => $value) {
+                                        if ($this->items['Title'] == 'errors') 
+                                                $value['Auth'] == 2;
                                         if ($this->auth >= $value['Auth']) 
                                                 continue;
                                         header('WWW-Authenticate: 
@@ -107,27 +112,6 @@ class Site
                 $str .= "<footer>".$this->footer."</footer>";
                 $str .= "</body></html>";
                 return $str;
-        }
-
-        /** authorize
-         * authorize queries db for user name and password hash.
-         * It then compares the two and returns authorization.
-         */
-        private function authorize($uid = NULL, $pw = NULL) 
-        {
-                $query = [
-                        "Table" => "users",
-                        "UID" => $uid,
-                ];
-                $auth = $this->db->GetItem($query); // Get user data
-                $pwa = "non";
-                $autha = 0;
-                if (count($auth) > 0) {
-                        $pwa = $auth[0]["PW"];
-                        $autha = $auth[0]["Auth"];
-                }
-                if (!password_verify($pw, $pwa)) 
-                        $this->auth = $autha;
         }
 
         /** 
@@ -225,7 +209,7 @@ class Site
                         foreach ($this->contents as $item) {
                                 $content .= '<tr>';
                                 foreach ($item as $val) 
-                                        $content .= "<td>$item</td>";
+                                        $content .= "<td>$val</td>";
                                 $content .= '</tr>';
                         }
                         $content .= "</table></section>";

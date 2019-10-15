@@ -15,10 +15,13 @@ class DB {
 		$this->site = $config["Site"];
 		$this->pass = $config["Pass"];
 		$this->database = $config["Database"];
+		if (!$this->connect()) 
+			trigger_error("Connection failed");
 		$this->output = [];
 	}
 
 	function __destruct() {
+		$this->conn->close();
 		$this->conn = NULL;
 		$this->user = NULL;
 		$this->site = NULL;
@@ -33,7 +36,6 @@ class DB {
 	*/
 	public function GetItem($inputs, $lang = NULL): array {
 		$this->output = [];
-		if (!$this->connect()) return $this->output;
 	
 		$items = [];
 		// Create assosiative array
@@ -45,14 +47,14 @@ class DB {
 		// If table doesn't exist stop here
 		if (!$this->checkTable($items["Table"])) {
 			trigger_error("db.GetItem: Table, ".$items["Table"].
-				", not found"); // TODO: db.GetItem: Table, footer+content, not found
+				", not found"); 
 			return $this->output;
 		}
 	
 		// Generate query
 		$sql = "SELECT * FROM ".$items["Table"];
 		$str = "";
-		if (isset($lang)) $str = " WHERE Language='" . $lang . "'";
+		if (isset($lang) && $items["Table"] != "errors") $str = " WHERE Language='" . $lang . "'";
 		foreach ($items as $column=>$item) {
 			if ($column != "Table") {
 				if ($str != "") $str .= " AND";
@@ -60,12 +62,13 @@ class DB {
 				$str .= " ".$column."='".$item."'";
 			}
 		}
-		$sql .= $str." LIMIT 10";
+		if ($items["Table"] == "errors") $str .= $str." ORDER BY id DESC";
+		$sql .= $str." LIMIT 10"; // Make this so that user decides.
 	
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error); // TODO: db.GetItem: SELECT * FROM errors WHERE Language='fi-FI' LIMIT 10; Unknown column 'Language' in 'where clause' 
+			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error); 
 			return $this->output;
 		}
 	
@@ -73,7 +76,6 @@ class DB {
 		while($row = $results->fetch_assoc()) $this->output[] = $row;
 		$results->free();
 
-		$this->conn->close();
 		return $this->output;
 	}
     
@@ -82,8 +84,6 @@ class DB {
 	 * Those using SetItem should have special privileges
 	 */
 	public function SetItem($table, $inputs, $die = 0) : bool {
-        if (!$this->connect()) return false;
-	
 		//* Sanitize inputs
 		$items = [];
 		// Create assosiative array 
@@ -137,7 +137,6 @@ class DB {
 			return false;
 		}
 
-		$this->conn->close();
 		return true;
 	}
 	
@@ -227,19 +226,24 @@ class DB {
 		$sql = "CREATE TABLE ".$table." (";
 		$items = [];
 		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
-		// All this should be given in an array
 		foreach($columns as $column) {
-			if ($column == "Title" || 
-				$column == "Language" || 
-				$column == "PW" || 
-				$column == "UID") {
+			switch ($column) {
+			case 'Title':
+			case 'Language':
+			case 'PW':
+			case 'UID':
 				$items[] = "$column VARCHAR(255) NOT NULL";
-			} elseif ($column == "Auth" || $column == "Verified") {
+				break;
+			case 'Auth':
+			case 'Verified':
 				$items[] = "$column TINYINT NOT NULL";
-			} elseif ($column == "Date") {
+				break;
+			case 'Date':
 				$items[] = "$column BIGINT NOT NULL";
-			} else {
+				break;
+			default:
 				$items[] = "$column LONGTEXT NOT NULL";
+				break;
 			}
 		}
 		$sql .= implode(", ", $items);
@@ -249,50 +253,47 @@ class DB {
 		return "";
 	}
 	
+	/**
+	 * InitEditor generates the initial editor used to generate further 
+	 * documents.
+	 */
 	public function InitEditor() {
 	   // A quick editor
 	   $editor = [
 			'Title' => 'Editori',
-			'Content' => "<h1>Lisää </h1>
+			'Content' => "<h1>Luo uusi</h1>
 				<form action='/content' method='POST'>
 				<p><input type='text' 
 					name='Title' 
-					placeholder='Title for the content' 
+					placeholder='Otsikko' 
 					required></p>
 				<p><textarea name='Content' 
-					placeholder='Content in html form' 
+					placeholder='Sisältö HTML muodossa' 
 					required></textarea></p>
 				<p><input type='text' 
-					name='Language' 
-					placeholder='Language in xx-XX form' 
+					name='Category' 
+					placeholder='Kategoria englanniksi' 
 					required></p>
 				<p><input type='text' 
-					name='Category' 
-					placeholder='Set the category' 
+					name='Translation' 
+					placeholder='Käännetty kategoria' 
 					required></p>
-				<p>Required level of 
-					authorization(0min and 3max): 
+				<p><input type='text' 
+					name='Language' 
+					placeholder='Kieli xx-XX muodossa' 
+					required></p>
+				<p>Required authorization(0min and 3max): 
 					<input type='number' 
-					name='auth' 
+					name='Auth' 
 					min='0' max='3' required></p><br>
 				<input type='submit'>
-				</form>
-				<h1>Add Language</h1>
-				<form action='/footer' method='POST'>
-				<p><textarea name='Content' 
-					placeholder='Text in footer' 
-					required></textarea></p><br>
-				<p><input type='text' name='Language' 
-					placeholder='Language in xx-XX form' 
-					required></p><br>
-				<input type='submit'>
-			</form>",
+				</form>",
 			'Category' => 'content',
 			'Language' => 'fi-FI',
 			'Auth' => 2,
 			'Date' => time(),
 		];
-		// A quick editor
+		/* A quick registery
 		$register = [
 			'Title' => 'Rekisteröidy',
 			'Content' => '<h1>Rekisteröidy</h1>
@@ -314,30 +315,16 @@ class DB {
 			'Auth' => 0,
 			'Date' => time(),
 		];
+		//*/
 	
 		// Upload editor UI
-		if ($this->SetItem("content", $editor) || 
-			$this->SetItem("content", $register)) 
-			return false;
+		if ($this->SetItem("content", $editor)) return false;
 		return true;
 	}
 	
-	private function initLang() {
-		$lang = "fi-FI";
-		$footer_text = "<p>Tein nämä sivut PHP:llä, 
-				yrittäen noudattaa REST mallia. 
-				Nämä sivut ovat minun testi sivut. 
-				https://student.labranet.jamk.fi/~K1729 
-				toimii minun CV:nä.</p>";
-		$footer = [
-			'Language' => $lang,
-			'Content' => $footer_text,
-		];
-	
-		if ($this->SetItem("footer", $footer)) return false;
-		return true;
-	}
-	
+	/**
+	 * InitFooter initializes footer table
+	 */
 	public function InitFooter() {
 		$lang = "fi-FI";
 		$footer_text = "<p>Tein nämä sivut PHP:llä, 

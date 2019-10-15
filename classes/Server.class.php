@@ -10,6 +10,7 @@ class Server {
         private $oldErrorHandler;
         private $startTime;
 
+        private $auth;
         private $items;
         private $langs;
         private $method;
@@ -33,8 +34,7 @@ class Server {
                         0
                 );
                 // Exception and error handling
-                $this->oldErrorHandler = set_error_handler(
-                        function(
+                $this->oldErrorHandler = set_error_handler(function(
                                 $errLvl, 
                                 $errMsg, 
                                 $errFile, 
@@ -97,48 +97,25 @@ class Server {
         public function Serve() {
                 $timer = round(microtime(true) * 1000);
                 $output = "";
+                $str = "";
+                $level = 2;
+                if ($this->items[0] == 'users') $level = 0;
+                $this->authorize();
                 switch($this->method) {
                 case 'GET':
                         $site = new Site($this->db,$this->langs,$this->items);
-                        $output = $site->Build($this->uid, $this->pw);
+                        $output = $site->Build($this->auth);
                         break;
                 case 'POST':
                         if (count($this->post) < 1) break;
-                        /**
-                         * This should take the table element and push it 
-                         * strait to db if user is allowed.
-                         */
-                        $query = [
-                                'Table' => 'users',
-                                'UID' => $this->uid,
-                        ];
-                        $str = "";
-                        $level = 0;
-                        if ($this->items[0] == "content") $level = 2;
-                        elseif ($this->items[0] == "users") {
-                                if (isset($this->post["pw"])) {
-                                        $this->post["pw"] = password_hash(
-                                                $this->post["pw"], 
-                                                PASSWORD_DEFAULT
-                                        );
-                                }
-                                else $this->post["pw"] = "";
-                        }
-                        $auth = $this->db->GetItem($query); // Get user data
-                        $authorization = 0;
-                        $pw = "";
-                        if(isset($auth[0]["Auth"])) 
-                                $authorization = $auth[0]["Auth"];
-                        if(isset($auth[0]["PW"])) $pw = $auth[0]["PW"];
-                        // Fail if incorrect credentials or authorization
-                        if (!password_verify($this->pw, $pw) && 
-                            $authorization < $level) {
+                                
+                        // Fail if low authorization
+                        if ($this->auth < $level) {
                                 header('WWW-Authenticate: Basic realm="'.
                                         $this->realm.'"');
                                 http_response_code(401);
                                 trigger_error(
-                                        "User: ".$this->post['uid'].
-                                                " unauthorized", 
+                                        "User: ".$this->uid." unauthorized", 
                                         E_USER_ERROR
                                 );
                         }
@@ -179,7 +156,28 @@ class Server {
                 return $output;
         }
 
-        public function getLang($str) {
+        /** 
+         * authorize queries db for user name and password hash.
+         * It then compares the two and returns authorization.
+         */
+        private function authorize() 
+        {
+                $query = [
+                        "Table" => "users",
+                        "UID" => $this->uid,
+                ];
+                $auth = $this->db->GetItem($query); // Get user data
+                $pwa = "non";
+                $autha = 0;
+                if (count($auth) > 0) {
+                        $pwa = $auth[0]["PW"];
+                        $autha = $auth[0]["Auth"];
+                }
+                if (!password_verify($this->pw, $pwa)) 
+                        $this->auth = $autha;
+        }
+
+        private function getLang($str) {
             $output = [];
             // Split the string
             $arr = explode(";", $str);
@@ -199,7 +197,7 @@ class Server {
          * parseObject recursively reads through object vars
          * and returns them in an array. Runs only 20 layers deep.
          */
-        function parseObject($obj, $i = 0) {
+        private function parseObject($obj, $i = 0) {
                 $output = [];
                 // Don't go deeper than 20
                 if ($i > 20) {
@@ -216,7 +214,7 @@ class Server {
         /**
          * loadFile gets file and returns contents in an array
          */
-        function loadJSON($file) {
+        private function loadJSON($file) {
                 $pwd = $file;
                 if (!file_exists($pwd)) return FALSE;
                 $json = file_get_contents($pwd); // reads file into string
