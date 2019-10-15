@@ -100,17 +100,8 @@ class Server {
                 $str = "";
                 $level = 2;
                 if ($this->items[0] == 'users') $level = 0;
-                $this->authorize();
-                switch($this->method) {
-                case 'GET':
-                        $site = new Site($this->db,$this->langs,$this->items);
-                        $output = $site->Build($this->auth);
-                        break;
-                case 'POST':
-                        if (count($this->post) < 1) break;
-                                
-                        // Fail if low authorization
-                        if ($this->auth < $level) {
+                if ($level > 0) {
+                        if (!isset($this->uid)) {
                                 header('WWW-Authenticate: Basic realm="'.
                                         $this->realm.'"');
                                 http_response_code(401);
@@ -118,7 +109,18 @@ class Server {
                                         "User: ".$this->uid." unauthorized", 
                                         E_USER_ERROR
                                 );
+                                die("Unauthorized!");
                         }
+                        $this->authorize();
+                }
+
+                switch($this->method) {
+                case 'GET':
+                        $site = new Site($this->db,$this->langs,$this->items);
+                        $output = $site->Build($this->auth, $this->realm);
+                        break;
+                case 'POST':
+                        if (count($this->post) < 1) break;
                         if (isset($this->post["uid"])) {
                                 $users = [
                                         'UID' => $this->post['uid'],
@@ -132,14 +134,16 @@ class Server {
                                         $users['Name'] = $this->post['name'];
                                 $this->db->SetItem("users", $users);
                         } else {
-                                // If ok, proceed with writing
+                                // split the upload into category and contents.
+                                $category = [
+                                        'Auth'=>0,
+                                        'Category'=>$this->post['Category'],
+                                        'Translation'=>$this->post['Translation'],
+                                        'Language'=>$this->post['Language']
+                                ];
+                                unset($this->post['Translation']);
+                                $this->db->SetItem('category', $category);
                                 $this->db->SetItem('content', $this->post);
-                        }
-                        if (isset($err)) {
-                                foreach ($err as $e) $str .= $e."<br>";
-                                //http_response_code(500);
-                        } else {
-                                http_response_code(201);
                         }
                         break;
                 default:
@@ -223,7 +227,7 @@ class Server {
         }
 
         private function createItem(){
-                if (isset($this->contacts[$items])) {
+                if (isset($this->contents[$items])) {
                         header('HTTP/1.1 409 Conflict');
                         return;
                 }
@@ -254,7 +258,6 @@ class Server {
         private function paths($url) {
                 // Remove slashes from both sides.
                 $str = trim($url, "/");
-                if ($str == "") $str = "home";
                 // Explode path into variables
                 $items = explode("/", $str);
                 return $items;

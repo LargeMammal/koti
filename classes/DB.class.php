@@ -54,7 +54,8 @@ class DB {
 		// Generate query
 		$sql = "SELECT * FROM ".$items["Table"];
 		$str = "";
-		if (isset($lang) && $items["Table"] != "errors") $str = " WHERE Language='" . $lang . "'";
+		if (isset($lang) && $items["Table"] != "errors") 
+			$str = " WHERE Language='" . $lang . "'";
 		foreach ($items as $column=>$item) {
 			if ($column != "Table") {
 				if ($str != "") $str .= " AND";
@@ -318,6 +319,13 @@ class DB {
 		//*/
 	
 		// Upload editor UI
+		$test = $this->GetItem(
+			[
+				"Table"=>"content",
+				"Title"=>"Editori"
+			], "fi-FI"
+		);
+		if (count($test) > 0) return true;
 		if ($this->SetItem("content", $editor)) return false;
 		return true;
 	}

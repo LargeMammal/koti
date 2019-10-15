@@ -46,7 +46,7 @@ class Site
         /** Build
          * Generate the site
          */
-        public function Build($auth = 0) 
+        public function Build($auth = 0, $realm = "Tardiland") 
         {
                 $this->auth = $auth; 
                 $this->footer = NULL;
@@ -67,6 +67,12 @@ class Site
                         if (is_null($this->footer)) continue;
                         break;
                 }
+                $query = [];
+                foreach ($this->items as $key => $value) {
+                        if ($key == "Extras") continue;
+                        $query[$key] = $value;
+                }
+                if (count($query) < 1) $query = ["Table"=>"content", "Title"=>"home"];
 
                 foreach ($this->langs as $l) {
                         // Go through every language selection
@@ -75,24 +81,27 @@ class Site
                                 $list[] = strtoupper($l);
                                 $l = implode("-", $list);
                         }
-
-                        $this->contents = $this->db->GetItem($this->items, $l);
+                        $this->contents = $this->db->GetItem($query, $l);
                         if (count($this->contents) < 1) {
                                 $this->db->InitEditor();
-                                $this->contents = $this->db->GetItem($this->items, $l);
+                                $this->contents = $this->db->GetItem($query, $l);
                         }
                         if (count($this->contents) > 0) {
                                 // Drop unauthorized stuff
                                 foreach ($this->contents as $key => $value) {
-                                        if ($this->items['Title'] == 'errors') 
-                                                $value['Auth'] == 2;
-                                        if ($this->auth >= $value['Auth']) 
-                                                continue;
-                                        header('WWW-Authenticate: 
-                                                Basic realm="Tardiland"');
+                                        $auth = 0;
+                                        if ($this->items['Title'] != 'errors') 
+                                                $auth = $value['Auth'];
+                                        if ($this->auth >= $auth) 
+                                                continue; 
+                                        header("WWW-Authenticate: 
+                                                Basic realm='$realm'"); 
                                         http_response_code(401);
-                                        unset($contents[$key]);
-                                        die("Unauthorized");
+                                        unset($this->contents[$key]);
+                                        //* Test without these 
+                                        echo "Authorization: $this->auth vs $auth";/*
+                                        die("Unauthorized"); 
+                                        //*/
                                 }
                                 if (count($this->contents) < 1) 
                                         $this->contents = NULL;
@@ -120,7 +129,7 @@ class Site
          */
         private function loadHead() 
         {
-                $title = $this->items['Category']; // TODO: Undefined index: Category
+                $title = $this->items['Table']; // TODO: Undefined index: Category
                 if (isset($this->contents))
                         if (count($this->contents) == 1)
                                 $title = $this->contents[0]['Title'];
@@ -193,7 +202,7 @@ class Site
         private function loadBody() 
         {
                 $content = "";
-                if (count($this->contents) < 1) // TODO: count(): Parameter must be an array or an object that implements Countable
+                if (is_null($this->contents) || count($this->contents) < 1) // TODO: count(): Parameter must be an array or an object that implements Countable
                         return "<h1>Site came up empty!</h1>";
                 if ($this->items['Table'] === 'errors') {
                         $content .= "<section><table>";
