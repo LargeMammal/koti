@@ -65,8 +65,8 @@ class Server {
                 } else $this->langs = ["fi-FI"];
                 
                 $this->method = $server['REQUEST_METHOD'];
+                if (count($post) > 0) $post["Date"] = time();
                 $this->post = $post;
-                if (count($post) < 1) $post["Date"] = time();
                 $this->pw = NULL;
                 $this->uid = NULL;
                 if (isset($server['PHP_AUTH_USER']) && 
@@ -99,17 +99,19 @@ class Server {
                 $output = "";
                 $str = "";
                 $level = 2;
-                if ($this->items[0] == 'users') $level = 0;
+                if (count($this->items) < 1 || $this->items[0] == 'users') $level = 0;
                 if ($level > 0) {
                         if (!isset($this->uid)) {
                                 header('WWW-Authenticate: Basic realm="'.
                                         $this->realm.'"');
+                                $this->auth = 0;
+                                /* 
                                 http_response_code(401);
                                 trigger_error(
                                         "User: ".$this->uid." unauthorized", 
                                         E_USER_ERROR
-                                );
-                                die("Unauthorized!");
+                                ); 
+                                */
                         }
                         $this->authorize();
                 }
@@ -120,7 +122,7 @@ class Server {
                         $output = $site->Build($this->auth, $this->realm);
                         break;
                 case 'POST':
-                        if (count($this->post) < 1) break;
+                        if (count($this->post) < 2) break;
                         if (isset($this->post["uid"])) {
                                 $users = [
                                         'UID' => $this->post['uid'],
@@ -258,7 +260,7 @@ class Server {
         private function paths($url) {
                 // Remove slashes from both sides.
                 $str = trim($url, "/");
-                // Explode path into variables
+                if ($str == "") return [];
                 $items = explode("/", $str);
                 return $items;
         }

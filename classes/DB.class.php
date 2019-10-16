@@ -38,7 +38,7 @@ class DB {
 		$this->output = [];
 	
 		$items = [];
-		// Create assosiative array
+		// Clean inputs
 		foreach ($inputs as $key => $value) {
 			$var = $this->conn->escape_string($value);
 			$items[$this->conn->escape_string($key)] = $var;
@@ -90,7 +90,7 @@ class DB {
 		// Create assosiative array 
 		foreach ($inputs as $key => $value) {
 			$var = $this->conn->escape_string($value);
-			$items[$this->conn->escape_string($key)] = $var;
+			$items[$key] = $var;
 		}
 		//*/
 	
@@ -294,29 +294,6 @@ class DB {
 			'Auth' => 2,
 			'Date' => time(),
 		];
-		/* A quick registery
-		$register = [
-			'Title' => 'Rekisteröidy',
-			'Content' => '<h1>Rekisteröidy</h1>
-			<form action="/users" method="POST">
-			<p><input type="text" name="uid" 
-				placeholder="Username" 
-				required></p>
-			<p><input type="password" 
-				name="pw" placeholder="Password" 
-				required></p>
-			<p><input type="text" name="name" 
-				placeholder="Your name(Not required)"></p>
-			<p><input type="email" name="email" 
-				placeholder="Email" required></p>
-			<input type="submit">
-			</form>',
-			'Category' => 'user',
-			'Language' => 'fi-FI',
-			'Auth' => 0,
-			'Date' => time(),
-		];
-		//*/
 	
 		// Upload editor UI
 		$test = $this->GetItem(

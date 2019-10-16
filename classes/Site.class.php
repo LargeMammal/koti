@@ -22,10 +22,10 @@ class Site
                         $this->langs[] = "fi-FI"; // default language
                 $this->items = [];
                 $rows = ["Table", "Category", "Title", "Extras"];
-                if (count($items) < 1) $items = ["content", "home"];
+                if (count($items) < 1) $items = ["content", "home", "Koti"];
                 foreach ($rows as $key => $val) {
                         if (!isset($items[$key])) break;
-                        if ($key < 3) $this->items[$val] = $items[$key];
+                        if ($key < 3) $this->items[$val] = urldecode($items[$key]);
                         else $this->items["Extras"] = $items[$key];
                 }
         }
@@ -71,11 +71,11 @@ class Site
                 foreach ($this->items as $key => $value) {
                         if ($key == "Extras") continue;
                         $query[$key] = $value;
+                        //echo "Building query: key $key and value ".urldecode($value)." <br>";
                 }
-                if (count($query) < 1) $query = ["Table"=>"content", "Title"=>"home"];
 
+                // Go through every language selection
                 foreach ($this->langs as $l) {
-                        // Go through every language selection
                         $list = explode("-", $l);
                         if (count($list) < 2) {
                                 $list[] = strtoupper($l);
@@ -90,18 +90,14 @@ class Site
                                 // Drop unauthorized stuff
                                 foreach ($this->contents as $key => $value) {
                                         $auth = 0;
-                                        if ($this->items['Title'] != 'errors') 
-                                                $auth = $value['Auth'];
+                                        if ($this->items['Table'] != 'errors') 
+                                                $auth = 2;
                                         if ($this->auth >= $auth) 
                                                 continue; 
                                         header("WWW-Authenticate: 
                                                 Basic realm='$realm'"); 
                                         http_response_code(401);
                                         unset($this->contents[$key]);
-                                        //* Test without these 
-                                        echo "Authorization: $this->auth vs $auth";/*
-                                        die("Unauthorized"); 
-                                        //*/
                                 }
                                 if (count($this->contents) < 1) 
                                         $this->contents = NULL;
@@ -150,8 +146,8 @@ class Site
         private function loadHeader() 
         {
                 $banner = "";
-                if (!isset($this->contents)) 
-                        return "<h1>".$this->items['Category']."</h1>"; // TODO: Undefined index: Category
+                if (is_null($this->contents)) 
+                        return "<h1>".$this->items['Category']."</h1>"; 
                 if (count($this->contents) == 1) 
                         $banner = $this->contents[0]['Title'];
                 $output = "<h1>$banner</h1>";
@@ -186,6 +182,7 @@ class Site
                                         <div class='dropdown-content'>";
                         foreach ($value as $cat) {
                                 $content .= '<a href="/'.
+                                        $this->items["Table"].'/'.
                                         $cat["Category"].'/'.
                                         $cat["Title"].'">'.
                                         $cat['Title'].'</a>';
@@ -202,30 +199,30 @@ class Site
         private function loadBody() 
         {
                 $content = "";
-                if (is_null($this->contents) || count($this->contents) < 1) // TODO: count(): Parameter must be an array or an object that implements Countable
+                if (is_null($this->contents) || count($this->contents) < 1) 
                         return "<h1>Site came up empty!</h1>";
                 if ($this->items['Table'] === 'errors') {
                         $content .= "<section><table>";
                         $rows = [];
-                        $columns = [];
-                        foreach ($this->contents as $key => $val) {
+                        foreach ($this->contents[0] as $key => $val) {
                                 $rows[] = $key;
-                                $columns[] = $val;
                         }
                         $content .= '<tr>';
                         foreach ($rows as $val) $content .= "<th>$val</th>";
                         $content .= '</tr>';
                         foreach ($this->contents as $item) {
                                 $content .= '<tr>';
-                                foreach ($item as $val) 
-                                        $content .= "<td>$val</td>";
+                                foreach ($item as $key => $val) {
+                                        if ($key == "Time")
+                                                $content .= "<td>".date("H:i:s",$val)."</td>"; 
+                                        else $content .= "<td>$val</td>";
+                                }
                                 $content .= '</tr>';
                         }
                         $content .= "</table></section>";
                 } else {
                         foreach ($this->contents as $items) {
                                 $content .= "<section>";
-                                $content .= "<h2>" . $items['Title'] . "</h2>";
                                 $content .= $items['Content'];
                                 $content .= "</section>";
                         }
