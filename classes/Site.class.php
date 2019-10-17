@@ -97,9 +97,10 @@ class Site
                                         $auth = 0;
                                         if (isset($value["Auth"])) 
                                                 $auth = $value["Auth"];
-                                        if ($this->auth < $auth) 
-                                                header("WWW-Authenticate: 
-                                                Basic realm='$realm'"); 
+                                        if ($this->auth < $auth) {
+                                                header("WWW-Authenticate: Basic realm='$realm'"); 
+                                                http_response_code(401);
+                                        }
                                         if ($this->auth < $auth) 
                                                 unset($this->contents[$key]);
                                 }
