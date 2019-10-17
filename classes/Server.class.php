@@ -100,21 +100,8 @@ class Server {
                 $str = "";
                 $level = 2;
                 if (count($this->items) < 1 || $this->items[0] == 'users') $level = 0;
-                if ($level > 0) {
-                        if (!isset($this->uid)) {
-                                header('WWW-Authenticate: Basic realm="'.
-                                        $this->realm.'"');
-                                $this->auth = 0;
-                                /* 
-                                http_response_code(401);
-                                trigger_error(
-                                        "User: ".$this->uid." unauthorized", 
-                                        E_USER_ERROR
-                                ); 
-                                */
-                        }
-                        $this->authorize();
-                }
+                $this->auth = 0;
+                $this->authorize();
 
                 switch($this->method) {
                 case 'GET':

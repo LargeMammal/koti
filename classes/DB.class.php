@@ -34,7 +34,7 @@ class DB {
 	* GetItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
 	*/
-	public function GetItem($inputs, $lang = NULL): array {
+	public function GetItem($inputs, $lang = NULL, $specifics = NULL): array {
 		$this->output = [];
 	
 		$items = [];

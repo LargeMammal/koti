@@ -28,6 +28,7 @@ class Site
                         if ($key < 3) $this->items[$val] = urldecode($items[$key]);
                         else $this->items["Extras"] = $items[$key];
                 }
+                //var_dump($this->items);
         }
 
         function __destruct() 
@@ -59,6 +60,11 @@ class Site
                 }
                 // check for fitting footer in language list
                 foreach ($this->langs as $lang) {
+                        $list = explode("-", $lang);
+                        if (count($list) < 2) {
+                                $list[] = strtoupper($lang);
+                                $lang = implode("-", $list);
+                        }
                         foreach ($footers as $footer) {
                                 if ($lang != $footer['Language']) continue;
                                 $this->footer = $footer["Content"];
@@ -71,7 +77,6 @@ class Site
                 foreach ($this->items as $key => $value) {
                         if ($key == "Extras") continue;
                         $query[$key] = $value;
-                        //echo "Building query: key $key and value ".urldecode($value)." <br>";
                 }
 
                 // Go through every language selection
@@ -90,14 +95,13 @@ class Site
                                 // Drop unauthorized stuff
                                 foreach ($this->contents as $key => $value) {
                                         $auth = 0;
-                                        if ($this->items['Table'] != 'errors') 
-                                                $auth = 2;
-                                        if ($this->auth >= $auth) 
-                                                continue; 
-                                        header("WWW-Authenticate: 
+                                        if (isset($value["Auth"])) 
+                                                $auth = $value["Auth"];
+                                        if ($this->auth < $auth) 
+                                                header("WWW-Authenticate: 
                                                 Basic realm='$realm'"); 
-                                        http_response_code(401);
-                                        unset($this->contents[$key]);
+                                        if ($this->auth < $auth) 
+                                                unset($this->contents[$key]);
                                 }
                                 if (count($this->contents) < 1) 
                                         $this->contents = NULL;
@@ -160,26 +164,23 @@ class Site
         private function loadNav()
         {
                 // Get all data from content table
-                $query = [ 'Table' => 'content' ];
+                $query = ['Table' => 'content'];
+                $specifics = ['Title', 'Category'];
                 $list = [];
                 $content = "";
-                $cats = $this->db->GetItem($query, $this->lang);
-                // If both outputs are null initialise database
-                if (is_null($cats)) {
-                        $this->db->InitEditor();
-                        // re-do the search
-                        $cats = $this->db->GetItem($query, $this->lang);
-                }
+                $cats = $this->db->GetItem($query, $this->lang, $specifics);
+                if (count($cats) < 1) return $content;
                 // Organize items along categories
                 foreach ($cats as $cat) $list[$cat["Category"]][] = $cat;
+                //$list = $cats;
 
                 // Generate dropdowns
-                $content .= '<ul><a href="/" class="dropdown">home</a>';
+                $content .= '<ul>';
                 foreach ($list as $key => $value) {
                         $content .= "<li class='dropdown'>
-                                        <a href='javascript:void(0)' 
-                                        class='dropbtn'>$key</a>
-                                        <div class='dropdown-content'>";
+                                <a href='javascript:void(0)' 
+                                class='dropbtn'>$key</a>
+                                <div class='dropdown-content'>";
                         foreach ($value as $cat) {
                                 $content .= '<a href="/'.
                                         $this->items["Table"].'/'.
@@ -189,6 +190,8 @@ class Site
                         }
                         $content .= '</div></li>';
                 }
+                $content .= '<a href="https://github.com/LargeMammal" class="dropdown">github</a>';
+                $content .= '<a href="https://gitlab.com/mammal" class="dropdown">gitlab</a>';
                 $content .= "<ul>";
                 return $content;
         }
