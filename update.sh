@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-rsync -avz --exclude=".[!.]*" . /srv/http
+rsync -avz --exclude=".[!.]*" . /srv/http/tardigrade.ddns.net/

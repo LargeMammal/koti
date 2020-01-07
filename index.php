@@ -15,7 +15,7 @@ function autoloader($class) {
  * I hope that later all errors to be saved into database for later usage.
  * Later This would become pipeline for analytics.
  */
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
         ob_start();
         debug_print_backtrace();
