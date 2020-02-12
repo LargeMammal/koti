@@ -4,31 +4,84 @@
  */
 class Site 
 {
-        private $auth; // 0..3
         private $categories;
         private $contents;
         private $db;
-        private $footer;
         private $errors;
+        private $footer;
+        private $form; // html/json/xml
+        private $get;
         private $items;
         private $lang; // first available language
         private $langs; // all client languages
+        private $post;
+        private $pw;
+        private $uid;
 
-        function __construct($db, $langs, $items) 
+        function __construct($db, $server, $post = NULL) 
         {
+                $this->auth = 0; // Make sure to purge privileges
+                $this->contents = [];
+                $this->form = "html";
+                $this->realm = "vesikarhu.fi";
                 $this->db = $db;
-                $this->langs = $langs;
-                if (count($this->langs) < 1) 
-                        $this->langs[] = "fi-FI"; // default language
-                $this->items = [];
-                $rows = ["Table", "Category", "Title", "Extras"];
-                if (count($items) < 1) $items = ["content", "home", "Koti"];
-                foreach ($rows as $key => $val) {
-                        if (!isset($items[$key])) break;
-                        if ($key < 3) $this->items[$val] = urldecode($items[$key]);
-                        else $this->items["Extras"] = $items[$key];
+                $this->server = $server;
+                
+                if (!is_null($post)) $post["Date"] = time();
+                $this->post = $post;
+
+                // Search start
+                /**
+                 * TODO: 
+                 * 1. Query should returns array of matching results
+                 * * first field is table. If only table is filled 
+                 *      return all items in table.
+                 * * second is Title. /table/title. If title field is
+                 *      is filled then search items with that title. 
+                 * 2. Results then are parsed according to client data
+                 * 3. Use get variables in parsing
+                 * 4. Move init stuff to DB side.
+                 */
+                $items = $this->paths($server['REQUEST_URI']);
+                
+                $this->langs = ["fi-FI"];
+                if (isset($server['HTTP_ACCEPT_LANGUAGE'])){
+                        $lang =$this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
+                        $this->langs = $lang;
                 }
-                //var_dump($this->items);
+                /**
+                 * Running a test. Dunno if http authentication resends the
+                 * request or will the code restart where it was called. 
+                 */
+                $this->pw = NULL;
+                $this->uid = NULL;
+                if (isset($server['PHP_AUTH_USER']) && 
+                        isset($server['PHP_AUTH_PW'])) {
+                        $this->pw = $server['PHP_AUTH_PW'];
+                        $this->uid = $server['PHP_AUTH_USER'];
+                }
+                // This gets user authorization from db 
+                $this->authorize();
+
+                $this->items = [];
+                if (count($items) < 1) $items = ["content", "Title", "Koti"];
+                $this->items["Table"] = $items[0];
+                array_shift($items);
+                foreach ($items as $key => $value) {
+                        if ($key % 2 == 0) {
+                                $name = trim($value, 's');
+                                $this->items[$name] = $items[$key+1];
+                        }
+                }
+                $this->contents = $this->db->GetItem($this->items);
+                // The rest should be moved to db side 
+                if (count($this->contents) < 1) {
+                        $this->db->InitEditor();
+                        $this->contents =$this->db->GetItem($this->items);
+                }
+                if (count($this->contents) < 1) 
+                        $this->contents = NULL;
+                // Search ends
         }
 
         function __destruct() 
@@ -44,14 +97,50 @@ class Site
                 $this->langs = NULL;
         }
 
-        /** Build
-         * Generate the site
-         */
-        public function Build($auth = 0, $realm = "Tardiland") 
+        public function Get()
         {
-                $this->auth = $auth; 
                 $this->footer = NULL;
-                $this->contents = [];
+
+                // Drop unauthorized stuff
+                foreach ($this->contents as $key => $value) {
+                        $auth = 0;
+                        if (isset($value["Auth"])) 
+                                $auth = $value["Auth"];
+                        else $auth = 3;
+
+                        // TODO: This should only be called if 
+                        // authentication is needed. 
+                        if ($this->auth < $auth) {
+                                header("WWW-Authenticate: " .
+                                        "Basic realm='$this->realm'");
+                                http_response_code(401);
+                        }
+                        if ($this->auth < $auth) 
+                                unset($this->contents[$key]);
+                }
+
+                switch ($this->form) {
+                        case 'json':
+                                header('Content-Type: application/json');
+                                return json_encode($this->contents);
+                        case 'xml':
+                                /**
+                                 * TODO: Fix this
+                                 */
+                                header('Content-Type: text/xml');
+                                $xml = new SimpleXMLElement('<root/>');
+                                array_flip($this->contents);
+                                array_walk_recursive($this->contents, array($xml, 'addChild'));
+                                return $xml->asXML();
+                        case 'test':
+                                //header('Content-Type: application/json');
+                                echo count($this->content);
+                                $json = $this->contents;
+                                return json_encode($json);
+                        default:
+                                # code...
+                                break;
+                }
 
                 $footers = $this->db->GetItem(["Table" => "footer"]);
                 if (count($footers) < 1) {
@@ -73,56 +162,76 @@ class Site
                         if (is_null($this->footer)) continue;
                         break;
                 }
-                $query = [];
-                foreach ($this->items as $key => $value) {
-                        if ($key == "Extras") continue;
-                        $query[$key] = $value;
-                }
-
-                // Go through every language selection
-                foreach ($this->langs as $l) {
-                        $list = explode("-", $l);
-                        if (count($list) < 2) {
-                                $list[] = strtoupper($l);
-                                $l = implode("-", $list);
-                        }
-                        $this->contents = $this->db->GetItem($query, $l);
-                        if (count($this->contents) < 1) {
-                                $this->db->InitEditor();
-                                $this->contents = $this->db->GetItem($query, $l);
-                        }
-                        if (count($this->contents) > 0) {
-                                // Drop unauthorized stuff
-                                foreach ($this->contents as $key => $value) {
-                                        $auth = 0;
-                                        if (isset($value["Auth"])) 
-                                                $auth = $value["Auth"];
-                                        else $auth = 3;
-                                        if ($this->auth < $auth) {
-                                                header("WWW-Authenticate: Basic realm='$realm'"); 
-                                                http_response_code(401);
-                                        }
-                                        if ($this->auth < $auth) 
-                                                unset($this->contents[$key]);
-                                }
-                                if (count($this->contents) < 1) 
-                                        $this->contents = NULL;
-                                $this->lang = $l;
-                                break;
-                        }
-                }
 
                 // Stuff in head
                 $str = '<!DOCTYPE html><html lang="'.$this->lang.'"><head>';
                 $str .= $this->loadHead();
-                $str .= "</head>";
+                $str .= '</head>';
                 // Stuff in body
-                $str .= "<body><header>".$this->loadHeader();
-                $str .= "<nav>".$this->loadNav()."</nav></header>";
-                $str .= "<section>".$this->loadBody()."</section>";
-                $str .= "<footer>".$this->footer."</footer>";
-                $str .= "</body></html>";
+                $str .= '<body><div id="root"><header>'.$this->loadHeader();
+                $str .= '<nav>'.$this->loadNav().'</nav></header>';
+                $str .= '<section>'.$this->loadBody().'</section>';
+                $str .= '<footer>'.$this->footer.'</footer>';
+                $str .= '</body></html>';
                 return $str;
+        }
+
+        public function Post()
+        {
+                // TODO: Move this to check portion
+                $this->pw = NULL;
+                $this->uid = NULL;
+                if (isset($server['PHP_AUTH_USER']) && 
+                        isset($server['PHP_AUTH_PW'])) {
+                        $this->pw = $server['PHP_AUTH_PW'];
+                        $this->uid = $server['PHP_AUTH_USER'];
+                }
+                if (count($this->post) < 2) return;
+                if (isset($this->post["uid"])) {
+                        $users = [
+                                'UID' => $this->post['uid'],
+                                'PW' => $this->post['pw'],
+                                'Mail' => $this->post['email'],
+                                'Date' => time(),
+                                'Auth' => 0,
+                                'Verified' => 0,
+                        ];
+                        if (isset($this->post["name"])) 
+                                $users['Name'] = $this->post['name'];
+                        $this->db->SetItem("users", $users);
+                } else {
+                        // split the upload into category and contents.
+                        $category = [
+                                'Auth'=>0,
+                                'Category'=>$this->post['Category'],
+                                'Translation'=>$this->post['Translation'],
+                                'Language'=>$this->post['Language']
+                        ];
+                        unset($this->post['Translation']);
+                        $this->db->SetItem('category', $category);
+                        $this->db->SetItem('content', $this->post);
+                }
+        }
+
+        /** 
+         * authorize queries db for user name and password hash.
+         * It then compares the two and returns authorization.
+         */
+        private function authorize() 
+        {
+                $query = [
+                        "Table" => "users",
+                        "UID" => $this->uid,
+                ];
+                $auth = $this->db->GetItem($query); // Get user data
+                $pwa = "non";
+                $autha = 0;
+                if (count($auth) > 0) {
+                        $pwa = $auth[0]["PW"];
+                        $autha = $auth[0]["Auth"];
+                }
+                if (!password_verify($this->pw, $pwa)) 
+                        $this->auth = $autha;
         }
 
         /** 
@@ -131,7 +240,7 @@ class Site
          */
         private function loadHead() 
         {
-                $title = $this->items['Table']; // TODO: Undefined index: Category
+                $title = $this->items['Table'];
                 if (isset($this->contents))
                         if (count($this->contents) == 1)
                                 $title = $this->contents[0]['Title'];
@@ -153,7 +262,7 @@ class Site
         {
                 $banner = "";
                 if (is_null($this->contents)) 
-                        return "<h1>".$this->items['Category']."</h1>"; 
+                        return "<h1>".$this->items['Title']."</h1>"; 
                 if (count($this->contents) == 1) 
                         $banner = $this->contents[0]['Title'];
                 $output = "<h1>$banner</h1>";
@@ -167,14 +276,13 @@ class Site
         {
                 // Get all data from content table
                 $query = ['Table' => 'content'];
-                $specifics = ['Title', 'Category'];
+                $specifics = ['Title', 'Main'];
                 $list = [];
                 $content = "";
                 $cats = $this->db->GetItem($query, $this->lang, $specifics);
                 if (count($cats) < 1) return $content;
                 // Organize items along categories
-                foreach ($cats as $cat) $list[$cat["Category"]][] = $cat;
-                //$list = $cats;
+                foreach ($cats as $cat) $list[$cat["Main"]][] = $cat;
 
                 // Generate dropdowns
                 $content .= '<ul>';
@@ -186,14 +294,16 @@ class Site
                         foreach ($value as $cat) {
                                 $content .= '<a href="/'.
                                         $this->items["Table"].'/'.
-                                        $cat["Category"].'/'.
+                                        $cat["Main"].'/'.
                                         $cat["Title"].'">'.
                                         $cat['Title'].'</a>';
                         }
                         $content .= '</div></li>';
                 }
-                $content .= '<a href="https://github.com/LargeMammal" class="dropdown">github</a>';
-                $content .= '<a href="https://gitlab.com/mammal" class="dropdown">gitlab</a>';
+                $content .= '<a href="https://github.com/LargeMammal" ';
+                $content .= 'class="dropdown">github</a>';
+                $content .= '<a href="https://gitlab.com/mammal" ';
+                $content .= 'class="dropdown">gitlab</a>';
                 $content .= "<ul>";
                 return $content;
         }
@@ -219,7 +329,7 @@ class Site
                                 $content .= '<tr>';
                                 foreach ($item as $key => $val) {
                                         if ($key == "Time")
-                                                $content .= "<td>".date("H:i:s",$val)."</td>"; 
+                                                $content .= "<td>".date("H:i:s",$val)."</td>";
                                         else $content .= "<td>$val</td>";
                                 }
                                 $content .= '</tr>';
@@ -233,6 +343,58 @@ class Site
                         }
                 }
                 return $content;
+        }
+
+        private function getLang($str) {
+            $output = [];
+            // Split the string
+            $arr = explode(";", $str);
+            foreach ($arr as $value) {
+                    // Ignore q thingys
+                    foreach (explode(",", $value) as $val) {
+                            if (false === strpos($val, "q=")) {
+                                    $output[] = $val;
+                                    break;
+                            }
+                    }
+            }
+            return $output;
+        }
+
+        /**
+         * paths extracts file path and get variables from URI
+         */
+        private function paths($url) {
+                // Get get variables. 
+                $vget = explode('?', trim($url, "/"));
+                $form = explode('.', $vget[0]);
+                if (count($form) > 1) {
+                        switch ($form[count($form)-1]) {
+                        case 'json':
+                                $this->form = 'json';
+                                unset($form[count($form)-1]);
+                                $vget[0] = implode('.', $form);
+                                break;
+                        case 'xml':
+                                $this->form = 'xml';
+                                unset($form[count($form)-1]);
+                                $vget[0] = implode('.', $form);
+                                break;
+                        case 'test':
+                                $this->form = 'test';
+                                unset($form[count($form)-1]);
+                                $vget[0] = implode('.', $form);
+                                break;
+                        default:
+                                throw new Exception("form not recognized");
+                                break;
+                        }
+                }
+                if (count($vget) > 1)
+                        $this->get = explode('&', $vget[1]);
+                if ($vget[0] == "") return [];
+                $items = explode("/", $vget[0]);
+                return $items;
         }
 }
 ?>

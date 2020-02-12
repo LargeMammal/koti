@@ -10,14 +10,8 @@ class Server {
         private $oldErrorHandler;
         private $startTime;
 
-        private $auth;
-        private $items;
-        private $langs;
         private $method;
-        private $post;
-        private $pw;
-        private $realm;
-        private $uid;
+        private $site;
 
         function __construct($config, $time, $server, $post = NULL) {
                 $this->startTime = $time;
@@ -33,8 +27,10 @@ class Server {
                         0, 
                         0
                 );
+                $this->method = $server['REQUEST_METHOD'];
                 // Exception and error handling
-                $this->oldErrorHandler = set_error_handler(function(
+                $this->oldErrorHandler = set_error_handler(
+                        function(
                                 $errLvl, 
                                 $errMsg, 
                                 $errFile, 
@@ -58,85 +54,39 @@ class Server {
                                 "exception"
                         );
                 });
-                $this->items = $this->paths($server['REQUEST_URI']);
-                if (isset($server['HTTP_ACCEPT_LANGUAGE'])){
-                        $lang =$this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
-                        $this->langs = $lang;
-                } else $this->langs = ["fi-FI"];
-                
-                $this->method = $server['REQUEST_METHOD'];
-                if (count($post) > 0) $post["Date"] = time();
-                $this->post = $post;
-                $this->pw = NULL;
-                $this->uid = NULL;
-                if (isset($server['PHP_AUTH_USER']) && 
-                        isset($server['PHP_AUTH_PW'])) {
-                        $this->pw = $server['PHP_AUTH_PW'];
-                        $this->uid = $server['PHP_AUTH_USER'];
-                }
+
                 $this->db->LogEvent(
                         E_USER_NOTICE, 
                         "Benchmark: Server construction took ". 
                                 (round(microtime(true) * 1000)-$timer).
                                 " milliseconds");
+                $this->site = new Site($this->db,$server,$post);
         }
 
         function __destruct() {
                 $this->config = NULL;
                 $this->db = NULL;
                 $this->oldErrorHandler = NULL;
-                $this->items = NULL;
-                $this->langs = NULL;
                 $this->method = NULL;
                 $this->post = NULL;
-                $this->pw = NULL;
-                $this->realm = NULL;
-                $this->uid = NULL;
+                $this->site = NULL;
         }
 
         public function Serve() {
                 $timer = round(microtime(true) * 1000);
                 $output = "";
                 $str = "";
-                $level = 2;
-                if (count($this->items) < 1 || $this->items[0] == 'users') $level = 0;
-                $this->auth = 0;
-                $this->authorize();
 
                 switch($this->method) {
                 case 'GET':
-                        $site = new Site($this->db,$this->langs,$this->items);
-                        $output = $site->Build($this->auth, $this->realm);
+                        $output = $this->site->Get();
                         break;
                 case 'POST':
-                        if (count($this->post) < 2) break;
-                        if (isset($this->post["uid"])) {
-                                $users = [
-                                        'UID' => $this->post['uid'],
-                                        'PW' => $this->post['pw'],
-                                        'Mail' => $this->post['email'],
-                                        'Date' => time(),
-                                        'Auth' => 0,
-                                        'Verified' => 0,
-                                ];
-                                if (isset($this->post["name"])) 
-                                        $users['Name'] = $this->post['name'];
-                                $this->db->SetItem("users", $users);
-                        } else {
-                                // split the upload into category and contents.
-                                $category = [
-                                        'Auth'=>0,
-                                        'Category'=>$this->post['Category'],
-                                        'Translation'=>$this->post['Translation'],
-                                        'Language'=>$this->post['Language']
-                                ];
-                                unset($this->post['Translation']);
-                                $this->db->SetItem('category', $category);
-                                $this->db->SetItem('content', $this->post);
-                        }
+                        $state = $this->site->Post();
+                        http_response_code($state);
                         break;
                 default:
-                        header('HTTP/1.1 405 Method Not Allowed');
+                        http_response_code(405);
                         header('Allow: GET POST');
                         break;
                 }
@@ -147,43 +97,6 @@ class Server {
                                 " milliseconds"
                         );
                 return $output;
-        }
-
-        /** 
-         * authorize queries db for user name and password hash.
-         * It then compares the two and returns authorization.
-         */
-        private function authorize() 
-        {
-                $query = [
-                        "Table" => "users",
-                        "UID" => $this->uid,
-                ];
-                $auth = $this->db->GetItem($query); // Get user data
-                $pwa = "non";
-                $autha = 0;
-                if (count($auth) > 0) {
-                        $pwa = $auth[0]["PW"];
-                        $autha = $auth[0]["Auth"];
-                }
-                if (!password_verify($this->pw, $pwa)) 
-                        $this->auth = $autha;
-        }
-
-        private function getLang($str) {
-            $output = [];
-            // Split the string
-            $arr = explode(";", $str);
-            foreach ($arr as $value) {
-                    // Ignore q thingys
-                    foreach (explode(",", $value) as $val) {
-                            if (false === strpos($val, "q=")) {
-                                    $output[] = $val;
-                                    break;
-                            }
-                    }
-            }
-            return $output;
         }
 
         /**
@@ -205,7 +118,7 @@ class Server {
         }
         
         /**
-         * loadFile gets file and returns contents in an array
+         * loadJSON gets JSON file and returns contents in an array
          */
         private function loadJSON($file) {
                 $pwd = $file;
@@ -213,43 +126,6 @@ class Server {
                 $json = file_get_contents($pwd); // reads file into string
                 $data = json_decode($json); // turns json into php object
                 return $this->parseObject($data);
-        }
-
-        private function createItem(){
-                if (isset($this->contents[$items])) {
-                        header('HTTP/1.1 409 Conflict');
-                        return;
-                }
-                /* 
-                 * PUT requests need to be handled by reading from standard 
-                 * input. php://input is a read-only stream that allows you 
-                 * to read raw data from the request body.
-                 */
-                $data = json_decode(file_get_contents('php://input'));
-                if (is_null($data)) {
-                        header('HTTP/1.1 400 Bad Request');
-                        $this->result();
-                        return;
-                }
-                $this->contacts[$items] = $data;
-                $this->result();
-        }
-
-        private function deleteItem() {
-                if (isset($this->contacts[$items])) {
-                        unset($this->contacts[$items]);
-                        $this->result();
-                } else {
-                        header('HTTP/1.1 404 Not Found');
-                }
-        }
-
-        private function paths($url) {
-                // Remove slashes from both sides.
-                $str = trim($url, "/");
-                if ($str == "") return [];
-                $items = explode("/", $str);
-                return $items;
         }
 }
 ?>

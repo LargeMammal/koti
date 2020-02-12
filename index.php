@@ -29,6 +29,7 @@ set_exception_handler(function($exception) {
 });
 if (!spl_autoload_register('autoloader')) 
         trigger_error("Autoloader error");
+http_response_code(200);
 
 // Serve
 $server = new Server(CONFIG, $time, $_SERVER, $_POST);
