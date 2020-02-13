@@ -159,6 +159,30 @@ class DB {
 	}
 
 	/**
+	 * GetTableFields gets table fields of given table
+	 */
+	public function GetTableFields($t) {
+		$fields = [];
+		$table = $this->conn->escape_string($t);
+		// If table doesn't exist stop here
+		if (!$this->checkTable($table)) {
+			trigger_error("db.GetItem: Table, $table, not found"); 
+			return $fields;
+		}
+		$sql = "DESCRIBE $table";
+		$results = $this->conn->query($sql);
+		// If query fails stop here
+		if ($results === FALSE) {
+			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error); 
+			return $fields;
+		}
+		// Fetch each row in associative form and pass it to output.
+		while($row = $results->fetch_assoc()) $fields[] = $row;
+		$results->free();
+		return $fields;
+	}
+
+	/**
 	 * LogEvent saves the event to database
 	 * This is supposed to handle exceptions, errors and benchmarking.
 	 */

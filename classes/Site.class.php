@@ -26,8 +26,6 @@ class Site
                 $this->realm = "vesikarhu.fi";
                 $this->db = $db;
                 $this->server = $server;
-                
-                if (!is_null($post)) $post["Date"] = time();
                 $this->post = $post;
 
                 // Search start
@@ -97,8 +95,12 @@ class Site
                 $this->langs = NULL;
         }
 
+        /**
+         * Get function handles get requests.
+         */
         public function Get()
         {
+                if($this->items["Table"] == "users") return;
                 $this->footer = NULL;
 
                 // Drop unauthorized stuff
@@ -176,17 +178,22 @@ class Site
                 return $str;
         }
 
+        /**
+         * Post function handles post requests.
+         */
         public function Post()
         {
-                // TODO: Move this to check portion
-                $this->pw = NULL;
-                $this->uid = NULL;
-                if (isset($server['PHP_AUTH_USER']) && 
-                        isset($server['PHP_AUTH_PW'])) {
-                        $this->pw = $server['PHP_AUTH_PW'];
-                        $this->uid = $server['PHP_AUTH_USER'];
-                }
-                if (count($this->post) < 2) return;
+                if (count($this->post) < 1) return;
+                $this->post["Date"] = time();
+
+                /**
+                 * TODO:
+                 * 1. Get table structure from db
+                 * * DESCRIBE table; gives you table columns 
+                 *   and explanations
+                 */
+                $fields = $this->db->GetTableFields($this->items["Table"]);
+                
                 if (isset($this->post["uid"])) {
                         $users = [
                                 'UID' => $this->post['uid'],
