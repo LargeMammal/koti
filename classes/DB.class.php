@@ -160,6 +160,8 @@ class DB {
 
 	/**
 	 * GetTableFields gets table fields of given table
+	 * 
+	 * @return array returns assoc array of table colums. 
 	 */
 	public function GetTableFields($t) {
 		$fields = [];

@@ -18,7 +18,15 @@ class Site
         private $pw;
         private $uid;
 
-        function __construct($db, $server, $post = NULL) 
+        /**
+         * Site object gathers all information needed to handle a request
+         * 
+         * @param DB my database object that creates 
+         * relatively easy database interface
+         * @param array assoc array of server parameters
+         * @param array assoc array of post variables
+         */
+        function __construct(DB $db, array $server, array $post = NULL) 
         {
                 $this->auth = 0; // Make sure to purge privileges
                 $this->contents = [];
@@ -72,6 +80,7 @@ class Site
                         }
                 }
                 $this->contents = $this->db->GetItem($this->items);
+
                 // The rest should be moved to db side 
                 if (count($this->contents) < 1) {
                         $this->db->InitEditor();
@@ -96,11 +105,16 @@ class Site
         }
 
         /**
-         * Get function handles get requests.
+         * Get function handles get requests. Adds necessary headers.
+         * 
+         * @return string Get function returns site in string form
          */
         public function Get()
         {
-                if($this->items["Table"] == "users") return;
+                if($this->items["Table"] == "users") {
+                        http_response_code(403);
+                        return "Forbidden";
+                }
                 $this->footer = NULL;
 
                 // Drop unauthorized stuff
@@ -109,9 +123,7 @@ class Site
                         if (isset($value["Auth"])) 
                                 $auth = $value["Auth"];
                         else $auth = 3;
-
-                        // TODO: This should only be called if 
-                        // authentication is needed. 
+                        
                         if ($this->auth < $auth) {
                                 header("WWW-Authenticate: " .
                                         "Basic realm='$this->realm'");
@@ -135,7 +147,6 @@ class Site
                                 array_walk_recursive($this->contents, array($xml, 'addChild'));
                                 return $xml->asXML();
                         case 'test':
-                                //header('Content-Type: application/json');
                                 echo count($this->content);
                                 $json = $this->contents;
                                 return json_encode($json);
@@ -180,11 +191,14 @@ class Site
 
         /**
          * Post function handles post requests.
+         * 
+         * @return void Post only generates response code
          */
         public function Post()
         {
                 if (count($this->post) < 1) return;
                 $this->post["Date"] = time();
+                $input = [];
 
                 /**
                  * TODO:
@@ -193,8 +207,19 @@ class Site
                  *   and explanations
                  */
                 $fields = $this->db->GetTableFields($this->items["Table"]);
-                
-                if (isset($this->post["uid"])) {
+
+                switch ($this->items["Table"]) {
+                case 'content':
+                        // split the upload into category and contents.
+                        $category = [
+                                'Auth'=>0,
+                                'Category'=>$this->post['Category'],
+                                'Translation'=>$this->post['Translation'],
+                                'Language'=>$this->post['Language'],
+                        ];
+                        unset($this->post['Translation']);
+                        break;
+                case 'users':
                         $users = [
                                 'UID' => $this->post['uid'],
                                 'PW' => $this->post['pw'],
@@ -206,18 +231,29 @@ class Site
                         if (isset($this->post["name"])) 
                                 $users['Name'] = $this->post['name'];
                         $this->db->SetItem("users", $users);
-                } else {
-                        // split the upload into category and contents.
-                        $category = [
-                                'Auth'=>0,
-                                'Category'=>$this->post['Category'],
-                                'Translation'=>$this->post['Translation'],
-                                'Language'=>$this->post['Language']
-                        ];
-                        unset($this->post['Translation']);
-                        $this->db->SetItem('category', $category);
-                        $this->db->SetItem('content', $this->post);
+                        break;
+                case 'category':
+                        # code...
+                        break;
+                case 'errors':
+                        # code...
+                        break;
+                case 'footer':
+                        # code...
+                        break;
+                default:
+                        # code...
+                        break;
                 }
+                foreach ($fields as $field) {
+                        if ($field["Field"] == "id") continue;
+                        if (isset($this->post[$field["Field"]])) {
+                                http_response_code(400);
+                                return;
+                        }
+                }
+                //$this->db->SetItem('category', $category);
+                //$this->db->SetItem('content', $this->post);
         }
 
         /** 
@@ -370,6 +406,9 @@ class Site
 
         /**
          * paths extracts file path and get variables from URI
+         * 
+         * @param string URI in string form 
+         * @return array returns array of URI elements. 
          */
         private function paths($url) {
                 // Get get variables. 
