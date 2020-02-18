@@ -32,6 +32,6 @@ if (!spl_autoload_register('autoloader'))
 http_response_code(200);
 
 // Serve
-$server = new Server(CONFIG, $time, $_SERVER, $_POST);
+$server = new Server(CONFIG, $time, $_SERVER, $_GET, $_POST);
 echo $server->Serve();
 ?>

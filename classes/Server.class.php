@@ -13,7 +13,7 @@ class Server {
         private $method;
         private $site;
 
-        function __construct($config, $time, $server, $post = NULL) {
+        function __construct($config, $time, $server, $get = NULL, $post = NULL) {
                 $this->startTime = $time;
                 $timer = round(microtime(true) * 1000); // Start benchmark
                 $this->config = $this->loadJSON($config);
@@ -60,7 +60,7 @@ class Server {
                         "Benchmark: Server construction took ". 
                                 (round(microtime(true) * 1000)-$timer).
                                 " milliseconds");
-                $this->site = new Site($this->db,$server,$post);
+                $this->site = new Site($this->db, $server, $get, $post);
         }
 
         function __destruct() {

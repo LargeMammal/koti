@@ -26,7 +26,7 @@ class Site
          * @param array assoc array of server parameters
          * @param array assoc array of post variables
          */
-        function __construct(DB $db, array $server, array $post = NULL) 
+        function __construct(DB $db, array $server, array $get = NULL, array $post = NULL) 
         {
                 $this->auth = 0; // Make sure to purge privileges
                 $this->contents = [];
@@ -35,6 +35,7 @@ class Site
                 $this->db = $db;
                 $this->server = $server;
                 $this->post = $post;
+                $this->get = $get;
 
                 // Search start
                 /**
@@ -198,7 +199,6 @@ class Site
         {
                 if (count($this->post) < 1) return;
                 $this->post["Date"] = time();
-                $input = [];
 
                 /**
                  * TODO:
@@ -209,51 +209,26 @@ class Site
                 $fields = $this->db->GetTableFields($this->items["Table"]);
 
                 switch ($this->items["Table"]) {
-                case 'content':
-                        // split the upload into category and contents.
-                        $category = [
-                                'Auth'=>0,
-                                'Category'=>$this->post['Category'],
-                                'Translation'=>$this->post['Translation'],
-                                'Language'=>$this->post['Language'],
-                        ];
-                        unset($this->post['Translation']);
-                        break;
                 case 'users':
-                        $users = [
-                                'UID' => $this->post['uid'],
-                                'PW' => $this->post['pw'],
-                                'Mail' => $this->post['email'],
-                                'Date' => time(),
-                                'Auth' => 0,
-                                'Verified' => 0,
-                        ];
-                        if (isset($this->post["name"])) 
-                                $users['Name'] = $this->post['name'];
-                        $this->db->SetItem("users", $users);
-                        break;
-                case 'category':
-                        # code...
-                        break;
-                case 'errors':
-                        # code...
-                        break;
-                case 'footer':
-                        # code...
+                        $this->post['Auth'] = 0;
+                        $this->post['Verified'] = 0;
                         break;
                 default:
-                        # code...
+                        if ($this->auth < 2) {
+                                header("WWW-Authenticate: " .
+                                        "Basic realm='$this->realm'");
+                                http_response_code(401);
+                        }
                         break;
                 }
                 foreach ($fields as $field) {
                         if ($field["Field"] == "id") continue;
-                        if (isset($this->post[$field["Field"]])) {
+                        if (!isset($this->post[$field["Field"]])) {
                                 http_response_code(400);
                                 return;
                         }
                 }
-                //$this->db->SetItem('category', $category);
-                //$this->db->SetItem('content', $this->post);
+                $this->db->SetItem($this->items["Table"], $this->post);
         }
 
         /** 
@@ -389,19 +364,19 @@ class Site
         }
 
         private function getLang($str) {
-            $output = [];
-            // Split the string
-            $arr = explode(";", $str);
-            foreach ($arr as $value) {
-                    // Ignore q thingys
-                    foreach (explode(",", $value) as $val) {
-                            if (false === strpos($val, "q=")) {
-                                    $output[] = $val;
-                                    break;
-                            }
-                    }
-            }
-            return $output;
+                $output = [];
+                // Split the string
+                $arr = explode(";", $str);
+                foreach ($arr as $value) {
+                        // Ignore q thingys
+                        foreach (explode(",", $value) as $val) {
+                                if (false === strpos($val, "q=")) {
+                                        $output[] = $val;
+                                        break;
+                                }
+                        }
+                }
+                return $output;
         }
 
         /**
@@ -436,8 +411,6 @@ class Site
                                 break;
                         }
                 }
-                if (count($vget) > 1)
-                        $this->get = explode('&', $vget[1]);
                 if ($vget[0] == "") return [];
                 $items = explode("/", $vget[0]);
                 return $items;
