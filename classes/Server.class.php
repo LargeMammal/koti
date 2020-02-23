@@ -82,12 +82,14 @@ class Server {
                         $output = $this->site->Get();
                         break;
                 case 'POST':
-                        $state = $this->site->Post();
-                        http_response_code($state);
+                        $this->site->Post();
+                        break;
+                case 'DELETE':
+                        $this->site->Delete();
                         break;
                 default:
                         http_response_code(405);
-                        header('Allow: GET POST');
+                        header('Allow: GET POST DELETE');
                         break;
                 }
                 $this->db->LogEvent(

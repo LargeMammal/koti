@@ -231,6 +231,46 @@ class Site
                 $this->db->SetItem($this->items["Table"], $this->post);
         }
 
+        /**
+         * Delete function handles delete requests.
+         * 
+         * @return void Delete only generates response code
+         */
+        public function Delete()
+        {
+                /**
+                 * TODO:
+                 * 1. Get table structure from db
+                 * * DESCRIBE table; gives you table columns 
+                 *   and explanations
+                 */
+                //$fields = $this->db->GetTableFields($this->items["Table"]);
+
+                switch ($this->items["Table"]) {
+                case 'users':
+                        http_response_code(403);
+                        break;
+                default:
+                        if ($this->auth < 3) {
+                                header("WWW-Authenticate: " .
+                                        "Basic realm='$this->realm'");
+                                http_response_code(401);
+                        }
+                        break;
+                }
+                echo "Delete was found";
+                /*
+                foreach ($fields as $field) {
+                        if ($field["Field"] == "id") continue;
+                        if (!isset($this->post[$field["Field"]])) {
+                                http_response_code(400);
+                                return;
+                        }
+                }
+                $this->db->SetItem($this->items["Table"], $this->post);
+                //*/
+        }
+
         /** 
          * authorize queries db for user name and password hash.
          * It then compares the two and returns authorization.
@@ -311,8 +351,7 @@ class Site
                                 <div class='dropdown-content'>";
                         foreach ($value as $cat) {
                                 $content .= '<a href="/'.
-                                        $this->items["Table"].'/'.
-                                        $cat["Main"].'/'.
+                                        'content/Titles/'.
                                         $cat["Title"].'">'.
                                         $cat['Title'].'</a>';
                         }
