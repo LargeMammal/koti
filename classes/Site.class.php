@@ -182,11 +182,11 @@ class Site
                 $str .= $this->loadHead();
                 $str .= '</head>';
                 // Stuff in body
-                $str .= '<body><div id="root"><header>'.$this->loadHeader();
+                $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
                 $str .= '<nav>'.$this->loadNav().'</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
                 $str .= '<footer>'.$this->footer.'</footer>';
-                $str .= '</body></html>';
+                $str .= '</div></div></body></html>';
                 return $str;
         }
 
