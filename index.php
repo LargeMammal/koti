@@ -15,7 +15,7 @@ function autoloader($class) {
  * I hope that later all errors to be saved into database for later usage.
  * Later This would become pipeline for analytics.
  */
-error_reporting(E_ALL);
+error_reporting(E_ALL);/* 
 set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
         ob_start();
         debug_print_backtrace();
@@ -23,7 +23,7 @@ set_error_handler(function($errLvl, $errMsg, $errFile, $errLine, $errCon) {
         echo "<b>Error: </b> [$errLvl] '$errMsg' in $errFile line". 
                 "$errLine<br><pre>$dump</pre>";
         if ($errno == E_ERROR || $errno == E_USER_ERROR) die();
-});
+}); */
 set_exception_handler(function($exception) {
         echo "<b>Exception:</b> ", $exception->getMessage();
 });

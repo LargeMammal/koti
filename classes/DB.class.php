@@ -48,6 +48,8 @@ class DB {
 		if (!$this->checkTable($items["Table"])) {
 			trigger_error("db.GetItem: Table, ".$items["Table"].
 				", not found"); 
+			echo "db.GetItem: Table, ".$items["Table"].
+				", not found";
 			return $this->output;
 		}
 	
@@ -140,7 +142,31 @@ class DB {
 
 		return true;
 	}
-	
+
+	/**
+	 * CheckUserTable
+	 * Check/Create user/password table. Necessary for when software is loaded
+	 * for the first time. 
+	 */
+	public function CheckUserTable() {
+		$die = 0;
+		// If table doesn't exist
+		if (!$this->checkTable('users')) {
+			// Create the table
+			$error = $this->createTable('users', ['UID','PW','Auth','Verified', 'Date']);
+			// If creation failed table stop here
+			if ($error != "") {
+				if ($die != 0) {
+					ob_start();
+					debug_print_backtrace();
+					$dump = ob_get_clean();
+					die("db.SetItem: $error.<br>
+						<pre>$dump</pre>");
+				} else trigger_error("db.SetItem: " . $error);
+			}
+		}
+	}
+
 	/** 
 	 * RemoveItem
 	 * remove selected item

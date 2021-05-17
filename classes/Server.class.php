@@ -29,6 +29,7 @@ class Server {
                 );
                 $this->method = $server['REQUEST_METHOD'];
                 // Exception and error handling
+                /* 
                 $this->oldErrorHandler = set_error_handler(
                         function(
                                 $errLvl, 
@@ -44,7 +45,7 @@ class Server {
                                         $errLine, 
                                         $errCon
                                 );
-                });
+                });  */
                 set_exception_handler(function($exception) {
                         return $this->db->LogEvent(
                                 $exception->getCode(), 
@@ -76,7 +77,6 @@ class Server {
                 $timer = round(microtime(true) * 1000);
                 $output = "";
                 $str = "";
-
                 switch($this->method) {
                 case 'GET':
                         $output = $this->site->Get();

@@ -31,7 +31,7 @@ class Site
                 $this->auth = 0; // Make sure to purge privileges
                 $this->contents = [];
                 $this->form = "html";
-                $this->realm = "vesikarhu.fi";
+                $this->realm = "Tardiland";
                 $this->db = $db;
                 $this->server = $server;
                 $this->post = $post;
@@ -67,7 +67,7 @@ class Site
                         $this->pw = $server['PHP_AUTH_PW'];
                         $this->uid = $server['PHP_AUTH_USER'];
                 }
-                // This gets user authorization from db 
+                // This gets user authorization from db
                 $this->authorize();
 
                 $this->items = [];
@@ -117,6 +117,7 @@ class Site
                         return "Forbidden";
                 }
                 $this->footer = NULL;
+
 
                 // Drop unauthorized stuff
                 foreach ($this->contents as $key => $value) {
@@ -281,6 +282,9 @@ class Site
                         "Table" => "users",
                         "UID" => $this->uid,
                 ];
+                if (!$this->db->CheckUserTable()) {
+                        trigger_error("Failed to create users table");
+                }
                 $auth = $this->db->GetItem($query); // Get user data
                 $pwa = "non";
                 $autha = 0;
@@ -370,6 +374,7 @@ class Site
          */
         private function loadBody() 
         {
+                return $this->items['Table'];
                 $content = "";
                 if (is_null($this->contents) || count($this->contents) < 1) 
                         return "<h1>Site came up empty!</h1>";
