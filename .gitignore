@@ -6,6 +6,7 @@ config/*
 .htaccess
 hackerman_hacktime*
 .well-known
+update.sh
 
 # Compiled source #
 ###################
