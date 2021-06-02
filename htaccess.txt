@@ -3,6 +3,9 @@
 #Action php-cgi /~K1729/cgi-bin/php-fastcgi
 
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+SetEnv HASH_SECRET (your secret used for hashing)
+SetEnv MASTER_UNAME (master user username)
+SetEnv MASTER_EMAIL (master email)
 
 # AddType is necessary because other rewriter doesn't understand to execute
 AddType application/x-httpd-php .php

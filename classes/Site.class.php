@@ -19,15 +19,21 @@ class Site
         private $uid;
 
         /**
+         * @brief
          * Site object gathers all information needed to handle a request
          * 
          * @param DB my database object that creates 
          * relatively easy database interface
          * @param array assoc array of server parameters
+         * @param array assoc array of get variables
          * @param array assoc array of post variables
          */
-        function __construct(DB $db, array $server, array $get = NULL, array $post = NULL) 
-        {
+        function __construct(
+                DB $db, 
+                array $server, 
+                array $get = NULL, 
+                array $post = NULL
+        ){
                 $this->auth = 0; // Make sure to purge privileges
                 $this->contents = [];
                 $this->form = "html";
@@ -36,6 +42,7 @@ class Site
                 $this->server = $server;
                 $this->post = $post;
                 $this->get = $get;
+                $this->items = [];
 
                 // Search start
                 /**
@@ -47,9 +54,7 @@ class Site
                  *      is filled then search items with that title. 
                  * 2. Results then are parsed according to client data
                  * 3. Use get variables in parsing
-                 * 4. Move init stuff to DB side.
                  */
-                $items = $this->paths($server['REQUEST_URI']);
                 
                 $this->langs = ["fi-FI"];
                 if (isset($server['HTTP_ACCEPT_LANGUAGE'])){
@@ -67,29 +72,6 @@ class Site
                         $this->pw = $server['PHP_AUTH_PW'];
                         $this->uid = $server['PHP_AUTH_USER'];
                 }
-                // This gets user authorization from db
-                $this->authorize();
-
-                $this->items = [];
-                if (count($items) < 1) $items = ["content", "Title", "Koti"];
-                $this->items["Table"] = $items[0];
-                array_shift($items);
-                foreach ($items as $key => $value) {
-                        if ($key % 2 == 0) {
-                                $name = trim($value, 's');
-                                $this->items[$name] = $items[$key+1];
-                        }
-                }
-                $this->contents = $this->db->GetItem($this->items);
-
-                // The rest should be moved to db side 
-                if (count($this->contents) < 1) {
-                        $this->db->InitEditor();
-                        $this->contents =$this->db->GetItem($this->items);
-                }
-                if (count($this->contents) < 1) 
-                        $this->contents = NULL;
-                // Search ends
         }
 
         function __destruct() 
@@ -106,12 +88,42 @@ class Site
         }
 
         /**
+         * @brief
          * Get function handles get requests. Adds necessary headers.
-         * 
+         * More accurately it formats the request. Request is done in 
+         * construction. 
          * @return string Get function returns site in string form
          */
         public function Get()
         {
+                // This gets user authorization from db
+                $this->authorize();
+                $items = $this->paths($server['REQUEST_URI']);
+                
+                if (count($items) < 1) $items = ["content", "Title", "Koti"];
+                $this->items["Table"] = $items[0];
+                array_shift($items);
+                foreach ($items as $key => $value) {
+                        if ($key % 2 == 0) {
+                                $name = trim($value, 's');
+                                $this->items[$name] = $items[$key+1];
+                        }
+                }
+                $this->contents = $this->db->DBGet($this->items);
+                // The rest should be moved to db side 
+                if (count($this->contents) < 1) {
+                        $this->db->InitEditor();
+                        $this->contents =$this->db->DBGet($this->items);
+                }
+                if (count($this->contents) < 1) 
+                        $this->contents = NULL;
+                // Search ends
+                /* Test tokens
+                if($this->items['Table'] == 'tokens') {
+                        $token = $this->db->DBGetToken('anon');
+                        var_dump($token);
+                }
+                //*/
                 if($this->items["Table"] == "users") {
                         http_response_code(403);
                         return "Forbidden";
@@ -158,6 +170,7 @@ class Site
                 }
 
                 $footers = $this->db->GetItem(["Table" => "footer"]);
+                //echo json_encode($footers);
                 if (count($footers) < 1) {
                         $this->db->InitFooter();
                         $footers = $this->db->GetItem(["Table" => "footer"]);
@@ -199,37 +212,28 @@ class Site
         public function Post()
         {
                 if (count($this->post) < 1) return;
-                $this->post["Date"] = time();
+                // Compare hashed user to db user
+                $query['Table'] = 'users';
+                $query['uname'] = crypt($this->post['user'], getenv("SALT"));
+                $id = $this->db->GetItem($query);
 
-                /**
-                 * TODO:
-                 * 1. Get table structure from db
-                 * * DESCRIBE table; gives you table columns 
-                 *   and explanations
-                 */
-                $fields = $this->db->GetTableFields($this->items["Table"]);
-
-                switch ($this->items["Table"]) {
-                case 'users':
-                        $this->post['Auth'] = 0;
-                        $this->post['Verified'] = 0;
-                        break;
-                default:
-                        if ($this->auth < 2) {
-                                header("WWW-Authenticate: " .
-                                        "Basic realm='$this->realm'");
-                                http_response_code(401);
-                        }
-                        break;
+                // Get token id pair that matches token in request
+                $token = $this->db->DBGetToken($this->post['token']);
+                if ($token['user'] !== $id) {
+                        http_response_code(403);
+                        return "Missing or wrong token";
                 }
-                foreach ($fields as $field) {
-                        if ($field["Field"] == "id") continue;
-                        if (!isset($this->post[$field["Field"]])) {
-                                http_response_code(400);
-                                return;
-                        }
+                $query = NULL;
+                $query['title'] = $this->post['title'];
+                $query['user'] = $id;
+                $query['blob'] = $this->post['blob'];
+                $query['auth'] = $this->post['auth'];
+                $query['tags'] = $this->post['tags'];
+                $dbitem = new DBItem($query);
+                if (!$this->db->DBPost($dbitem)) {
+                        http_response_code(500);
+                        return "Failed the request";
                 }
-                $this->db->SetItem($this->items["Table"], $this->post);
         }
 
         /**
@@ -374,7 +378,6 @@ class Site
          */
         private function loadBody() 
         {
-                return $this->items['Table'];
                 $content = "";
                 if (is_null($this->contents) || count($this->contents) < 1) 
                         return "<h1>Site came up empty!</h1>";
@@ -407,7 +410,8 @@ class Site
                 return $content;
         }
 
-        private function getLang($str) {
+        private function getLang($str) 
+        {
                 $output = [];
                 // Split the string
                 $arr = explode(";", $str);
@@ -429,7 +433,8 @@ class Site
          * @param string URI in string form 
          * @return array returns array of URI elements. 
          */
-        private function paths($url) {
+        private function paths($url):array
+        {
                 // Get get variables. 
                 $vget = explode('?', trim($url, "/"));
                 $form = explode('.', $vget[0]);

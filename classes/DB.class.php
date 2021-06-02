@@ -1,6 +1,42 @@
 <?php
 /**
+ * DBItem
+ */
+class DBItem {
+	private $hash;
+	private $title;
+	private $date;
+	private $blob;
+	private $tags;
+	private $user;
+	private $auth;
+
+	function __construct($array) {
+		$this->hash = hash("sha512", $array["blob"]);
+		$this->title = $array["title"];
+		$this->date = time();
+		$this->blob = $array["blob"];
+		$this->tags = $array["tags"];
+		$this->user = $array["user"];
+		$this->auth = $array["auth"];
+	}
+
+	function __destruct() {
+		$this->hash = NULL;
+		$this->title = NULL;
+		$this->date = NULL;
+		$this->blob = NULL;
+		$this->tags = NULL;
+		$this->user = NULL;
+		$this->auth = NULL;
+	}
+}
+
+/**
  * DB class
+ * 
+ * TODO: If I simplify DB and this, then I should run all 
+ * checks in construct. Now I'm wasting cycles. 
  */
 class DB {
 	private $conn;
@@ -33,10 +69,15 @@ class DB {
 	/** 
 	* GetItem gets an item from database
 	* Generate the code here and later turn it into a exterrior script
+	* @param array inputs in assosiative array format. Needs 'Table' which 
+	* contains the table which is searched. Further information is used
+	* for further refinement. TABLE=TABLE WHERE SOMETHING=SOMETHING
+	* @param string lang in a string: xx-XX
+	* @return array returns results in an array
 	*/
-	public function GetItem($inputs, $lang = NULL, $specifics = NULL): array {
+	public function GetItem($inputs, $lang = NULL): array {
 		$this->output = [];
-	
+		
 		$items = [];
 		// Clean inputs
 		foreach ($inputs as $key => $value) {
@@ -48,8 +89,7 @@ class DB {
 		if (!$this->checkTable($items["Table"])) {
 			trigger_error("db.GetItem: Table, ".$items["Table"].
 				", not found"); 
-			echo "db.GetItem: Table, ".$items["Table"].
-				", not found";
+			echo "db.GetItem: Table, " . $items["Table"] . ", not found";
 			return $this->output;
 		}
 	
@@ -78,7 +118,7 @@ class DB {
 		// Fetch each row in associative form and pass it to output.
 		while($row = $results->fetch_assoc()) $this->output[] = $row;
 		$results->free();
-
+		//var_dump($this->output);
 		return $this->output;
 	}
     
@@ -86,6 +126,7 @@ class DB {
 	 * SetItem inserts data into a table.
 	 * Those using SetItem should have special privileges
 	 */
+	//*
 	public function SetItem($table, $inputs, $die = 0) : bool {
 		//* Sanitize inputs
 		$items = [];
@@ -106,6 +147,7 @@ class DB {
 		}
 		$sql .= implode(", ", $columns) . ") 
 			VALUES (" . implode(", ", $values) . ");";
+		echo $sql;
 	
 		// If table does exist
 		if (!$this->checkTable($table)) {
@@ -125,9 +167,10 @@ class DB {
 				return false;
 			}
 		}
-	
+		
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
+			echo "</br>".$this->conn->error."</br>";
 			if ($die != 0) {
 				ob_start();
 				debug_print_backtrace();
@@ -139,32 +182,177 @@ class DB {
 				"<br>".$this->conn->error);
 			return false;
 		}
+		//var_dump($this->conn);
 
 		return true;
 	}
+	//*/
 
+	/**
+	 * DBGet is the new get function that checks items and tags 
+	 * tables for stuff. At this moment this will work as a wrapper.
+	 * Eventually this will replace GetItem
+	 * @param array $search array are the search parameters. 
+	 * They are what fill the portion after WHERE=
+	 * @return array array of results 
+	 */
+	public function DBGet($search): array {
+		// Check table
+		$val = $this->conn->query("select 1 from `items` LIMIT 1");
+		// If table doesn't exist
+		if ($val === FALSE) {
+			// Create the table
+			$sql = "CREATE TABLE items (hash VARCHAR(255) PRIMARY KEY,".
+				" user INT UNSIGNED NOT NULL, date BIGINT NOT NULL,".
+				" title TEXT NOT NULL, blob BLOB NOT NULL,".
+				" auth INT UNSIGNED NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				//echo "</br>".$this->conn->error."</br>";
+				trigger_error("db.DBGet: ".$this->conn->error);
+				return [];
+			}
+		}
+		// Do the search
+		$inputs = $search;
+		$inputs['Table'] = "items";
+		return $this->GetItem($inputs);
+	}
+
+	/**
+	 * DBPost
+	 * @param DBItem insert post in items table. 
+	 * @return bool returns boolean value indicating success or failure
+	 */
+	public function DBPost($dbitem): bool {
+		// If table does exist
+		if (!$this->checkTable('items')) {
+			//trigger_error("db.SetItem: Table, items , not found");
+			// Create the table
+			$sql = "CREATE TABLE items (hash VARCHAR(255) PRIMARY KEY,".
+				" title TEXT NOT NULL, date BIGINT NOT NULL,".
+				" blob BLOB NOT NULL, user INT UNSIGNED NOT NULL,".
+				" auth INT UNSIGNED NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				trigger_error("db.createTable: ".$this->conn->error);
+				return false;
+			}
+		}
+
+		//* Sanitize inputs
+		$items = [];
+		// Clean inputs
+		foreach ($dbitem as $key => $value) {
+			$var = $this->conn->escape_string($value);
+			$items[$this->conn->escape_string($key)] = $var;
+		}
+	
+		// Generate query
+		$sql = "INSERT INTO items (";
+		$sql .= "hash, title, date, blob, user, auth) VALUES (".
+			$items['hash'].", ".
+			$items['title'].", ".
+			$items['date'].", ".
+			$items['blob'].", ".
+			$items['user'].", ".
+			$items['auth'].", ".");";
+	
+		// Query
+		if ($this->conn->query($sql) !== TRUE) {
+			trigger_error("db.SetItem: ".$sql.
+				"<br>".$this->conn->error);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * DPGetToken
+	 * Get tokens of specific user
+	 * @param string token
+	 * @return array returns token id pair.
+	 */
+	//*
+	public function DBGetToken($token) : array {
+		$this->output = [];
+		// If table does exist
+		if (!$this->checkTable('tokens')) {
+			// Create the table
+			$sql = "CREATE TABLE tokens (token VARCHAR(255) PRIMARY KEY,".
+				" user INT UNSIGNED NOT NULL, exp BIGINT NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				//echo "</br>".$this->conn->error."</br>";
+				trigger_error("db.createTable: ".$this->conn->error);
+				return [];
+			}
+		}
+		$check=$this->conn->query("SELECT * FROM tokens");
+		var_dump($check);
+		if($check->num_rows < 1) {
+			// Generate master token
+			$master['user'] = 1;
+			$master['token'] = $this->generateJWT(
+				$master['user'], strtotime('+1 month')
+			);
+			$master['exp'] = strtotime('+1 month');
+			echo ($master['token']);
+			if(!$this->SetItem('tokens', $master)) {
+				//echo "</br>".$this->conn->error."</br>";
+				trigger_error("db.SetItem: ".$this->conn->error);
+				return [];
+			}
+		}
+		$var = $this->conn->escape_string($token);
+		// Hash tokens in future.
+		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
+	
+		// Generate query
+		$sql = "SELECT * FROM tokens WHERE token='$var'";
+	
+		$results = $this->conn->query($sql); 
+		if ($results !== TRUE) {
+			trigger_error("db.SetItem: ".$this->conn->error);
+			return [];
+		}
+	
+		// Fetch each row in associative form and pass it to output.
+		while($row = $results->fetch_assoc()) $this->output[] = $row;
+		$results->free();
+		return $this->output[0];
+	}
+
+	//*/
 	/**
 	 * CheckUserTable
 	 * Check/Create user/password table. Necessary for when software is loaded
 	 * for the first time. 
 	 */
 	public function CheckUserTable() {
-		$die = 0;
+		$val = $this->conn->query("select 1 from `users` LIMIT 1");
 		// If table doesn't exist
-		if (!$this->checkTable('users')) {
+		if ($val === FALSE) {
 			// Create the table
-			$error = $this->createTable('users', ['UID','PW','Auth','Verified', 'Date']);
+			$error = $this->createTable('users', ['uname','auth', 'date', 'email']);
 			// If creation failed table stop here
 			if ($error != "") {
-				if ($die != 0) {
-					ob_start();
-					debug_print_backtrace();
-					$dump = ob_get_clean();
-					die("db.SetItem: $error.<br>
-						<pre>$dump</pre>");
-				} else trigger_error("db.SetItem: " . $error);
+				trigger_error("db.SetItem: " . $error);
+				return false;
 			}
 		}
+		if ($val->num_rows < 1) {
+			// Generate master user
+			$master = array(
+				'uname'=>crypt(getenv("MASTER_UNAME"), getenv("SALT")),
+				'auth'=>3,
+				'date'=>time(),
+				'email'=>crypt(getenv("MASTER_EMAIL"), getenv("SALT"))
+			);
+			if(!$this->SetItem('users', $master)) {
+				//echo "</br>".$this->conn->error."</br>";
+				trigger_error("db.SetItem: ".$this->conn->error);
+				return [];
+			}
+		}
+		return true;
 	}
 
 	/** 
@@ -174,9 +362,8 @@ class DB {
 	public function RemoveItem($table, $items) {
 		
 	}
-	
-	/** 
-	 * UpdateItem
+
+	/**
 	 * update selected item
 	 */
 	public function UpdateItem($table, $item) {
@@ -243,6 +430,41 @@ class DB {
 		return $this->SetItem($table, $items, 1); 
 	}
 
+	/**
+	 * base64url_encode
+	 */
+	private function base64url_encode($data) {
+		return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+	}
+
+	/**
+	 * generateJWT generates JWT from secret 
+	 * @param string subject to whom token is assigned to 
+	 * @param int unix time when token expires
+	 * @return string JWT token in string format
+	 */
+	//*
+	private function generateJWT($subject, $expiration): string {
+		// The header
+		$header = json_encode([
+			'typ' => 'JWT',
+			'alg' => 'HS256'
+		]);
+		// The payload
+		$time = time();
+		$payload = json_encode([
+			'sub' => $subject,
+			'iat' => time(),
+			'exp' => $expiration
+		]);
+		// Generate the token
+		$data = $this->base64url_encode($header).'.'.$this->base64url_encode($payload);
+		$hashedData = hash_hmac('sha256', $data, getenv("HASH_SECRET"), true);
+		$signature = $this->base64url_encode($hashedData);
+		return $data.'.'.$signature;
+	}
+	//*/
+
 	/** 
 	 * connects to database
 	 * returns true if successful
@@ -264,10 +486,10 @@ class DB {
 	/** 
 	 * checkTable returns true if table exists
 	 */
-	private function checkTable($items = "") : bool {
-		$result = $this->conn->query("SHOW TABLES LIKE '$items'");
-		if ($result->num_rows < 1) return false;
-		$result->free();
+	private function checkTable($table = "") : bool {
+		$result = $this->conn->query("select 1 from `$table` LIMIT 1");
+		if ($result === FALSE) return false;
+		$result->free(); 
 		return true;
 	}
     
@@ -281,17 +503,17 @@ class DB {
 		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 		foreach($columns as $column) {
 			switch ($column) {
-			case 'Title':
-			case 'Language':
-			case 'PW':
-			case 'UID':
+			case 'title':
+			case 'language':
+			case 'pw':
+			case 'users':
 				$items[] = "$column VARCHAR(255) NOT NULL";
 				break;
-			case 'Auth':
-			case 'Verified':
+			case 'auth':
+			case 'verified':
 				$items[] = "$column TINYINT NOT NULL";
 				break;
-			case 'Date':
+			case 'date':
 				$items[] = "$column BIGINT NOT NULL";
 				break;
 			default:
@@ -305,7 +527,7 @@ class DB {
 			return "db.createTable: ".$sql.": ".$this->conn->error;
 		return "";
 	}
-	
+	/// TODO: Remove all hardcoding. 
 	/**
 	 * InitEditor generates the initial editor used to generate further 
 	 * documents.

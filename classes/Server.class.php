@@ -18,6 +18,7 @@ class Server {
                 $timer = round(microtime(true) * 1000); // Start benchmark
                 $this->config = $this->loadJSON($config);
                 $this->db = new DB($this->config);
+                /*
                 $this->db->LogEvent(
                         E_USER_NOTICE, 
                         "Benchmark: Initialisation took ".
@@ -27,6 +28,7 @@ class Server {
                         0, 
                         0
                 );
+                //*/
                 $this->method = $server['REQUEST_METHOD'];
                 // Exception and error handling
                 /* 
@@ -45,7 +47,7 @@ class Server {
                                         $errLine, 
                                         $errCon
                                 );
-                });  */
+                }); // */
                 set_exception_handler(function($exception) {
                         return $this->db->LogEvent(
                                 $exception->getCode(), 
@@ -55,12 +57,13 @@ class Server {
                                 "exception"
                         );
                 });
-
+                /*
                 $this->db->LogEvent(
                         E_USER_NOTICE, 
                         "Benchmark: Server construction took ". 
                                 (round(microtime(true) * 1000)-$timer).
                                 " milliseconds");
+                //*/
                 $this->site = new Site($this->db, $server, $get, $post);
         }
 
@@ -92,12 +95,14 @@ class Server {
                         header('Allow: GET POST DELETE');
                         break;
                 }
+                /*
                 $this->db->LogEvent(
                         E_USER_NOTICE, 
                         "Benchmark: Serve method took ". 
                                 (round(microtime(true) * 1000)-$timer).
                                 " milliseconds"
                         );
+                //*/
                 return $output;
         }
 
