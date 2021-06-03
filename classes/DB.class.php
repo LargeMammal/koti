@@ -38,8 +38,6 @@ class DBItem {
 /**
  * DB class
  * 
- * TODO: If I simplify DB and this, then I should run all 
- * checks in construct. Now I'm wasting cycles. 
  */
 class DB {
 	private $conn;
@@ -49,7 +47,7 @@ class DB {
 	private $site;
 	private $user;
 
-	function __construct($config) {
+	function __construct($config): bool {
 		$this->user = $config["User"];
 		$this->site = $config["Site"];
 		$this->pass = $config["Pass"];
@@ -57,6 +55,85 @@ class DB {
 		if (!$this->connect()) 
 			trigger_error("Connection failed");
 		$this->output = [];
+		
+		// Check items table
+		$val = $this->conn->query("select 1 from `items` LIMIT 1");
+		if ($val === FALSE) {
+			// Create the table
+			$sql = "CREATE TABLE items (hash VARCHAR(255) PRIMARY KEY,".
+				" user INT UNSIGNED NOT NULL, date BIGINT NOT NULL,".
+				" title TEXT NOT NULL, blob BLOB NOT NULL,".
+				" auth INT UNSIGNED NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				trigger_error("db.__construct: ".$this->conn->error);
+				return false;
+			}
+		}
+		// Check tags table 
+		$val = $this->conn->query("select 1 from `tags` LIMIT 1");
+		if ($val === FALSE) {
+			// Create the table
+			$sql = "CREATE TABLE tags (hash VARCHAR(255) PRIMARY KEY,".
+				" tag TEXT NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				trigger_error("db.__construct: ".$this->conn->error);
+				return false;
+			}
+		}
+		// Check tokens table
+		$val = $this->conn->query("select 1 from `tokens` LIMIT 1");
+		if ($val === FALSE) {
+			// Create the table
+			$sql = "CREATE TABLE tokens (token VARCHAR(255) PRIMARY KEY,".
+				" user INT UNSIGNED NOT NULL, exp BIGINT NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				trigger_error("db.__construct: ".$this->conn->error);
+				return false;
+			}
+		}
+		if($val->num_rows < 1) {
+			// Generate master token
+			$master['user'] = 1;
+			$master['token'] = $this->generateJWT(
+				$master['user'], strtotime('+1 month')
+			);
+			$master['exp'] = strtotime('+1 month');
+			echo ($master['token']);
+			if(!$this->SetItem('tokens', $master)) {
+				trigger_error("db.__construct: ".$this->conn->error);
+				return false;
+			}
+		}
+		// Check users table
+		$val = $this->conn->query("select 1 from `users` LIMIT 1");
+		if ($val === FALSE) {
+			// Create the table
+			$error = $this->createTable('users', ['uname','auth', 'date', 'email']);
+			// Create the table
+			$sql = "CREATE TABLE items ".
+                "(id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,".
+				" uname VARCHAR(255) NOT NULL, auth TINYINT NOT NULL,".
+				" email VARCHAR(255) NOT NULL, date BIGINT NOT NULL";
+			if ($this->conn->query($sql) !== TRUE) {
+				trigger_error("db.__construct: ".$this->conn->error);
+				return false;
+			}
+		}
+		if ($val->num_rows < 1) {
+			// Generate master user
+			$master = array(
+				'uname'=>crypt(getenv("MASTER_UNAME"), getenv("SALT")),
+				'auth'=>3,
+				'date'=>time(),
+				'email'=>crypt(getenv("MASTER_EMAIL"), getenv("SALT"))
+			);
+			if(!$this->SetItem('users', $master)) {
+				trigger_error("db.__construct: ".$this->conn->error);
+				return false;
+			}
+		}
+		return true;
+		//$this->__destruct();
 	}
 
 	function __destruct() {
@@ -73,16 +150,14 @@ class DB {
 	 * SetItem inserts data into a table.
 	 * Those using SetItem should have special privileges
 	 */
-	//*
 	public function SetItem($table, $inputs, $die = 0) : bool {
-		//* Sanitize inputs
+		// Sanitize inputs
 		$items = [];
 		// Create assosiative array 
 		foreach ($inputs as $key => $value) {
 			$var = $this->conn->escape_string($value);
 			$items[$key] = $var;
 		}
-		//*/
 	
 		// Generate query
 		$sql = "INSERT INTO ". $table ."(";
@@ -95,73 +170,27 @@ class DB {
 		$sql .= implode(", ", $columns) . ") 
 			VALUES (" . implode(", ", $values) . ");";
 		echo $sql;
-	
-		// If table does exist
-		if (!$this->checkTable($table)) {
-			trigger_error("db.SetItem: Table, " .
-				$table . " , not found");
-			// Create the table
-			$error = $this->createTable($table, $columns);
-			// If creation failed table stop here
-			if ($error != "") {
-				if ($die != 0) {
-					ob_start();
-					debug_print_backtrace();
-					$dump = ob_get_clean();
-					die("db.SetItem: $error.<br>
-						<pre>$dump</pre>");
-				} else trigger_error("db.SetItem: " . $error);
-				return false;
-			}
-		}
 		
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			echo "</br>".$this->conn->error."</br>";
-			if ($die != 0) {
-				ob_start();
-				debug_print_backtrace();
-				$dump = ob_get_clean();
-				die("db.SetItem: $sql<br>".$this->conn->error.
-					"<br><pre>$dump</pre>");
-			} 
-			else trigger_error("db.SetItem: ".$sql.
-				"<br>".$this->conn->error);
+			trigger_error("db.SetItem: ".$sql."<br>".$this->conn->error);
 			return false;
 		}
-		//var_dump($this->conn);
-
 		return true;
 	}
 	//*/
 
 	/**
+	 * @brief
 	 * DBGet is the new get function that checks items and tags 
 	 * tables for stuff. At this moment this will work as a wrapper.
 	 * Eventually this will replace GetItem
-	 * @param array $search array are the search parameters. 
+	 * @param array inputs array are the search parameters. 
 	 * They are what fill the portion after WHERE=
 	 * @return array array of results 
 	 */
-	public function DBGet($search): array {
+	public function DBGet($inputs): array {
 		$output = [];
-		// Check table
-		$val = $this->conn->query("select 1 from `items` LIMIT 1");
-		// If table doesn't exist
-		if ($val === FALSE) {
-			// Create the table
-			$sql = "CREATE TABLE items (hash VARCHAR(255) PRIMARY KEY,".
-				" user INT UNSIGNED NOT NULL, date BIGINT NOT NULL,".
-				" title TEXT NOT NULL, blob BLOB NOT NULL,".
-				" auth INT UNSIGNED NOT NULL)";
-			if ($this->conn->query($sql) !== TRUE) {
-				//echo "</br>".$this->conn->error."</br>";
-				trigger_error("db.DBGet: ".$this->conn->error);
-				return [];
-			}
-		}
-		// Do the search
-		$inputs = $search;
 		$items = [];
 		// Clean inputs
 		foreach ($inputs as $key => $value) {
@@ -195,35 +224,12 @@ class DB {
 	}
 
 	/**
-	 * DBPost
-	 * @param DBItem insert post in items table. 
+	 * @brief
+	 * DBPost funciton for inserting data into items table.
+	 * @param DBItem DBItem wrapped data
 	 * @return bool returns boolean value indicating success or failure
 	 */
 	public function DBPost($dbitem): bool {
-		// If table does exist
-		if (!$this->checkTable('items')) {
-			//trigger_error("db.SetItem: Table, items , not found");
-			// Create the table
-			$sql = "CREATE TABLE items (hash VARCHAR(255) PRIMARY KEY,".
-				" title TEXT NOT NULL, date BIGINT NOT NULL,".
-				" blob BLOB NOT NULL, user INT UNSIGNED NOT NULL,".
-				" auth INT UNSIGNED NOT NULL)";
-			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.DBPost: ".$this->conn->error);
-				return false;
-			}
-		}
-		// If tags table exists
-		if (!$this->checkTable('tags')) {
-			// Create the table
-			$sql = "CREATE TABLE tags (hash VARCHAR(255) PRIMARY KEY,".
-				" tag TEXT NOT NULL)";
-			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.DBPost: ".$this->conn->error);
-				return false;
-			}
-		}
-
 		//* Sanitize inputs
 		$items = [];
 		// Clean inputs
@@ -275,33 +281,6 @@ class DB {
 	//*
 	public function DBGetToken($token) : array {
 		$this->output = [];
-		// If table does exist
-		if (!$this->checkTable('tokens')) {
-			// Create the table
-			$sql = "CREATE TABLE tokens (token VARCHAR(255) PRIMARY KEY,".
-				" user INT UNSIGNED NOT NULL, exp BIGINT NOT NULL)";
-			if ($this->conn->query($sql) !== TRUE) {
-				//echo "</br>".$this->conn->error."</br>";
-				trigger_error("db.createTable: ".$this->conn->error);
-				return [];
-			}
-		}
-		$check=$this->conn->query("SELECT * FROM tokens");
-		var_dump($check);
-		if($check->num_rows < 1) {
-			// Generate master token
-			$master['user'] = 1;
-			$master['token'] = $this->generateJWT(
-				$master['user'], strtotime('+1 month')
-			);
-			$master['exp'] = strtotime('+1 month');
-			echo ($master['token']);
-			if(!$this->SetItem('tokens', $master)) {
-				//echo "</br>".$this->conn->error."</br>";
-				trigger_error("db.SetItem: ".$this->conn->error);
-				return [];
-			}
-		}
 		$var = $this->conn->escape_string($token);
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
@@ -320,41 +299,7 @@ class DB {
 		$results->free();
 		return $this->output[0];
 	}
-
 	//*/
-	/**
-	 * CheckUserTable
-	 * Check/Create user/password table. Necessary for when software is loaded
-	 * for the first time. 
-	 */
-	public function CheckUserTable() {
-		$val = $this->conn->query("select 1 from `users` LIMIT 1");
-		// If table doesn't exist
-		if ($val === FALSE) {
-			// Create the table
-			$error = $this->createTable('users', ['uname','auth', 'date', 'email']);
-			// If creation failed table stop here
-			if ($error != "") {
-				trigger_error("db.SetItem: " . $error);
-				return false;
-			}
-		}
-		if ($val->num_rows < 1) {
-			// Generate master user
-			$master = array(
-				'uname'=>crypt(getenv("MASTER_UNAME"), getenv("SALT")),
-				'auth'=>3,
-				'date'=>time(),
-				'email'=>crypt(getenv("MASTER_EMAIL"), getenv("SALT"))
-			);
-			if(!$this->SetItem('users', $master)) {
-				//echo "</br>".$this->conn->error."</br>";
-				trigger_error("db.SetItem: ".$this->conn->error);
-				return [];
-			}
-		}
-		return true;
-	}
 
 	/** 
 	 * RemoveItem
@@ -374,17 +319,12 @@ class DB {
 
 	/**
 	 * GetTableFields gets table fields of given table
-	 * 
+	 * @param string table name
 	 * @return array returns assoc array of table colums. 
 	 */
 	public function GetTableFields($t) {
 		$fields = [];
 		$table = $this->conn->escape_string($t);
-		// If table doesn't exist stop here
-		if (!$this->checkTable($table)) {
-			trigger_error("db.GetTableFields: Table, $table, not found"); 
-			return $fields;
-		}
 		$sql = "DESCRIBE $table";
 		$results = $this->conn->query($sql);
 		// If query fails stop here
@@ -481,114 +421,6 @@ class DB {
 			$this->output["err"][] = mysqli_connect_error();
 			return false;
 		}
-		return true;
-	}
-
-	/** 
-	 * checkTable returns true if table exists
-	 */
-	private function checkTable($table = "") : bool {
-		$result = $this->conn->query("select 1 from `$table` LIMIT 1");
-		if ($result === FALSE) return false;
-		$result->free(); 
-		return true;
-	}
-    
-	/** 
-	 * createTitle creates table with given name and data.
-	 * First item in array will become primary key
-	 */
-	private function createTable($table, $columns) {
-		$sql = "CREATE TABLE ".$table." (";
-		$items = [];
-		$items[] = "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
-		foreach($columns as $column) {
-			switch ($column) {
-			case 'title':
-			case 'language':
-			case 'pw':
-			case 'users':
-				$items[] = "$column VARCHAR(255) NOT NULL";
-				break;
-			case 'auth':
-			case 'verified':
-				$items[] = "$column TINYINT NOT NULL";
-				break;
-			case 'date':
-				$items[] = "$column BIGINT NOT NULL";
-				break;
-			default:
-				$items[] = "$column LONGTEXT NOT NULL";
-				break;
-			}
-		}
-		$sql .= implode(", ", $items);
-		$sql .= ")";
-		if ($this->conn->query($sql) !== TRUE) 
-			return "db.createTable: ".$sql.": ".$this->conn->error;
-		return "";
-	}
-	/// TODO: Remove all hardcoding. 
-	/**
-	 * InitEditor generates the initial editor used to generate further 
-	 * documents.
-	 */
-	public function InitEditor() {
-	   // A quick editor
-	   $editor = [
-			'Title' => 'Editori',
-			'Content' => "<h1>Luo uusi</h1>
-				<form action='/content' method='POST'>
-				<p><input type='text' 
-					name='Title' 
-					placeholder='Otsikko' 
-					required></p>
-				<p><textarea name='Content' 
-					placeholder='Sisältö HTML muodossa' 
-					required></textarea></p>
-				<p><input type='text' 
-					name='Category' 
-					placeholder='Kategoria englanniksi' 
-					required></p>
-				<p><input type='text' 
-					name='Translation' 
-					placeholder='Käännetty kategoria' 
-					required></p>
-				<p><input type='text' 
-					name='Language' 
-					placeholder='Kieli xx-XX muodossa' 
-					required></p>
-				<p>Required authorization(0min and 3max): 
-					<input type='number' 
-					name='Auth' 
-					min='0' max='3' required></p><br>
-				<input type='submit'>
-				</form>",
-			'Category' => 'content',
-			'Language' => 'fi-FI',
-			'Auth' => 2,
-			'Date' => time(),
-		];
-		if ($this->SetItem("content", $editor)) return false;
-		return true;
-	}
-	
-	/**
-	 * InitFooter initializes footer table
-	 */
-	public function InitFooter() {
-		$lang = "fi-FI";
-		$footer_text = "<p>Tein nämä sivut PHP:llä, 
-				yrittäen noudattaa REST mallia. 
-				Nämä sivut ovat minun testi sivut. 
-				https://student.labranet.jamk.fi/~K1729 
-				toimii minun CV:nä.</p>";
-		$footer = [
-			'Language' => $lang,
-			'Content' => $footer_text,
-		];
-	
-		if ($this->SetItem("footer", $footer)) return false;
 		return true;
 	}
 }

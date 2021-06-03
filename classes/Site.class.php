@@ -61,17 +61,6 @@ class Site
                         $lang =$this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
                         $this->langs = $lang;
                 }
-                /**
-                 * Running a test. Dunno if http authentication resends the
-                 * request or will the code restart where it was called. 
-                 */
-                $this->pw = NULL;
-                $this->uid = NULL;
-                if (isset($server['PHP_AUTH_USER']) && 
-                        isset($server['PHP_AUTH_PW'])) {
-                        $this->pw = $server['PHP_AUTH_PW'];
-                        $this->uid = $server['PHP_AUTH_USER'];
-                }
         }
 
         function __destruct() 
@@ -96,8 +85,6 @@ class Site
          */
         public function Get()
         {
-                // This gets user authorization from db
-                $this->authorize();
                 $items = $this->paths($server['REQUEST_URI']);
                 
                 if (count($items) < 1) $items = ["content", "Title", "Koti"];
@@ -205,13 +192,14 @@ class Site
         }
 
         /**
+         * @brief
          * Post function handles post requests.
-         * 
          * @return void Post only generates response code
          */
         public function Post()
         {
                 if (count($this->post) < 1) return;
+                if ($this->post['token'] === NULL) return;
                 // Compare hashed user to db user
                 $query['Table'] = 'users';
                 $query['uname'] = crypt($this->post['user'], getenv("SALT"));
@@ -263,7 +251,6 @@ class Site
                         }
                         break;
                 }
-                echo "Delete was found";
                 /*
                 foreach ($fields as $field) {
                         if ($field["Field"] == "id") continue;
@@ -274,30 +261,6 @@ class Site
                 }
                 $this->db->SetItem($this->items["Table"], $this->post);
                 //*/
-        }
-
-        /** 
-         * authorize queries db for user name and password hash.
-         * It then compares the two and returns authorization.
-         */
-        private function authorize() 
-        {
-                $query = [
-                        "Table" => "users",
-                        "UID" => $this->uid,
-                ];
-                if (!$this->db->CheckUserTable()) {
-                        trigger_error("Failed to create users table");
-                }
-                $auth = $this->db->GetItem($query); // Get user data
-                $pwa = "non";
-                $autha = 0;
-                if (count($auth) > 0) {
-                        $pwa = $auth[0]["PW"];
-                        $autha = $auth[0]["Auth"];
-                }
-                if (!password_verify($this->pw, $pwa)) 
-                        $this->auth = $autha;
         }
 
         /** 
