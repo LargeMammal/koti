@@ -11,6 +11,9 @@ class DBItem {
 	private $user;
 	private $auth;
 
+	/**
+	 * DBItem
+	 */
 	function __construct($array) {
 		$this->hash = hash("sha512", $array["blob"]);
 		$this->title = $array["title"];
@@ -64,62 +67,6 @@ class DB {
 		$this->pass = NULL;
 		$this->database = NULL;
 		$this->output = NULL;
-	}
-	
-	/** 
-	* GetItem gets an item from database
-	* Generate the code here and later turn it into a exterrior script
-	* @param array inputs in assosiative array format. Needs 'Table' which 
-	* contains the table which is searched. Further information is used
-	* for further refinement. TABLE=TABLE WHERE SOMETHING=SOMETHING
-	* @param string lang in a string: xx-XX
-	* @return array returns results in an array
-	*/
-	public function GetItem($inputs, $lang = NULL): array {
-		$this->output = [];
-		
-		$items = [];
-		// Clean inputs
-		foreach ($inputs as $key => $value) {
-			$var = $this->conn->escape_string($value);
-			$items[$this->conn->escape_string($key)] = $var;
-		}
-	
-		// If table doesn't exist stop here
-		if (!$this->checkTable($items["Table"])) {
-			trigger_error("db.GetItem: Table, ".$items["Table"].
-				", not found"); 
-			echo "db.GetItem: Table, " . $items["Table"] . ", not found";
-			return $this->output;
-		}
-	
-		// Generate query
-		$sql = "SELECT * FROM ".$items["Table"];
-		$str = "";
-		if (isset($lang) && $items["Table"] != "errors") 
-			$str = " WHERE Language='" . $lang . "'";
-		foreach ($items as $column=>$item) {
-			if ($column != "Table") {
-				if ($str != "") $str .= " AND";
-				else $str .= " WHERE";
-				$str .= " ".$column."='".$item."'";
-			}
-		}
-		if ($items["Table"] == "errors") $str .= $str." ORDER BY id DESC";
-		$sql .= $str." LIMIT 10"; // Make this so that user decides.
-	
-		$results = $this->conn->query($sql);
-		// If query fails stop here
-		if ($results === FALSE) {
-			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error); 
-			return $this->output;
-		}
-	
-		// Fetch each row in associative form and pass it to output.
-		while($row = $results->fetch_assoc()) $this->output[] = $row;
-		$results->free();
-		//var_dump($this->output);
-		return $this->output;
 	}
     
 	/** 
@@ -197,6 +144,7 @@ class DB {
 	 * @return array array of results 
 	 */
 	public function DBGet($search): array {
+		$output = [];
 		// Check table
 		$val = $this->conn->query("select 1 from `items` LIMIT 1");
 		// If table doesn't exist
@@ -214,8 +162,36 @@ class DB {
 		}
 		// Do the search
 		$inputs = $search;
-		$inputs['Table'] = "items";
-		return $this->GetItem($inputs);
+		$items = [];
+		// Clean inputs
+		foreach ($inputs as $key => $value) {
+			$var = $this->conn->escape_string($value);
+			$items[$this->conn->escape_string($key)] = $var;
+		}
+	
+		// Generate query
+		$sql = "SELECT * FROM items";
+		$str = "";
+		foreach ($items as $column=>$item) {
+			if ($str != "") $str .= " AND";
+			else $str .= " WHERE";
+			$str .= " ".$column."='".$item."'";
+		}
+		if ($items["Table"] == "errors") $str .= $str." ORDER BY id DESC";
+		$sql .= $str." LIMIT 10"; // Make this so that user decides.
+	
+		$results = $this->conn->query($sql);
+		// If query fails stop here
+		if ($results === FALSE) {
+			trigger_error("db.DBGet: ".$sql."; ".$this->conn->error); 
+			return $output;
+		}
+	
+		// Fetch each row in associative form and pass it to output.
+		while($row = $results->fetch_assoc()) $output[] = $row;
+		$results->free();
+		
+		return $output;
 	}
 
 	/**
@@ -233,7 +209,17 @@ class DB {
 				" blob BLOB NOT NULL, user INT UNSIGNED NOT NULL,".
 				" auth INT UNSIGNED NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.createTable: ".$this->conn->error);
+				trigger_error("db.DBPost: ".$this->conn->error);
+				return false;
+			}
+		}
+		// If tags table exists
+		if (!$this->checkTable('tags')) {
+			// Create the table
+			$sql = "CREATE TABLE tags (hash VARCHAR(255) PRIMARY KEY,".
+				" tag TEXT NOT NULL)";
+			if ($this->conn->query($sql) !== TRUE) {
+				trigger_error("db.DBPost: ".$this->conn->error);
 				return false;
 			}
 		}
@@ -246,7 +232,7 @@ class DB {
 			$items[$this->conn->escape_string($key)] = $var;
 		}
 	
-		// Generate query
+		// Insert items 
 		$sql = "INSERT INTO items (";
 		$sql .= "hash, title, date, blob, user, auth) VALUES (".
 			$items['hash'].", ".
@@ -254,7 +240,22 @@ class DB {
 			$items['date'].", ".
 			$items['blob'].", ".
 			$items['user'].", ".
-			$items['auth'].", ".");";
+			$items['auth'].");";
+	
+		// Query
+		if ($this->conn->query($sql) !== TRUE) {
+			trigger_error("db.SetItem: ".$sql.
+				"<br>".$this->conn->error);
+			return false;
+		}
+	
+		// insert tags
+		$sql = "INSERT INTO tags (";
+		$sql .= "hash, tag) VALUES"
+		foreach ($items['tags'] as $tag) {
+			$sql .= ' ('.$items['hash'].',$tag)';
+		}
+		$sql .= ';';
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
@@ -381,14 +382,14 @@ class DB {
 		$table = $this->conn->escape_string($t);
 		// If table doesn't exist stop here
 		if (!$this->checkTable($table)) {
-			trigger_error("db.GetItem: Table, $table, not found"); 
+			trigger_error("db.GetTableFields: Table, $table, not found"); 
 			return $fields;
 		}
 		$sql = "DESCRIBE $table";
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			trigger_error("db.GetItem: ".$sql."; ".$this->conn->error); 
+			trigger_error("db.GetTableFields: ".$sql."; ".$this->conn->error); 
 			return $fields;
 		}
 		// Fetch each row in associative form and pass it to output.
@@ -568,15 +569,6 @@ class DB {
 			'Auth' => 2,
 			'Date' => time(),
 		];
-	
-		// Upload editor UI
-		$test = $this->GetItem(
-			[
-				"Table"=>"content",
-				"Title"=>"Editori"
-			], "fi-FI"
-		);
-		if (count($test) > 0) return true;
 		if ($this->SetItem("content", $editor)) return false;
 		return true;
 	}
