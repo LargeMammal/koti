@@ -97,24 +97,9 @@ class Site
                         }
                 }
                 $this->contents = $this->db->DBGet($this->items);
-                // The rest should be moved to db side 
-                if (count($this->contents) < 1) {
-                        $this->db->InitEditor();
-                        $this->contents =$this->db->DBGet($this->items);
-                }
                 if (count($this->contents) < 1) 
                         $this->contents = NULL;
                 // Search ends
-                /* Test tokens
-                if($this->items['Table'] == 'tokens') {
-                        $token = $this->db->DBGetToken('anon');
-                        var_dump($token);
-                }
-                //*/
-                if($this->items["Table"] == "users") {
-                        http_response_code(403);
-                        return "Forbidden";
-                }
                 $this->footer = NULL;
 
 
@@ -157,11 +142,6 @@ class Site
                 }
 
                 $footers = $this->db->GetItem(["Table" => "footer"]);
-                //echo json_encode($footers);
-                if (count($footers) < 1) {
-                        $this->db->InitFooter();
-                        $footers = $this->db->GetItem(["Table" => "footer"]);
-                }
                 // check for fitting footer in language list
                 foreach ($this->langs as $lang) {
                         $list = explode("-", $lang);

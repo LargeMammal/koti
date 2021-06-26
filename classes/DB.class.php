@@ -169,7 +169,6 @@ class DB {
 		}
 		$sql .= implode(", ", $columns) . ") 
 			VALUES (" . implode(", ", $values) . ");";
-		echo $sql;
 		
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
