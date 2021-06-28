@@ -46,6 +46,7 @@ class DB {
 	private $pass;
 	private $site;
 	private $user;
+	private $error;
 
 	function __construct($config) {
 		$this->user = $config["User"];
@@ -55,6 +56,7 @@ class DB {
 		if (!$this->connect()) 
 			trigger_error("Connection failed");
 		$this->output = [];
+		$this->error = NULL;
 		
 		// Check items table
 		$val = $this->conn->query("select 1 from `items` LIMIT 1");
@@ -62,11 +64,11 @@ class DB {
 			// Create the table
 			$sql = "CREATE TABLE items (hash VARCHAR(255) PRIMARY KEY,".
 				" user INT UNSIGNED NOT NULL, date BIGINT NOT NULL,".
-				" title TEXT NOT NULL, blob BLOB NOT NULL,".
+				" title TEXT NOT NULL, item BLOB NOT NULL,".
 				" auth INT UNSIGNED NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.__construct: ".$this->conn->error);
-				return false;
+				//trigger_error("db.__construct: ".$this->conn->error);
+				echo "failed to create items table: ".$this->conn->error;
 			}
 		}
 		// Check tags table 
@@ -77,7 +79,7 @@ class DB {
 				" tag TEXT NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
 				trigger_error("db.__construct: ".$this->conn->error);
-				return false;
+				echo "failed to create tags table";
 			}
 		}
 		// Check tokens table
@@ -88,7 +90,7 @@ class DB {
 				" user INT UNSIGNED NOT NULL, exp BIGINT NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
 				trigger_error("db.__construct: ".$this->conn->error);
-				return false;
+				echo "failed to create tokens table";
 			}
 		}
 		if($val->num_rows < 1) {
@@ -101,7 +103,7 @@ class DB {
 			echo ($master['token']);
 			if(!$this->SetItem('tokens', $master)) {
 				trigger_error("db.__construct: ".$this->conn->error);
-				return false;
+				echo "failed to create master token";
 			}
 		}
 		// Check users table
@@ -116,7 +118,7 @@ class DB {
 				" email VARCHAR(255) NOT NULL, date BIGINT NOT NULL";
 			if ($this->conn->query($sql) !== TRUE) {
 				trigger_error("db.__construct: ".$this->conn->error);
-				return false;
+				echo "failed to create users table";
 			}
 		}
 		if ($val->num_rows < 1) {
@@ -129,10 +131,9 @@ class DB {
 			);
 			if(!$this->SetItem('users', $master)) {
 				trigger_error("db.__construct: ".$this->conn->error);
-				return false;
+				echo "failed to create master user";
 			}
 		}
-		return true;
 		//$this->__destruct();
 	}
 

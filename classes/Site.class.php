@@ -141,7 +141,7 @@ class Site
                                 break;
                 }
 
-                $footers = $this->db->GetItem(["Table" => "footer"]);
+                $footers = $this->db->DBGet(["title" => "footer"]);
                 // check for fitting footer in language list
                 foreach ($this->langs as $lang) {
                         $list = explode("-", $lang);
@@ -288,7 +288,7 @@ class Site
                 $specifics = ['Title', 'Main'];
                 $list = [];
                 $content = "";
-                $cats = $this->db->GetItem($query, $this->lang, $specifics);
+                $cats = $this->db->DBGet(["title" => "footer"]);
                 if (count($cats) < 1) return $content;
                 // Organize items along categories
                 foreach ($cats as $cat) $list[$cat["Main"]][] = $cat;
