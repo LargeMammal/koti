@@ -47,7 +47,7 @@ class DB {
 	private $site;
 	private $user;
 
-	function __construct($config): bool {
+	function __construct($config) {
 		$this->user = $config["User"];
 		$this->site = $config["Site"];
 		$this->pass = $config["Pass"];
@@ -256,7 +256,7 @@ class DB {
 	
 		// insert tags
 		$sql = "INSERT INTO tags (";
-		$sql .= "hash, tag) VALUES"
+		$sql .= "hash, tag) VALUES";
 		foreach ($items['tags'] as $tag) {
 			$sql .= ' ('.$items['hash'].',$tag)';
 		}
