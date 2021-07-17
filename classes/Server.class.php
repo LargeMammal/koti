@@ -5,49 +5,6 @@
  */
 
 class Server {
-        private $site;
-
-        function __construct($time, $server, $get = NULL, $post = NULL) {
-                $this->startTime = $time;
-                $timer = round(microtime(true) * 1000); // Start benchmark
-                $this->method = $server['REQUEST_METHOD'];
-                $this->site = new Site($this->db, $server, $get, $post);
-        }
-
-        function __destruct() {
-                $this->config = NULL;
-                $this->method = NULL;
-                $this->post = NULL;
-                $this->site = NULL;
-        }
-
-        public function Serve() {
-                $timer = round(microtime(true) * 1000);
-                $output = "";
-                $str = "";
-                switch($this->method) {
-                case 'GET':
-                        $output = $this->site->Get();
-                        break;
-                case 'POST':
-                        $this->site->Post();
-                        break;
-                case 'DELETE':
-                        $this->site->Delete();
-                        break;
-                default:
-                        http_response_code(405);
-                        header('Allow: GET POST DELETE');
-                        break;
-                }
-                return $output;
-        }
-}
-/** Site class
- * More later
- */
-class Site 
-{
         private $categories;
         private $contents;
         private $db;
@@ -59,6 +16,7 @@ class Site
         private $post;
         private $pw;
         private $uid;
+        private $method;
 
         /**
          * @brief
@@ -83,8 +41,12 @@ class Site
                 $this->post = $post;
                 $this->get = $get;
                 $this->items = [];
+                $this->startTime = $time;
+                $timer = round(microtime(true) * 1000); // Start benchmark
+                $this->method = $server['REQUEST_METHOD'];
+                $this->site = new Site($this->db, $server, $get, $post);
         }
-
+        
         function __destruct() 
         {
                 $this->auth = NULL;
@@ -94,8 +56,33 @@ class Site
                 $this->footer = NULL;
                 $this->errors = NULL;
                 $this->items = NULL;
+                $this->config = NULL;
+                $this->method = NULL;
+                $this->post = NULL;
         }
 
+        public function Serve() {
+                $timer = round(microtime(true) * 1000);
+                $output = "";
+                $str = "";
+                switch($this->method) {
+                case 'GET':
+                        $output = $this->site->Get();
+                        break;
+                case 'POST':
+                        $this->site->Post();
+                        break;
+                case 'DELETE':
+                        $this->site->Delete();
+                        break;
+                default:
+                        http_response_code(405);
+                        header('Allow: GET POST DELETE');
+                        break;
+                }
+                return $output;
+        }
+        
         /**
          * @brief
          * Get function handles get requests. Adds necessary headers.
