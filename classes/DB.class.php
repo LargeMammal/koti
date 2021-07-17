@@ -48,11 +48,11 @@ class DB {
 	private $user;
 	private $error;
 
-	function __construct($config) {
-		$this->user = $config["User"];
-		$this->site = $config["Site"];
-		$this->pass = $config["Pass"];
-		$this->database = $config["Database"];
+	function __construct() {
+		$this->user = getenv("USER");
+		$this->site = getenv("SITE");
+		$this->pass = getenv("PASS");
+		$this->database = getenv("DB");
 		if (!$this->connect()) 
 			trigger_error("Connection failed");
 		$this->output = [];

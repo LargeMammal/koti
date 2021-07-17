@@ -6,6 +6,10 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 SetEnv HASH_SECRET (your secret used for hashing)
 SetEnv MASTER_UNAME (master user username)
 SetEnv MASTER_EMAIL (master email)
+SetEnv USER (database user)
+SetEnv SITE (database location)
+SetEnv PASS (database user password)
+SetEnv DB (database name)
 
 # AddType is necessary because other rewriter doesn't understand to execute
 AddType application/x-httpd-php .php
