@@ -123,16 +123,5 @@ class Server {
                 }
                 return $output;
         }
-        
-        /**
-         * loadJSON gets JSON file and returns contents in an array
-         */
-        private function loadJSON($file) {
-                $pwd = $file;
-                if (!file_exists($pwd)) return FALSE;
-                $json = file_get_contents($pwd); // reads file into string
-                $data = json_decode($json); // turns json into php object
-                return $this->parseObject($data);
-        }
 }
 ?>

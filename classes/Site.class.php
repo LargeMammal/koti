@@ -12,8 +12,6 @@ class Site
         private $form; // html/json/xml
         private $get;
         private $items;
-        private $lang; // first available language
-        private $langs; // all client languages
         private $post;
         private $pw;
         private $uid;
@@ -39,7 +37,7 @@ class Site
                 $this->form = "html";
                 $this->realm = "Tardiland";
                 $this->db = $db;
-                $this->server = $server;
+                $this->server = $this->paths($server['REQUEST_URI']);
                 $this->post = $post;
                 $this->get = $get;
                 $this->items = [];
@@ -55,12 +53,6 @@ class Site
                  * 2. Results then are parsed according to client data
                  * 3. Use get variables in parsing
                  */
-                
-                $this->langs = ["fi-FI"];
-                if (isset($server['HTTP_ACCEPT_LANGUAGE'])){
-                        $lang =$this->getLang($server['HTTP_ACCEPT_LANGUAGE']);
-                        $this->langs = $lang;
-                }
         }
 
         function __destruct() 
@@ -72,8 +64,6 @@ class Site
                 $this->footer = NULL;
                 $this->errors = NULL;
                 $this->items = NULL;
-                $this->lang = NULL;
-                $this->langs = NULL;
         }
 
         /**
@@ -85,9 +75,9 @@ class Site
          */
         public function Get()
         {
-                $items = $this->paths($server['REQUEST_URI']);
+                $items = $this->server;
                 
-                if (count($items) < 1) $items = ["content", "Title", "Koti"];
+                if (count($items) < 1) $items = ["title", "index"];
                 $this->items["Table"] = $items[0];
                 array_shift($items);
                 foreach ($items as $key => $value) {
@@ -142,24 +132,9 @@ class Site
                 }
 
                 $footers = $this->db->DBGet(["title" => "footer"]);
-                // check for fitting footer in language list
-                foreach ($this->langs as $lang) {
-                        $list = explode("-", $lang);
-                        if (count($list) < 2) {
-                                $list[] = strtoupper($lang);
-                                $lang = implode("-", $list);
-                        }
-                        foreach ($footers as $footer) {
-                                if ($lang != $footer['Language']) continue;
-                                $this->footer = $footer["Content"];
-                                break;
-                        }
-                        if (is_null($this->footer)) continue;
-                        break;
-                }
 
                 // Stuff in head
-                $str = '<!DOCTYPE html><html lang="'.$this->lang.'"><head>';
+                $str = '<!DOCTYPE html><head>';
                 $str .= $this->loadHead();
                 $str .= '</head>';
                 // Stuff in body
@@ -284,8 +259,6 @@ class Site
         private function loadNav()
         {
                 // Get all data from content table
-                $query = ['Table' => 'content'];
-                $specifics = ['Title', 'Main'];
                 $list = [];
                 $content = "";
                 $cats = $this->db->DBGet(["title" => "footer"]);
@@ -351,23 +324,6 @@ class Site
                         }
                 }
                 return $content;
-        }
-
-        private function getLang($str) 
-        {
-                $output = [];
-                // Split the string
-                $arr = explode(";", $str);
-                foreach ($arr as $value) {
-                        // Ignore q thingys
-                        foreach (explode(",", $value) as $val) {
-                                if (false === strpos($val, "q=")) {
-                                        $output[] = $val;
-                                        break;
-                                }
-                        }
-                }
-                return $output;
         }
 
         /**
