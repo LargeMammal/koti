@@ -5,18 +5,17 @@
  */
 
 class Server {
-        private $categories;
+        private $method;
+        private $get;
+        private $post;
+        
         private $contents;
         private $db;
-        private $errors;
         private $footer;
-        private $form; // html/json/xml
-        private $get;
+        private $type; // html/json/xml
         private $items;
-        private $post;
         private $pw;
         private $uid;
-        private $method;
 
         /**
          * @brief
@@ -35,26 +34,22 @@ class Server {
         ){
                 $this->auth = 0; // Make sure to purge privileges
                 $this->contents = [];
-                $this->form = "html";
+                $this->type = "html";
                 $this->db = new DB($this->config);
                 $this->server = $this->paths($server['REQUEST_URI']);
                 $this->post = $post;
                 $this->get = $get;
                 $this->items = [];
-                $this->startTime = $time;
                 $timer = round(microtime(true) * 1000); // Start benchmark
                 $this->method = $server['REQUEST_METHOD'];
-                $this->site = new Site($this->db, $server, $get, $post);
         }
         
         function __destruct() 
         {
                 $this->auth = NULL;
-                $this->categories = NULL;
                 $this->contents = NULL;
                 $this->db = NULL;
                 $this->footer = NULL;
-                $this->errors = NULL;
                 $this->items = NULL;
                 $this->config = NULL;
                 $this->method = NULL;
@@ -67,17 +62,17 @@ class Server {
                 $str = "";
                 switch($this->method) {
                 case 'GET':
-                        $output = $this->site->Get();
+                        $output = $this->Get();
                         break;
                 case 'POST':
-                        $this->site->Post();
+                        $this->Post();
                         break;
                 case 'DELETE':
-                        $this->site->Delete();
+                        $this->Delete();
                         break;
                 default:
                         http_response_code(405);
-                        header('Allow: GET POST DELETE');
+                        header('Allow: GET POST');
                         break;
                 }
                 return $output;
@@ -90,10 +85,8 @@ class Server {
          * construction. 
          * @return string Get function returns site in string form
          */
-        public function Get()
+        private function get()
         {
-                $items = $this->server;
-                
                 if (count($items) < 1) $items = ["title", "index"];
                 $this->items["Table"] = $items[0];
                 array_shift($items);
@@ -106,17 +99,12 @@ class Server {
                 $this->contents = $this->db->DBGet($this->items);
                 if (count($this->contents) < 1) 
                         $this->contents = NULL;
-                // Search ends
-                $this->footer = NULL;
 
-                switch ($this->form) {
+                switch ($this->type) {
                         case 'json':
                                 header('Content-Type: application/json');
                                 return json_encode($this->contents);
                         case 'xml':
-                                /**
-                                 * TODO: Fix this
-                                 */
                                 header('Content-Type: text/xml');
                                 $xml = new SimpleXMLElement('<root/>');
                                 array_flip($this->contents);
@@ -131,17 +119,15 @@ class Server {
                                 break;
                 }
 
-                $footers = $this->db->DBGet(["title" => "footer"]);
-
                 // Stuff in head
                 $str = '<!DOCTYPE html><head>';
                 $str .= $this->loadHead();
                 $str .= '</head>';
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
-                $str .= '<nav>'.$this->loadNav().'</nav></header>';
+                $str .= '<nav>'.$this->db->DBGet(["title" => "nav"]).'</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
-                $str .= '<footer>'.$this->footer.'</footer>';
+                $str .= '<footer>'.$this->db->DBGet(["title" => "footer"]).'</footer>';
                 $str .= '</div></div></body></html>';
                 return $str;
         }
@@ -151,7 +137,7 @@ class Server {
          * Post function handles post requests.
          * @return void Post only generates response code
          */
-        public function Post()
+        private function post()
         {
                 if (count($this->post) < 1) return;
                 if ($this->post['token'] === NULL) return;
@@ -184,7 +170,7 @@ class Server {
          * 
          * @return void Delete only generates response code
          */
-        public function Delete()
+        private function delete()
         {
         }
 
@@ -223,42 +209,6 @@ class Server {
                 return $output;
         }
 
-        /** loadNav
-         * loadNav loads nav bar. 
-         */
-        private function loadNav()
-        {
-                // Get all data from content table
-                $list = [];
-                $content = "";
-                $cats = $this->db->DBGet(["title" => "footer"]);
-                if (count($cats) < 1) return $content;
-                // Organize items along categories
-                foreach ($cats as $cat) $list[$cat["Main"]][] = $cat;
-
-                // Generate dropdowns
-                $content .= '<ul>';
-                foreach ($list as $key => $value) {
-                        $content .= "<li class='dropdown'>
-                                <a href='javascript:void(0)' 
-                                class='dropbtn'>$key</a>
-                                <div class='dropdown-content'>";
-                        foreach ($value as $cat) {
-                                $content .= '<a href="/'.
-                                        'content/Titles/'.
-                                        $cat["Title"].'">'.
-                                        $cat['Title'].'</a>';
-                        }
-                        $content .= '</div></li>';
-                }
-                $content .= '<a href="https://github.com/LargeMammal" ';
-                $content .= 'class="dropdown">github</a>';
-                $content .= '<a href="https://gitlab.com/mammal" ';
-                $content .= 'class="dropdown">gitlab</a>';
-                $content .= "<ul>";
-                return $content;
-        }
-
         /** loadBody
          * loadBody will generate content section of the page
          */
@@ -267,31 +217,10 @@ class Server {
                 $content = "";
                 if (is_null($this->contents) || count($this->contents) < 1) 
                         return "<h1>Site came up empty!</h1>";
-                if ($this->items['Table'] === 'errors') {
-                        $content .= "<section><table>";
-                        $rows = [];
-                        foreach ($this->contents[0] as $key => $val) {
-                                $rows[] = $key;
-                        }
-                        $content .= '<tr>';
-                        foreach ($rows as $val) $content .= "<th>$val</th>";
-                        $content .= '</tr>';
-                        foreach ($this->contents as $item) {
-                                $content .= '<tr>';
-                                foreach ($item as $key => $val) {
-                                        if ($key == "Time")
-                                                $content .= "<td>".date("H:i:s",$val)."</td>";
-                                        else $content .= "<td>$val</td>";
-                                }
-                                $content .= '</tr>';
-                        }
-                        $content .= "</table></section>";
-                } else {
-                        foreach ($this->contents as $items) {
+                foreach ($this->contents as $items) {
                                 $content .= "<section>";
                                 $content .= $items['Content'];
                                 $content .= "</section>";
-                        }
                 }
                 return $content;
         }
@@ -306,26 +235,26 @@ class Server {
         {
                 // Get get variables. 
                 $vget = explode('?', trim($url, "/"));
-                $form = explode('.', $vget[0]);
-                if (count($form) > 1) {
-                        switch ($form[count($form)-1]) {
+                $type = explode('.', $vget[0]);
+                if (count($type) > 1) {
+                        switch ($type[count($type)-1]) {
                         case 'json':
-                                $this->form = 'json';
-                                unset($form[count($form)-1]);
-                                $vget[0] = implode('.', $form);
+                                $this->type = 'json';
+                                unset($type[count($type)-1]);
+                                $vget[0] = implode('.', $type);
                                 break;
                         case 'xml':
-                                $this->form = 'xml';
-                                unset($form[count($form)-1]);
-                                $vget[0] = implode('.', $form);
+                                $this->type = 'xml';
+                                unset($type[count($type)-1]);
+                                $vget[0] = implode('.', $type);
                                 break;
                         case 'test':
-                                $this->form = 'test';
-                                unset($form[count($form)-1]);
-                                $vget[0] = implode('.', $form);
+                                $this->type = 'test';
+                                unset($type[count($type)-1]);
+                                $vget[0] = implode('.', $type);
                                 break;
                         default:
-                                throw new Exception("form not recognized");
+                                throw new Exception("file type not recognized");
                                 break;
                         }
                 }
