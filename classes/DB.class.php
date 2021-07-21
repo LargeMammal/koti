@@ -195,18 +195,19 @@ class DB {
 		// Clean inputs
 		foreach ($inputs as $key => $value) {
 			$var = $this->conn->escape_string($value);
-			$items[$this->conn->escape_string($key)] = $var;
+			$items[$key] = $var;
 		}
 	
 		// Generate query
 		$sql = "SELECT * FROM items";
+
+		
 		$str = "";
 		foreach ($items as $column=>$item) {
 			if ($str != "") $str .= " AND";
 			else $str .= " WHERE";
 			$str .= " ".$column."='".$item."'";
 		}
-		if ($items["Table"] == "errors") $str .= $str." ORDER BY id DESC";
 		$sql .= $str." LIMIT 10"; // Make this so that user decides.
 	
 		$results = $this->conn->query($sql);

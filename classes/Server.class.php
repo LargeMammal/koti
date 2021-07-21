@@ -5,17 +5,17 @@
  */
 
 class Server {
+        public $error;
+
         private $method;
-        private $get;
         private $post;
+        private $get;
         
         private $contents;
-        private $db;
-        private $footer;
-        private $type; // html/json/xml
         private $items;
-        private $pw;
-        private $uid;
+        private $db;
+        private $type; // html/json/xml
+        private $server;
 
         /**
          * @brief
@@ -32,43 +32,47 @@ class Server {
                 array $get = NULL, 
                 array $post = NULL
         ){
-                $this->auth = 0; // Make sure to purge privileges
-                $this->contents = [];
-                $this->type = "html";
-                $this->db = new DB($this->config);
-                $this->server = $this->paths($server['REQUEST_URI']);
+                $this->error = NULL;
+
+                $this->method = $server['REQUEST_METHOD'];
                 $this->post = $post;
                 $this->get = $get;
+
+                $this->contents = [];
                 $this->items = [];
-                $timer = round(microtime(true) * 1000); // Start benchmark
-                $this->method = $server['REQUEST_METHOD'];
+                $this->db = new DB($this->config);
+                $this->type = "html";
+                $this->server = $this->paths($server['REQUEST_URI']);
+                if ($this->server === NULL) $this->server = ["title", "index"];
+                $n = count($this->server);
+                if (($n > 1) && ($n % 2 !== 0))
+                        $this->error = "Malformed request!";
         }
         
         function __destruct() 
         {
-                $this->auth = NULL;
-                $this->contents = NULL;
-                $this->db = NULL;
-                $this->footer = NULL;
-                $this->items = NULL;
-                $this->config = NULL;
                 $this->method = NULL;
                 $this->post = NULL;
+                $this->get = NULL;
+
+                $this->contents = NULL;
+                $this->items = NULL;
+                $this->db = NULL;
+                $this->type = NULL;
+                $this->server = NULL;
         }
 
         public function Serve() {
-                $timer = round(microtime(true) * 1000);
                 $output = "";
-                $str = "";
                 switch($this->method) {
                 case 'GET':
-                        $output = $this->Get();
+                        $output = $this->get();
                         break;
                 case 'POST':
-                        $this->Post();
+                        $this->post();
                         break;
                 case 'DELETE':
-                        $this->Delete();
+                        $this->delete();
                         break;
                 default:
                         http_response_code(405);
@@ -87,16 +91,7 @@ class Server {
          */
         private function get()
         {
-                if (count($items) < 1) $items = ["title", "index"];
-                $this->items["Table"] = $items[0];
-                array_shift($items);
-                foreach ($items as $key => $value) {
-                        if ($key % 2 == 0) {
-                                $name = trim($value, 's');
-                                $this->items[$name] = $items[$key+1];
-                        }
-                }
-                $this->contents = $this->db->DBGet($this->items);
+                $this->contents = $this->db->DBGet($this->server);
                 if (count($this->contents) < 1) 
                         $this->contents = NULL;
 
@@ -125,9 +120,9 @@ class Server {
                 $str .= '</head>';
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
-                $str .= '<nav>'.$this->db->DBGet(["title" => "nav"]).'</nav></header>';
+                $str .= '<nav>'.$this->db->DBGet(["title", "nav"]).'</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
-                $str .= '<footer>'.$this->db->DBGet(["title" => "footer"]).'</footer>';
+                $str .= '<footer>'.$this->db->DBGet(["title", "footer"]).'</footer>';
                 $str .= '</div></div></body></html>';
                 return $str;
         }
@@ -233,9 +228,11 @@ class Server {
          */
         private function paths($url):array
         {
+                if ($url === '') return NULL;
                 // Get get variables. 
                 $vget = explode('?', trim($url, "/"));
                 $type = explode('.', $vget[0]);
+                if ($vget[0] == "") return [];
                 if (count($type) > 1) {
                         switch ($type[count($type)-1]) {
                         case 'json':
@@ -258,7 +255,6 @@ class Server {
                                 break;
                         }
                 }
-                if ($vget[0] == "") return [];
                 $items = explode("/", $vget[0]);
                 return $items;
         }
