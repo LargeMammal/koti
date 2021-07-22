@@ -69,7 +69,7 @@ class Server {
                         $output = $this->get();
                         break;
                 case 'POST':
-                        $this->post();
+                        $output = $this->post();
                         break;
                 case 'DELETE':
                         $this->delete();
@@ -91,6 +91,7 @@ class Server {
          */
         private function get()
         {
+                $token = $this->get['token'];
                 $this->contents = $this->db->DBGet($this->server);
                 if (count($this->contents) < 1) 
                         $this->contents = NULL;
@@ -105,10 +106,6 @@ class Server {
                                 array_flip($this->contents);
                                 array_walk_recursive($this->contents, array($xml, 'addChild'));
                                 return $xml->asXML();
-                        case 'test':
-                                echo count($this->content);
-                                $json = $this->contents;
-                                return json_encode($json);
                         default:
                                 # code...
                                 break;
@@ -130,26 +127,27 @@ class Server {
         /**
          * @brief
          * Post function handles post requests.
-         * @return void Post only generates response code
+         * @return string error string. NULL if no errors
          */
-        private function post()
+        private function post(): string
         {
-                if (count($this->post) < 1) return;
-                if ($this->post['token'] === NULL) return;
+                if (count($this->post) < 1) return 'Empty request';
+                if ($this->post['token'] === NULL) return 'Missing token';
+                if ((count($this->server) < 2) || $this->server[0] !== 'title')
+                    return 'Malformed request';
+                
                 // Compare hashed user to db user
-                $query['Table'] = 'users';
-                $query['uname'] = crypt($this->post['user'], getenv("SALT"));
-                $id = $this->db->GetItem($query);
+                $uname = crypt($this->post['user'], getenv("SALT"));
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($this->post['token']);
-                if ($token['user'] !== $id) {
+                if (crypt($token['user'], getenv("SALT")) !== $uname) {
                         http_response_code(403);
-                        return "Missing or wrong token";
+                        return "Wrong token";
                 }
                 $query = NULL;
-                $query['title'] = $this->post['title'];
-                $query['user'] = $id;
+                $query['title'] = $this->server[1];
+                $query['user'] = $token['user'];
                 $query['blob'] = $this->post['blob'];
                 $query['auth'] = $this->post['auth'];
                 $query['tags'] = $this->post['tags'];
@@ -158,6 +156,7 @@ class Server {
                         http_response_code(500);
                         return "Failed the request";
                 }
+                return NULL;
         }
 
         /**

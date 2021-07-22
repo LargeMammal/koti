@@ -13,10 +13,15 @@ class DBItem {
 
 	/**
 	 * DBItem
+     * 'title' title url endcoded
+     * 'token' user token
+     * 'blob' item to be saved
+     * 'auth' authorization level required to view
+     * 'tags' associated tags
 	 */
 	function __construct($array) {
 		$this->hash = hash("sha512", $array["blob"]);
-		$this->title = $array["title"];
+		$this->title = urldecode($array["title"]);
 		$this->date = time();
 		$this->blob = $array["blob"];
 		$this->tags = $array["tags"];
@@ -87,7 +92,7 @@ class DB {
 		if ($val === FALSE) {
 			// Create the table
 			$sql = "CREATE TABLE tokens (token VARCHAR(255) PRIMARY KEY,".
-				" user INT UNSIGNED NOT NULL, exp BIGINT NOT NULL)";
+				" user INT UNSIGNED NOT NULL";
 			if ($this->conn->query($sql) !== TRUE) {
 				trigger_error("db.__construct: ".$this->conn->error);
 				echo "failed to create tokens table";
@@ -195,7 +200,7 @@ class DB {
 		// Clean inputs
 		foreach ($inputs as $key => $value) {
 			$var = $this->conn->escape_string($value);
-			$items[$key] = $var;
+			$inputs[$key] = $var;
 		}
 	
 		// Generate query
@@ -203,11 +208,18 @@ class DB {
 
 		
 		$str = "";
-		foreach ($items as $column=>$item) {
-			if ($str != "") $str .= " AND";
-			else $str .= " WHERE";
-			$str .= " ".$column."='".$item."'";
-		}
+        if (count($inputs) > 1) {
+            foreach ($inputs as $key => $var) {
+                if ($key % 2 !== 0) continue;
+                $items = ["$var[$key]" => $var[$key+1]];
+            }
+            
+            foreach ($items as $column=>$item) {
+                if ($str != "") $str .= " AND";
+                else $str .= " WHERE";
+                $str .= " ".$column."='".$item."'";
+            }
+        }
 		$sql .= $str." LIMIT 10"; // Make this so that user decides.
 	
 		$results = $this->conn->query($sql);
@@ -223,6 +235,17 @@ class DB {
 		
 		return $output;
 	}
+	
+	/**
+     * @brief 
+     * DBGetUser retrieves user if one exists from database
+     * @param hash associated with user
+     * @return string returns user string
+     */
+    public function DBGetUser(string $hash):string {
+        
+        return NULL;
+    }
 
 	/**
 	 * @brief
@@ -231,14 +254,11 @@ class DB {
 	 * @return bool returns boolean value indicating success or failure
 	 */
 	public function DBPost($dbitem): bool {
-		//* Sanitize inputs
-		$items = [];
-		// Clean inputs
+        $items = [];
 		foreach ($dbitem as $key => $value) {
 			$var = $this->conn->escape_string($value);
-			$items[$this->conn->escape_string($key)] = $var;
+			$items[$key] = $var;
 		}
-	
 		// Insert items 
 		$sql = "INSERT INTO items (";
 		$sql .= "hash, title, date, blob, user, auth) VALUES (".
