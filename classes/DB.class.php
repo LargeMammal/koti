@@ -10,11 +10,13 @@ class DBItem {
 	private $tags;
 	private $user;
 	private $auth;
+    
+    private $error;
 
 	/**
 	 * DBItem
      * 'title' title url endcoded
-     * 'token' user token
+     * 'user' user id
      * 'blob' item to be saved
      * 'auth' authorization level required to view
      * 'tags' associated tags
@@ -26,6 +28,7 @@ class DBItem {
 		$this->blob = $array["blob"];
 		$this->tags = $array["tags"];
 		$this->user = $array["user"];
+        if (!is_int($array["auth"])) $this->error = "Malformed request: auth must be int";
 		$this->auth = $array["auth"];
 	}
 
@@ -115,8 +118,6 @@ class DB {
 		$val = $this->conn->query("select 1 from `users` LIMIT 1");
 		if ($val === FALSE) {
 			// Create the table
-			$error = $this->createTable('users', ['uname','auth', 'date', 'email']);
-			// Create the table
 			$sql = "CREATE TABLE items ".
                 "(id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,".
 				" uname VARCHAR(255) NOT NULL, auth TINYINT NOT NULL,".
@@ -204,7 +205,7 @@ class DB {
 		}
 	
 		// Generate query
-		$sql = "SELECT * FROM items";
+		$sql = "SELECT * FROM items JOIN tags ON items.hash=tags.hash";
 
 		
 		$str = "";
@@ -220,7 +221,7 @@ class DB {
                 $str .= " ".$column."='".$item."'";
             }
         }
-		$sql .= $str." LIMIT 10"; // Make this so that user decides.
+		$sql .= $str."GROUP BY items.hash LIMIT 10"; // Make this so that user decides.
 	
 		$results = $this->conn->query($sql);
 		// If query fails stop here
@@ -240,11 +241,25 @@ class DB {
      * @brief 
      * DBGetUser retrieves user if one exists from database
      * @param hash associated with user
-     * @return string returns user string
+     * @return array returns user array
      */
-    public function DBGetUser(string $hash):string {
-        
-        return NULL;
+    public function DBGetUser(int $id):array {
+		$this->output = [];
+		$var = $this->conn->escape_string($id);
+	
+		// Generate query
+		$sql = "SELECT * FROM users WHERE id='$var'";
+	
+		$results = $this->conn->query($sql); 
+		if ($results !== TRUE) {
+			trigger_error("db.SetItem: ".$this->conn->error);
+			return [];
+		}
+	
+		// Fetch each row in associative form and pass it to output.
+		while($row = $results->fetch_assoc()) $this->output[] = $row;
+		$results->free();
+		return $this->output[0];
     }
 
 	/**
@@ -254,20 +269,18 @@ class DB {
 	 * @return bool returns boolean value indicating success or failure
 	 */
 	public function DBPost($dbitem): bool {
-        $items = [];
-		foreach ($dbitem as $key => $value) {
-			$var = $this->conn->escape_string($value);
-			$items[$key] = $var;
-		}
 		// Insert items 
 		$sql = "INSERT INTO items (";
-		$sql .= "hash, title, date, blob, user, auth) VALUES (".
-			$items['hash'].", ".
-			$items['title'].", ".
-			$items['date'].", ".
-			$items['blob'].", ".
-			$items['user'].", ".
-			$items['auth'].");";
+		$sql .= "hash, title, date, blob, user, auth) VALUES (";
+        $sql .= $dbitem->hash.", ";
+        $sql .= $this->conn->escape_string($dbitem->title).", ";
+        $sql .= $dbitem->date.", ";
+        if (is_string($dbitem->blob))
+            $sql .= $this->conn->escape_string($dbitem->blob).", ";
+        else
+            $sql .= $dbitem->blob.", ";
+        $sql .= $dbitem->user.", ";
+        $sql .= $dbitem->auth.");";
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
@@ -279,9 +292,10 @@ class DB {
 		// insert tags
 		$sql = "INSERT INTO tags (";
 		$sql .= "hash, tag) VALUES";
-		foreach ($items['tags'] as $tag) {
-			$sql .= ' ('.$items['hash'].',$tag)';
-		}
+        foreach (explode('+', $dbitem['tags'] as $tag)) {
+            $sql .= ' ('.$dbitem['hash'].','.$tag.'),';
+        }
+        trim($sql, ',')
 		$sql .= ';';
 	
 		// Query
@@ -299,7 +313,6 @@ class DB {
 	 * @param string token
 	 * @return array returns token id pair.
 	 */
-	//*
 	public function DBGetToken($token) : array {
 		$this->output = [];
 		$var = $this->conn->escape_string($token);
@@ -320,7 +333,6 @@ class DB {
 		$results->free();
 		return $this->output[0];
 	}
-	//*/
 
 	/** 
 	 * RemoveItem

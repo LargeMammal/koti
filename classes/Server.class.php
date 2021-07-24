@@ -117,9 +117,9 @@ class Server {
                 $str .= '</head>';
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
-                $str .= '<nav>'.$this->db->DBGet(["title", "nav"]).'</nav></header>';
+                $str .= '<nav>'.($this->db->DBGet(["title", "nav"]))[0].'</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
-                $str .= '<footer>'.$this->db->DBGet(["title", "footer"]).'</footer>';
+                $str .= '<footer>'.($this->db->DBGet(["title", "footer"]))[0].'</footer>';
                 $str .= '</div></div></body></html>';
                 return $str;
         }
@@ -135,23 +135,24 @@ class Server {
                 if ($this->post['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
                     return 'Malformed request';
-                
-                // Compare hashed user to db user
-                $uname = crypt($this->post['user'], getenv("SALT"));
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($this->post['token']);
-                if (crypt($token['user'], getenv("SALT")) !== $uname) {
+                if ($token['user'] !== $uname) {
                         http_response_code(403);
                         return "Wrong token";
                 }
                 $query = NULL;
                 $query['title'] = $this->server[1];
-                $query['user'] = $token['user'];
+                $query['user'] = $token['user']; // token 'user' is just user id number
                 $query['blob'] = $this->post['blob'];
                 $query['auth'] = $this->post['auth'];
                 $query['tags'] = $this->post['tags'];
                 $dbitem = new DBItem($query);
+                if ($dbitem->error !== NULL) {
+                    http_response_code(500);
+                    return $dbitem->error;
+                }
                 if (!$this->db->DBPost($dbitem)) {
                         http_response_code(500);
                         return "Failed the request";
