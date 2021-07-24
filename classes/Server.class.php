@@ -69,7 +69,7 @@ class Server {
                         $output = $this->get();
                         break;
                 case 'POST':
-                        $output = $this->post();
+                        $output = $this->Post();
                         break;
                 case 'DELETE':
                         $this->delete();
@@ -129,10 +129,10 @@ class Server {
          * Post function handles post requests.
          * @return string error string. NULL if no errors
          */
-        private function post(): string
+        private function Post(): string
         {
                 echo empty($this->post);
-                if (empty($this->post) < 1) return 'Empty request';
+                if (empty($this->post)) return 'Empty request';
                 if ($this->post['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
                     return 'Malformed request';
