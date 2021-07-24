@@ -131,6 +131,7 @@ class Server {
          */
         private function post(): string
         {
+                echo $this->post;
                 if (count($this->post) < 1) return 'Empty request';
                 if ($this->post['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
