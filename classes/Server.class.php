@@ -131,14 +131,14 @@ class Server {
          */
         private function Post(): string
         {
-                echo empty($this->post);
-                if (empty($this->post)) return 'Empty request';
-                if ($this->post['token'] === NULL) return 'Missing token';
+                echo empty($_POST);
+                if (empty($_POST)) return 'Empty request';
+                if ($_POST['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
                     return 'Malformed request';
 
                 // Get token id pair that matches token in request
-                $token = $this->db->DBGetToken($this->post['token']);
+                $token = $this->db->DBGetToken($_POST['token']);
                 if ($token['user'] !== $uname) {
                         http_response_code(403);
                         return "Wrong token";
@@ -146,9 +146,9 @@ class Server {
                 $query = NULL;
                 $query['title'] = $this->server[1];
                 $query['user'] = $token['user']; // token 'user' is just user id number
-                $query['blob'] = $this->post['blob'];
-                $query['auth'] = $this->post['auth'];
-                $query['tags'] = $this->post['tags'];
+                $query['blob'] = $_POST['blob'];
+                $query['auth'] = $_POST['auth'];
+                $query['tags'] = $_POST['tags'];
                 $dbitem = new DBItem($query);
                 if ($dbitem->error !== NULL) {
                     http_response_code(500);
