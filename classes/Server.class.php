@@ -40,7 +40,7 @@ class Server {
 
                 $this->contents = [];
                 $this->items = [];
-                $this->db = new DB($this->config);
+                $this->db = new DB();
                 $this->type = "html";
                 $this->server = $this->paths($server['REQUEST_URI']);
                 if ($this->server === NULL) $this->server = ["title", "index"];
