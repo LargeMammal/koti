@@ -187,10 +187,10 @@ class Server {
          */
         private function loadHead() 
         {
-                $title = $this->items['Table'];
+                $title = $this->items['title'];
                 if (isset($this->contents))
                         if (count($this->contents) == 1)
-                                $title = $this->contents[0]['Title'];
+                                $title = $this->contents[0]['title'];
                                 
                 $str = '<meta charset="UTF-8">';
                 $str .= "<title>$title</title>";
@@ -209,9 +209,9 @@ class Server {
         {
                 $banner = "";
                 if (is_null($this->contents)) 
-                        return "<h1>".$this->items['Title']."</h1>"; 
+                        return "<h1>".$this->items['title']."</h1>"; 
                 if (count($this->contents) == 1) 
-                        $banner = $this->contents[0]['Title'];
+                        $banner = $this->contents[0]['title'];
                 $output = "<h1>$banner</h1>";
                 return $output;
         }
