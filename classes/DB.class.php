@@ -148,6 +148,7 @@ class DB {
 		$this->pass = NULL;
 		$this->database = NULL;
 		$this->output = NULL;
+        $this->error = NULL;
 	}
     
 	/** 
@@ -281,8 +282,8 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			trigger_error("db.SetItem: ".$sql.
-				"<br>".$this->conn->error);
+			$this->error = "db.SetItem: ".$sql.
+				"<br>".$this->conn->error;
 			return false;
 		}
 	
@@ -297,8 +298,8 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			trigger_error("db.SetItem: ".$sql.
-				"<br>".$this->conn->error);
+			$this->error = "db.SetItem: ".$sql.
+				"<br>".$this->conn->error;
 			return false;
 		}
 		return true;
