@@ -128,13 +128,15 @@ class Server {
          * @brief
          * Post function handles post requests.
          */
-        private function post()
+        private function post():void
         {
                 echo var_dump($_POST);
                 if (empty($_POST)) return 'Empty request';
                 if ($_POST["token"] === NULL) return 'Missing token';
-                if ((count($this->server) < 2) || $this->server[0] !== 'title')
+                if ((count($this->server) < 2) || $this->server[0] !== 'title') {
                         $this->error = 'Malformed request';
+                        return;
+                }
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
@@ -142,10 +144,12 @@ class Server {
                 if ($this->db->error !== NULL) {
                         http_response_code(500);
                         $this->error =  $dbitem->error;
+                        return;
                 }
                 if ($token['user'] !== $uname) {
                         http_response_code(403);
                         $this->error =  "Wrong token";
+                        return;
                 }
                 $query = NULL;
                 $query['title'] = $this->server[1];
@@ -157,10 +161,12 @@ class Server {
                 if ($dbitem->error !== NULL) {
                         http_response_code(500);
                         $this->error =  $dbitem->error;
+                        return;
                 }
                 if (!$this->db->DBPost($dbitem)) {
-                        http_response_code(500);
                         $this->error =  "Failed the request: ". $this->db->error;
+                        http_response_code(500);
+                        return;
                 }
         }
 
