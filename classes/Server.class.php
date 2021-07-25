@@ -94,7 +94,8 @@ class Server {
          */
         private function get()
         {
-                $token = $this->get['token'];
+                if(isset($this->get['token']))
+                    $token = $this->get['token'];
                 $this->contents = $this->db->DBGet($this->server);
                 if (count($this->contents) < 1) 
                         $this->contents = NULL;
