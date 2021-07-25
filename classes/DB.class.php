@@ -454,7 +454,7 @@ class DB {
 			$this->database
 		);
 		if (!$this->conn) {
-			$this->output["err"][] = mysqli_connect_error();
+			$this->error = mysqli_connect_error();
 			return false;
 		}
 		return true;
