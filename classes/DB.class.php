@@ -322,6 +322,7 @@ class DB {
 		$sql = "SELECT * FROM tokens WHERE token='$var'";
 	
 		$results = $this->conn->query($sql); 
+        var_dump($results);
 		if ($results !== TRUE) {
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];

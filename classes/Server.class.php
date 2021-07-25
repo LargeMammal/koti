@@ -130,7 +130,6 @@ class Server {
          */
         private function post()
         {
-                echo var_dump($_POST);
                 if (empty($_POST)) return 'Empty request';
                 if ($_POST["token"] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title') {
