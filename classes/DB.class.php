@@ -3,13 +3,13 @@
  * DBItem
  */
 class DBItem {
-	private $hash;
-	private $title;
-	private $date;
-	private $blob;
-	private $tags;
-	private $user;
-	private $auth;
+	public $hash;
+	public $title;
+	public $date;
+	public $blob;
+	public $tags;
+	public $user;
+	public $auth;
     
     public $error;
 
