@@ -154,7 +154,7 @@ class Server {
                     http_response_code(500);
                     return $dbitem->error;
                 }
-                if (!$this->db->DBPost()) {
+                if (!$this->db->DBPost($dbitem)) {
                         http_response_code(500);
                         return "Failed the request: ". $this->db->error;
                 }
