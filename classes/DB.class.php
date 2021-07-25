@@ -11,7 +11,7 @@ class DBItem {
 	private $user;
 	private $auth;
     
-    private $error;
+    public $error;
 
 	/**
 	 * DBItem
@@ -54,7 +54,8 @@ class DB {
 	private $pass;
 	private $site;
 	private $user;
-	private $error;
+    
+    public $error;
 
 	function __construct() {
 		$this->user = getenv("USER");
