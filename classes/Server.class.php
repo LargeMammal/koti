@@ -69,7 +69,7 @@ class Server {
                         $output = $this->get();
                         break;
                 case 'POST':
-                        $output = $this->post();
+                        $this->post();
                         break;
                 case 'DELETE':
                         $this->delete();
@@ -127,25 +127,24 @@ class Server {
         /**
          * @brief
          * Post function handles post requests.
-         * @return string error string. NULL if no errors
          */
-        private function post(): string
+        private function post()
         {
                 echo var_dump($_POST);
                 if (empty($_POST)) return 'Empty request';
                 if ($_POST["token"] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
-                        return 'Malformed request';
+                        $this->error = 'Malformed request';
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
                 if ($this->db->error !== NULL) {
                         http_response_code(500);
-                        return $dbitem->error;
+                        $this->error =  $dbitem->error;
                 }
                 if ($token['user'] !== $uname) {
                         http_response_code(403);
-                        return "Wrong token";
+                        $this->error =  "Wrong token";
                 }
                 $query = NULL;
                 $query['title'] = $this->server[1];
@@ -156,13 +155,12 @@ class Server {
                 $dbitem = new DBItem($query);
                 if ($dbitem->error !== NULL) {
                         http_response_code(500);
-                        return $dbitem->error;
+                        $this->error =  $dbitem->error;
                 }
                 if (!$this->db->DBPost($dbitem)) {
                         http_response_code(500);
-                        return "Failed the request: ". $this->db->error;
+                        $this->error =  "Failed the request: ". $this->db->error;
                 }
-                return "";
         }
 
         /**
