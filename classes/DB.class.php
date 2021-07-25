@@ -331,6 +331,7 @@ class DB {
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
+		echo "i'm here";
 	
 		// Fetch each row in associative form and pass it to output.
 		//while($row = $results->fetch_assoc()) $this->output[] = $row;
