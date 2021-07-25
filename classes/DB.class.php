@@ -326,7 +326,7 @@ class DB {
 		$results = $this->conn->query($sql);
         //var_dump($results);
         var_dump($results->fetch_assoc());
-		if ($results !== TRUE) {
+		if ($results === FALSE) {
             var_dump($this->conn->error);
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
