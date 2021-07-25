@@ -324,6 +324,7 @@ class DB {
 	
 		$results = $this->conn->query($sql);
 		if ($results !== TRUE) {
+            echo ($this->conn->error);
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
