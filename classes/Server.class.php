@@ -135,10 +135,14 @@ class Server {
                 if (empty($_POST)) return 'Empty request';
                 if ($_POST["token"] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
-                    return 'Malformed request';
+                        return 'Malformed request';
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
+                if ($this->db->error !== NULL) {
+                        http_response_code(500);
+                        return $dbitem->error;
+                }
                 if ($token['user'] !== $uname) {
                         http_response_code(403);
                         return "Wrong token";
@@ -146,13 +150,13 @@ class Server {
                 $query = NULL;
                 $query['title'] = $this->server[1];
                 $query['user'] = $token['user']; // token 'user' is just user id number
-                $query['blob'] = $_POST['blob'];
+                $query['item'] = $_POST['item'];
                 $query['auth'] = $_POST['auth'];
                 $query['tags'] = $_POST['tags'];
                 $dbitem = new DBItem($query);
                 if ($dbitem->error !== NULL) {
-                    http_response_code(500);
-                    return $dbitem->error;
+                        http_response_code(500);
+                        return $dbitem->error;
                 }
                 if (!$this->db->DBPost($dbitem)) {
                         http_response_code(500);
@@ -214,9 +218,9 @@ class Server {
                 if (is_null($this->contents) || count($this->contents) < 1) 
                         return "<h1>Site came up empty!</h1>";
                 foreach ($this->contents as $items) {
-                                $content .= "<section>";
-                                $content .= $items['Content'];
-                                $content .= "</section>";
+			$content .= "<section>";
+			$content .= $items['Content'];
+			$content .= "</section>";
                 }
                 return $content;
         }

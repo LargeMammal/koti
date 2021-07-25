@@ -6,7 +6,7 @@ class DBItem {
 	public $hash;
 	public $title;
 	public $date;
-	public $blob;
+	public $item;
 	public $tags;
 	public $user;
 	public $auth;
@@ -17,15 +17,15 @@ class DBItem {
 	 * DBItem
      * 'title' title url endcoded
      * 'user' user id
-     * 'blob' item to be saved
+     * 'item' item to be saved
      * 'auth' authorization level required to view
      * 'tags' associated tags
 	 */
 	function __construct($array) {
-		$this->hash = hash("sha512", $array["blob"]);
+		$this->hash = hash("sha512", $array["item"]);
 		$this->title = urldecode($array["title"]);
 		$this->date = time();
-		$this->blob = $array["blob"];
+		$this->item = $array["item"];
 		$this->tags = $array["tags"];
 		$this->user = $array["user"];
         if (!is_int($array["auth"]) && !ctype_digit($array["auth"])) {
@@ -39,7 +39,7 @@ class DBItem {
 		$this->hash = NULL;
 		$this->title = NULL;
 		$this->date = NULL;
-		$this->blob = NULL;
+		$this->item = NULL;
 		$this->tags = NULL;
 		$this->user = NULL;
 		$this->auth = NULL;
@@ -269,14 +269,14 @@ class DB {
 	public function DBPost($dbitem): bool {
 		// Insert items 
 		$sql = "INSERT INTO items (";
-		$sql .= "hash, title, date, blob, user, auth) VALUES (";
+		$sql .= "hash, title, date, item, user, auth) VALUES (";
         $sql .= $dbitem->hash.", ";
         $sql .= $this->conn->escape_string($dbitem->title).", ";
         $sql .= $dbitem->date.", ";
-        if (is_string($dbitem->blob))
-            $sql .= $this->conn->escape_string($dbitem->blob).", ";
+        if (is_string($dbitem->item))
+            $sql .= $this->conn->escape_string($dbitem->item).", ";
         else
-            $sql .= $dbitem->blob.", ";
+            $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
 	
@@ -322,7 +322,7 @@ class DB {
 	
 		$results = $this->conn->query($sql); 
 		if ($results !== TRUE) {
-			trigger_error("db.SetItem: ".$this->conn->error);
+			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
 	
