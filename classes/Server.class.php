@@ -162,7 +162,7 @@ class Server {
                         http_response_code(500);
                         return "Failed the request: ". $this->db->error;
                 }
-                return NULL;
+                return "";
         }
 
         /**
