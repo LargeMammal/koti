@@ -286,6 +286,7 @@ class DB {
 				"<br>".$this->conn->error;
 			return false;
 		}
+		echo $sql;
 	
 		// insert tags
 		$sql = "INSERT INTO tags (";
