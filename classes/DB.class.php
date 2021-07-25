@@ -319,7 +319,7 @@ class DB {
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
 	
 		// Generate query
-		$sql = "SELECT * FROM tokens WHERE token='$var'";
+		$sql = "SELECT * FROM tokens"; // WHERE token='$var'";
 	
 		$results = $this->conn->query($sql);
 		if ($results !== TRUE) {
