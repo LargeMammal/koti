@@ -79,8 +79,7 @@ class DB {
 				" title TEXT NOT NULL, item BLOB NOT NULL,".
 				" auth INT UNSIGNED NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
-				//trigger_error("db.__construct: ".$this->conn->error);
-				echo "failed to create items table: ".$this->conn->error;
+				$this->error = "failed to create items table: ".$this->conn->error;
 			}
 		}
 		// Check tags table 
@@ -90,8 +89,7 @@ class DB {
 			$sql = "CREATE TABLE tags (hash VARCHAR(255) PRIMARY KEY,".
 				" tag TEXT NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.__construct: ".$this->conn->error);
-				echo "failed to create tags table";
+				$this->error = "db.__construct: failed to create tags table".$this->conn->error;
 			}
 		}
 		// Check tokens table
@@ -101,8 +99,7 @@ class DB {
 			$sql = "CREATE TABLE tokens (token VARCHAR(255) PRIMARY KEY,".
 				" user INT UNSIGNED NOT NULL";
 			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.__construct: ".$this->conn->error);
-				echo "failed to create tokens table";
+				$this->error = "db.__construct: failed to create tokens table".$this->conn->error;
 			}
 		}
 		if($val->num_rows < 1) {
@@ -114,8 +111,7 @@ class DB {
 			$master['exp'] = strtotime('+1 month');
 			echo ($master['token']);
 			if(!$this->SetItem('tokens', $master)) {
-				trigger_error("db.__construct: ".$this->conn->error);
-				echo "failed to create master token";
+				$this->error = "db.__construct: failed to create master token".$this->conn->error;
 			}
 		}
 		// Check users table
@@ -127,8 +123,7 @@ class DB {
 				" uname VARCHAR(255) NOT NULL, auth TINYINT NOT NULL,".
 				" email VARCHAR(255) NOT NULL, date BIGINT NOT NULL";
 			if ($this->conn->query($sql) !== TRUE) {
-				trigger_error("db.__construct: ".$this->conn->error);
-				echo "failed to create users table";
+				$this->error = "db.__construct: failed to create users table".$this->conn->error;
 			}
 		}
 		if ($val->num_rows < 1) {
@@ -140,11 +135,9 @@ class DB {
 				'email'=>crypt(getenv("MASTER_EMAIL"), getenv("SALT"))
 			);
 			if(!$this->SetItem('users', $master)) {
-				trigger_error("db.__construct: ".$this->conn->error);
-				echo "failed to create master user";
+				$this->error = "db.__construct: failed to create master user".$this->conn->error;
 			}
 		}
-		//$this->__destruct();
 	}
 
 	function __destruct() {
@@ -230,7 +223,7 @@ class DB {
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			trigger_error("db.DBGet: ".$sql."; ".$this->conn->error); 
+			$this->error = "db.DBGet: ".$sql."; ".$this->conn->error;
 			return $output;
 		}
 	
