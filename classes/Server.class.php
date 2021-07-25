@@ -8,7 +8,7 @@ class Server {
         public $error;
 
         private $method;
-        private $post;
+        //private $post;
         private $get;
         
         private $contents;
@@ -35,7 +35,7 @@ class Server {
                 $this->error = NULL;
 
                 $this->method = $server['REQUEST_METHOD'];
-                $this->post = $post;
+                //$this->post = $post;
                 $this->get = $get;
 
                 $this->contents = [];
@@ -69,7 +69,7 @@ class Server {
                         $output = $this->get();
                         break;
                 case 'POST':
-                        $output = $this->Post();
+                        $output = $this->post();
                         break;
                 case 'DELETE':
                         $this->delete();
@@ -129,10 +129,11 @@ class Server {
          * Post function handles post requests.
          * @return string error string. NULL if no errors
          */
-        private function Post(): string
+        private function post(): string
         {
                 //echo var_dump($_POST);
                 if (empty($_POST)) return 'Empty request';
+                echo var_dump($_POST['token']);
                 if ($_POST['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
                     return 'Malformed request';
