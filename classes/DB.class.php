@@ -65,10 +65,12 @@ class DB {
 		$this->site = getenv("SITE");
 		$this->pass = getenv("PASS");
 		$this->database = getenv("DB");
-		if (!$this->connect()) 
-			trigger_error("Connection failed");
-		$this->output = [];
 		$this->error = NULL;
+		if (!$this->connect()) {
+			$this->error = "Connection failed";
+            return;
+        }
+		$this->output = [];
 		
 		// Check items table
 		$val = $this->conn->query("select 1 from `items` LIMIT 1");
