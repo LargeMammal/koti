@@ -134,7 +134,7 @@ class Server {
                 //echo var_dump($_POST);
                 if (empty($_POST)) return 'Empty request';
                 echo var_dump($_POST['token']);
-                if ($_POST['token'] === NULL) return 'Missing token';
+                if ($_POST[0]['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
                     return 'Malformed request';
 
