@@ -128,7 +128,7 @@ class Server {
          * @brief
          * Post function handles post requests.
          */
-        private function post():void
+        private function post():NULL
         {
                 echo var_dump($_POST);
                 if (empty($_POST)) return 'Empty request';
