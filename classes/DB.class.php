@@ -315,14 +315,14 @@ class DB {
 	public function DBGetToken($token) : array {
 		$this->output = [];
 		$var = $this->conn->escape_string($token);
+        echo $var;
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
 	
 		// Generate query
-		$sql = "SELECT * FROM tokens WHERE token=$var";
+		$sql = "SELECT * FROM tokens WHERE token='$var'";
 	
-		$results = $this->conn->query($sql); 
-        var_dump($results);
+		$results = $this->conn->query($sql);
 		if ($results !== TRUE) {
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
