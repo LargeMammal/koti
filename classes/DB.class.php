@@ -324,8 +324,8 @@ class DB {
 		$sql = "SELECT * FROM tokens"; // WHERE token='$var'";
 	
 		$results = $this->conn->query($sql);
-        var_dump($results);
-        var_dump($results->fetch_assoc());
+        //var_dump($results);
+        //var_dump($results->fetch_assoc());
 		if ($results !== TRUE) {
             echo ($this->conn->error);
 			$this->error = "db.SetItem: ".$this->conn->error;
@@ -333,9 +333,10 @@ class DB {
 		}
 	
 		// Fetch each row in associative form and pass it to output.
-		while($row = $results->fetch_assoc()) $this->output[] = $row;
+		//while($row = $results->fetch_assoc()) $this->output[] = $row;
+		$output = $results->fetch_assoc();
 		$results->free();
-		return $this->output[0];
+		return $output;
 	}
 
 	/** 
