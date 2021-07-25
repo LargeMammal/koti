@@ -16,7 +16,7 @@ if (!spl_autoload_register('autoloader'))
 http_response_code(200);
 
 // Serve
-echo var_dump($_POST);
+//echo var_dump($_POST);
 $server = new Server($_SERVER, $_GET, $_POST);
 if ($server->error !== NULL) echo $server->error;
 echo $server->Serve();
