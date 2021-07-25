@@ -145,7 +145,7 @@ class Server {
                 var_dump($token);
                 if ($this->db->error !== NULL) {
                         http_response_code(500);
-                        $this->error =  $dbitem->error;
+                        $this->error =  $this->db->error;
                         return;
                 }
                 if ($token['user'] !== $uname) {
