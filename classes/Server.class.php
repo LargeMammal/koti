@@ -131,8 +131,8 @@ class Server {
          */
         private function Post(): string
         {
-                echo empty($_POST);
-                if (empty($_POST)) return 'Empty request';
+                //echo empty($_POST);
+                //if (empty($_POST)) return 'Empty request';
                 if ($_POST['token'] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title')
                     return 'Malformed request';
