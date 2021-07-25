@@ -319,6 +319,7 @@ class DB {
 	
 		// Generate query
 		$sql = "SELECT * FROM tokens WHERE token='$var'";
+        echo $sql;
 	
 		$results = $this->conn->query($sql); 
 		if ($results !== TRUE) {
