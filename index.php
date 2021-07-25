@@ -18,6 +18,9 @@ http_response_code(200);
 // Serve
 //echo var_dump($_POST);
 $server = new Server($_SERVER, $_GET, $_POST);
-if ($server->error !== NULL) echo $server->error;
+if ($server->error !== NULL) {
+    echo $server->error;
+    return;
+}
 echo $server->Serve();
 ?>
