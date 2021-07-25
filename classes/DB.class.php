@@ -279,6 +279,7 @@ class DB {
             $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
+		echo $sql;
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
@@ -286,7 +287,6 @@ class DB {
 				"<br>".$this->conn->error;
 			return false;
 		}
-		echo $sql;
 	
 		// insert tags
 		$sql = "INSERT INTO tags (";
