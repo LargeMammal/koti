@@ -28,7 +28,7 @@ class DBItem {
 		$this->blob = $array["blob"];
 		$this->tags = $array["tags"];
 		$this->user = $array["user"];
-        if (!is_int($array["auth"]) && ctype_digit($array["auth"])) {
+        if (!is_int($array["auth"]) && !ctype_digit($array["auth"])) {
             $this->error = "Malformed request: auth must be int";
         }
         else 
