@@ -335,6 +335,7 @@ class DB {
 		// Fetch each row in associative form and pass it to output.
 		//while($row = $results->fetch_assoc()) $this->output[] = $row;
 		$output = $results->fetch_assoc();
+        var_dump($output);
 		$results->free();
 		return $output;
 	}
