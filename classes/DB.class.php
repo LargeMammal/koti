@@ -325,13 +325,13 @@ class DB {
 	
 		$results = $this->conn->query($sql);
         var_dump($results);
+        var_dump($results->fetch_assoc());
 		if ($results !== TRUE) {
             echo ($this->conn->error);
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
 	
-        var_dump($results->fetch_assoc());
 		// Fetch each row in associative form and pass it to output.
 		while($row = $results->fetch_assoc()) $this->output[] = $row;
 		$results->free();
