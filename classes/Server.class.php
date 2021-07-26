@@ -82,6 +82,7 @@ class Server {
                         header('Allow: GET POST');
                         break;
                 }
+                $output = $this->error;
                 return $output;
         }
         
@@ -168,10 +169,8 @@ class Server {
                 if (!$this->db->DBPost($dbitem)) {
                         $this->error =  "Failed the request: ". $this->db->error;
                         http_response_code(500);
-                        echo "failed!";
                         return;
                 }
-                echo "success!";
         }
 
         /**
