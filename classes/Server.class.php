@@ -149,11 +149,8 @@ class Server {
                         $this->error =  $this->db->error;
                         return;
                 }
-                if ($token['user'] !== $uname) {
-                        http_response_code(403);
-                        $this->error =  "Wrong token";
-                        return;
-                }
+                $t = $token;
+                var_dump($t);
                 $query = NULL;
                 $query['title'] = $this->server[1];
                 $query['user'] = $token['user']; // token 'user' is just user id number
