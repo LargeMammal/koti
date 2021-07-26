@@ -11,7 +11,6 @@ class Server {
         //private $post;
         private $get;
         
-        private $contents;
         private $items;
         private $db;
         private $type; // html/json/xml
@@ -38,7 +37,7 @@ class Server {
                 //$this->post = $post;
                 $this->get = $get;
 
-                $this->contents = [];
+                $this->items = [];
                 $this->items = [];
                 $this->db = new DB();
                 if ($this->db->error !== NULL) {
@@ -58,7 +57,7 @@ class Server {
                 $this->post = NULL;
                 $this->get = NULL;
 
-                $this->contents = NULL;
+                $this->items = NULL;
                 $this->items = NULL;
                 $this->db = NULL;
                 $this->type = NULL;
@@ -97,19 +96,19 @@ class Server {
         {
                 if(isset($this->get['token']))
                     $token = $this->get['token'];
-                $this->contents = $this->db->DBGet($this->server);
-                if (count($this->contents) < 1) 
-                        $this->contents = NULL;
+                $this->items = $this->db->DBGet($this->server);
+                if (count($this->items) < 1) 
+                        $this->items = NULL;
 
                 switch ($this->type) {
                         case 'json':
                                 header('Content-Type: application/json');
-                                return json_encode($this->contents);
+                                return json_encode($this->items);
                         case 'xml':
                                 header('Content-Type: text/xml');
                                 $xml = new SimpleXMLElement('<root/>');
-                                array_flip($this->contents);
-                                array_walk_recursive($this->contents, array($xml, 'addChild'));
+                                array_flip($this->items);
+                                array_walk_recursive($this->items, array($xml, 'addChild'));
                                 return $xml->asXML();
                         default:
                                 # code...
@@ -188,10 +187,10 @@ class Server {
          */
         private function loadHead() 
         {
-                $title = $this->items['title'];
-                if (isset($this->contents))
-                        if (count($this->contents) == 1)
-                                $title = $this->contents[0]['title'];
+                $title = $this->items[0]['title'];
+                if (isset($this->items))
+                        if (count($this->items) == 1)
+                                $title = $this->items[0]['title'];
                                 
                 $str = '<meta charset="UTF-8">';
                 $str .= "<title>$title</title>";
@@ -209,10 +208,10 @@ class Server {
         private function loadHeader() 
         {
                 $banner = "";
-                if (is_null($this->contents)) 
+                if (is_null($this->items)) 
                         return "<h1>".$this->items['title']."</h1>"; 
-                if (count($this->contents) == 1) 
-                        $banner = $this->contents[0]['title'];
+                if (count($this->items) == 1) 
+                        $banner = $this->items[0]['title'];
                 $output = "<h1>$banner</h1>";
                 return $output;
         }
@@ -223,9 +222,9 @@ class Server {
         private function loadBody() 
         {
                 $content = "";
-                if (is_null($this->contents) || count($this->contents) < 1) 
+                if (is_null($this->items) || count($this->items) < 1) 
                         return "<h1>Site came up empty!</h1>";
-                foreach ($this->contents as $items) {
+                foreach ($this->items as $items) {
 			$content .= "<section>";
 			$content .= $items['Content'];
 			$content .= "</section>";
