@@ -324,7 +324,7 @@ class DB {
 	
 		$results = $this->conn->query($sql);
         //var_dump($results);
-        var_dump($results->fetch_assoc());
+        //var_dump($results->fetch_assoc());
 		if ($results === FALSE) {
 			$this->error = "db.SetItem: ".$this->conn->error;
 			return [];
@@ -333,7 +333,8 @@ class DB {
 		// Fetch each row in associative form and pass it to output.
 		//while($row = $results->fetch_assoc()) $this->output[] = $row;
 		$output = $results->fetch_assoc();
-        var_dump($output);
+        $d = $output;
+        var_dump($d);
 		$results->free();
 		return $output;
 	}
