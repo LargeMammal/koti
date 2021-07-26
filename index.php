@@ -20,7 +20,7 @@ http_response_code(200);
 $server = new Server($_SERVER, $_GET, $_POST);
 if ($server->error !== NULL) {
     echo $server->error;
-    return;
+    return void;
 }
 echo $server->Serve();
 ?>

@@ -270,9 +270,9 @@ class DB {
 	 */
 	public function DBPost($dbitem): bool {
 		// Insert items 
-		$sql = "INSERT INTO items (";
-		$sql .= "hash, title, date, item, user, auth) VALUES (";
-        $sql .= $dbitem->hash.", ";
+		$sql = "INSERT INTO 'items' (";
+		$sql .= "'hash', 'title', 'date', 'item', 'user', 'auth') VALUES ('";
+        $sql .= $dbitem->hash."', ";
         $sql .= $this->conn->escape_string($dbitem->title).", ";
         $sql .= $dbitem->date.", ";
         if (is_string($dbitem->item))
