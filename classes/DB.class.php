@@ -315,7 +315,7 @@ class DB {
 	 * @return array returns token id pair.
 	 */
 	public function DBGetToken($token): array {
-        $output[];
+        $output = [];
 		$var = $this->conn->escape_string($token);
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
