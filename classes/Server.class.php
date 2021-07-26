@@ -81,7 +81,6 @@ class Server {
                         header('Allow: GET POST');
                         break;
                 }
-                $output = $this->error;
                 return $output;
         }
         
