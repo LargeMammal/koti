@@ -281,12 +281,11 @@ class DB {
             $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
-		echo $sql;
+		//echo $sql;
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			$this->error = "db.SetItem: ".$sql.
-				"<br>".$this->conn->error;
+			$this->error = $this->conn->error;
 			return false;
 		}
 	
@@ -301,8 +300,7 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
-			$this->error = "db.SetItem: ".$sql.
-				"<br>".$this->conn->error;
+			$this->error = $this->conn->error;
 			return false;
 		}
 		return true;

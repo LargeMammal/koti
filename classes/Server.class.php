@@ -170,6 +170,7 @@ class Server {
                         http_response_code(500);
                         return;
                 }
+                echo "success!";
         }
 
         /**
