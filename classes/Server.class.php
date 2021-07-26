@@ -131,15 +131,14 @@ class Server {
         /**
          * @brief
          * Post function handles post requests.
-         * @return NULL post returns null
          */
-        private function post() : NULL
+        private function post()
         {
                 if (empty($_POST)) return 'Empty request';
                 if ($_POST["token"] === NULL) return 'Missing token';
                 if ((count($this->server) < 2) || $this->server[0] !== 'title') {
                         $this->error = 'Malformed request';
-                        return NULL;
+                        return;
                 }
 
                 // Get token id pair that matches token in request
@@ -148,7 +147,7 @@ class Server {
                 if ($this->db->error !== NULL) {
                         http_response_code(500);
                         $this->error =  $this->db->error;
-                        return NULL;
+                        return;
                 }
                 //$t = $token;
                 //var_dump($t);
@@ -164,12 +163,12 @@ class Server {
                 if ($dbitem->error !== NULL) {
                         http_response_code(500);
                         $this->error =  $dbitem->error;
-                        return NULL;
+                        return;
                 }
                 if (!$this->db->DBPost($dbitem)) {
                         $this->error =  "Failed the request: ". $this->db->error;
                         http_response_code(500);
-                        return NULL;
+                        return;
                 }
         }
 
