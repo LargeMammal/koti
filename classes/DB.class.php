@@ -314,14 +314,14 @@ class DB {
 	 * @param string token
 	 * @return array returns token id pair.
 	 */
-	public function DBGetToken($token) : array {
+	public function DBGetToken($token) {
 		$this->output = [];
 		$var = $this->conn->escape_string($token);
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
 	
 		// Generate query
-		$sql = "SELECT * FROM tokens"; // WHERE token='$var'";
+		$sql = "SELECT * FROM tokens WHERE token='$var'";
 	
 		$results = $this->conn->query($sql);
         //var_dump($results);
