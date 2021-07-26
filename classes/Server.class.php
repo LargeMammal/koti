@@ -121,9 +121,9 @@ class Server {
                 $str .= '</head>';
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
-                $str .= '<nav>'.($this->db->DBGet(["title", "nav"]))[0].'</nav></header>';
+                $str .= '<nav>'.($this->db->DBGet(["title", "nav"])[0]).'</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
-                $str .= '<footer>'.($this->db->DBGet(["title", "footer"]))[0].'</footer>';
+                $str .= '<footer>'.($this->db->DBGet(["title", "footer"])[0]).'</footer>';
                 $str .= '</div></div></body></html>';
                 return $str;
         }
@@ -187,7 +187,7 @@ class Server {
          */
         private function loadHead() 
         {
-                $title = $this->items[0]['title'];
+                $title = "empty";
                 if (isset($this->items))
                         if (count($this->items) == 1)
                                 $title = $this->items[0]['title'];
@@ -209,7 +209,7 @@ class Server {
         {
                 $banner = "";
                 if (is_null($this->items)) 
-                        return "<h1>".$this->items['title']."</h1>"; 
+                        return "<h1>empty</h1>"; 
                 if (count($this->items) == 1) 
                         $banner = $this->items[0]['title'];
                 $output = "<h1>$banner</h1>";
