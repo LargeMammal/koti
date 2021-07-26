@@ -160,7 +160,7 @@ class Server {
                 $query['item'] = $_POST['item'];
                 $query['auth'] = $_POST['auth'];
                 $query['tags'] = $_POST['tags'];
-                $q = $query:
+                $q = $query;
                 var_dump($q);
                 $dbitem = new DBItem($query);
                 if ($dbitem->error !== NULL) {
