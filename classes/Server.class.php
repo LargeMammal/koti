@@ -129,7 +129,7 @@ class Server {
                 $str .= '<section>'.$this->loadBody().'</section>';
                 $footer = $this->db->DBGet(["title", "footer"]);
                 array_filter($footer);
-                if (empty($footer))
+                if (!empty($footer))
                         $str .= '<footer>'.$footer[0].'</footer>';
                 else $str .= '<footer>empty</footer>';
                 $str .= '</div></div></body></html>';
