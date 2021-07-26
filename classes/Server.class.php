@@ -121,9 +121,15 @@ class Server {
                 $str .= '</head>';
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
-                $str .= '<nav>'.($this->db->DBGet(["title", "nav"])[0]).'</nav></header>';
+                $nav = $this->db->DBGet(["title", "nav"]);
+                if (!is_null($nav))
+                        $str .= '<nav>'.$nav[0].'</nav></header>';
+                else $str .= '<nav>empty</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
-                $str .= '<footer>'.($this->db->DBGet(["title", "footer"])[0]).'</footer>';
+                $footer = $this->db->DBGet(["title", "footer"]);
+                if (!is_null($footer))
+                        $str .= '<footer>'.$footer[0].'</footer>';
+                else $str .= '<footer>empty</footer>';
                 $str .= '</div></div></body></html>';
                 return $str;
         }
