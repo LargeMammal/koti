@@ -153,7 +153,7 @@ class Server {
                 var_dump($t);
                 $query = NULL;
                 $query['title'] = $this->server[1];
-                $query['user'] = $token['user']; // token 'user' is just user id number
+                $query['user'] = $token[0]['user']; // token 'user' is just user id number
                 $query['item'] = $_POST['item'];
                 $query['auth'] = $_POST['auth'];
                 $query['tags'] = $_POST['tags'];
