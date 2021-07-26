@@ -314,7 +314,8 @@ class DB {
 	 * @param string token
 	 * @return array returns token id pair.
 	 */
-	public function DBGetToken($token) {
+	public function DBGetToken($token): array {
+        $output[];
 		$var = $this->conn->escape_string($token);
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
@@ -331,10 +332,8 @@ class DB {
 		}
 	
 		// Fetch each row in associative form and pass it to output.
-		//while($row = $results->fetch_assoc()) $this->output[] = $row;
-		$output = $results->fetch_assoc();
-        $d = $output;
-        var_dump($d);
+		while($row = $results->fetch_assoc()) $output[] = $row;
+		//$output = $results->fetch_assoc();
 		$results->free();
 		return $output;
 	}

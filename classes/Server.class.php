@@ -143,7 +143,7 @@ class Server {
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
-                var_dump($token);
+                
                 if ($this->db->error !== NULL) {
                         http_response_code(500);
                         $this->error =  $this->db->error;
