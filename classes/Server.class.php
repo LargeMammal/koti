@@ -96,7 +96,7 @@ class Server {
                 if(isset($this->get['token']))
                     $token = $this->get['token'];
                 $this->items = $this->db->DBGet($this->server);
-                if (count($this->items) < 1) 
+                if (empty($this->items) < 1) 
                         $this->items = NULL;
 
                 switch ($this->type) {
@@ -141,8 +141,14 @@ class Server {
          */
         private function post()
         {
-                if (empty($_POST)) return 'Empty request';
-                if ($_POST["token"] === NULL) return 'Missing token';
+                if (empty($_POST)) {
+                        $this->error = 'Empty request'; 
+                        return;
+                }
+                if ($_POST["token"] === NULL) {
+                        $this->error = 'Missing token';
+                        return;
+                }
                 if ((count($this->server) < 2) || $this->server[0] !== 'title') {
                         $this->error = 'Malformed request';
                         return;
