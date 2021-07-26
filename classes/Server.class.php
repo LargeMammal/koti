@@ -122,12 +122,12 @@ class Server {
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
                 $nav = $this->db->DBGet(["title", "nav"]);
-                if (!is_null($nav))
+                if (count($nav)<1)
                         $str .= '<nav>'.$nav[0].'</nav></header>';
                 else $str .= '<nav>empty</nav></header>';
                 $str .= '<section>'.$this->loadBody().'</section>';
                 $footer = $this->db->DBGet(["title", "footer"]);
-                if (!is_null($footer))
+                if (count($footer)<1)
                         $str .= '<footer>'.$footer[0].'</footer>';
                 else $str .= '<footer>empty</footer>';
                 $str .= '</div></div></body></html>';
