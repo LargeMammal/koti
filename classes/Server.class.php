@@ -81,7 +81,6 @@ class Server {
                         header('Allow: GET POST');
                         break;
                 }
-                echo "serve finished";
                 return $output;
         }
         
@@ -139,22 +138,21 @@ class Server {
         /**
          * @brief
          * Post function handles post requests.
-         * @return bool returns boolean
          */
         private function post():bool
         {
                 echo "at start";
                 if (empty($_POST)) {
                         $this->error[] = 'Empty request'; 
-                        return false;
+                        return;
                 }
                 if ($_POST["token"] === NULL) {
                         $this->error[] = 'Missing token';
-                        return false;
+                        return;
                 }
                 if ((count($this->server) < 2) || $this->server[0] !== 'title') {
                         $this->error[] = 'Malformed request';
-                        return false;
+                        return;
                 }
                 echo "checks done";
 
@@ -166,9 +164,9 @@ class Server {
                         echo "error start";
                         http_response_code(500);
                         echo "response set";
-                        array_push($this->error, $this->db->error);
+                        array_merge($this->error, $this->db->error);
                         echo "errors merged";
-                        return false;
+                        return;
                 }
                 echo "no token errors";
                 //$t = $token;
@@ -183,18 +181,17 @@ class Server {
                 //var_dump($q);
                 $dbitem = new DBItem($query);
                 if (!empty($dbitem->error)) {
-                        array_push($this->error, $dbitem->error);
+                        array_merge($this->error, $dbitem->error);
                         http_response_code(500);
-                        return false;
+                        return;
                 }
                 echo "dbitem done";
                 if (!$this->db->DBPost($dbitem)) {
-                        array_push($this->error, $this->db->error);
+                        array_merge($this->error, $this->db->error);
                         http_response_code(500);
-                        return false;
+                        return;
                 }
                 echo "dbpost done";
-                return true;
         }
 
         /**
