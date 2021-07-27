@@ -173,9 +173,9 @@ class Server {
                 //$q = $query;
                 //var_dump($q);
                 $dbitem = new DBItem($query);
-                if ($dbitem->error !== NULL) {
-                        http_response_code(500);
+                if (!empty($dbitem->error)) {
                         array_push($this->error, $dbitem->error);
+                        http_response_code(500);
                         return;
                 }
                 if (!$this->db->DBPost($dbitem)) {

@@ -286,6 +286,7 @@ class DB {
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
 			$this->error[] = $this->conn->error;
+            var_dump($this->error);
 			return false;
 		}
 	
