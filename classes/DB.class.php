@@ -297,8 +297,8 @@ class DB {
         foreach (explode('+', $dbitem->tags) as $tag) {
             $sql .= "'".$dbitem->hash."', '".$tag."',";
         }
-        $sql .= ')';
         trim($sql, ',');
+        $sql .= ')';
 		echo "tags success\n";
 	
 		// Query
