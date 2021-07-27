@@ -295,14 +295,15 @@ class DB {
 		$sql = "INSERT INTO tags (";
 		$sql .= "hash, tag) VALUES ( ";
         foreach (explode('+', $dbitem->tags) as $tag) {
-            $sql .= "'".$dbitem->hash."', ".$tag."),";
+            $sql .= "'".$dbitem->hash."', '".$tag."',";
         }
+        $sql .= ')';
         trim($sql, ',');
 		echo "tags success\n";
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
-            echo "sql: $sql";
+            echo "sql: $sql \n";
 			$this->error[] = $this->conn->error;
 			return false;
 		}
