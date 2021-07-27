@@ -223,7 +223,7 @@ class DB {
                 $str .= " ".$column."='".$item."'";
             }
         }
-		$sql .= $str."GROUP BY items.hash LIMIT 10"; // Make this so that user decides.
+		$sql .= $str." GROUP BY items.hash LIMIT 10"; // Make this so that user decides.
 	
 		$results = $this->conn->query($sql);
 		// If query fails stop here
