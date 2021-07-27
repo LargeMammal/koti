@@ -31,7 +31,7 @@ class Server {
                 array $get = NULL, 
                 array $post = NULL
         ){
-                $this->error = NULL;
+                $this->error = [];
 
                 $this->method = $server['REQUEST_METHOD'];
                 //$this->post = $post;
@@ -40,15 +40,15 @@ class Server {
                 $this->items = [];
                 $this->items = [];
                 $this->db = new DB();
-                if ($this->db->error !== NULL) {
-                    $this->error = $this->db->error;
+                if (!empty($this->db->error)) {
+                    $this->error[] = $this->db->error;
                 }
                 $this->type = "html";
                 $this->server = $this->paths($server['REQUEST_URI']);
                 if ($this->server === NULL) $this->server = ["title", "index"];
                 $n = count($this->server);
                 if (($n > 1) && ($n % 2 !== 0))
-                        $this->error = "Malformed request!";
+                        $this->error[] = "Malformed request!";
         }
         
         function __destruct() 
@@ -142,15 +142,15 @@ class Server {
         private function post()
         {
                 if (empty($_POST)) {
-                        $this->error = 'Empty request'; 
+                        $this->error[] = 'Empty request'; 
                         return;
                 }
                 if ($_POST["token"] === NULL) {
-                        $this->error = 'Missing token';
+                        $this->error[] = 'Missing token';
                         return;
                 }
                 if ((count($this->server) < 2) || $this->server[0] !== 'title') {
-                        $this->error = 'Malformed request';
+                        $this->error[] = 'Malformed request';
                         return;
                 }
 
@@ -159,7 +159,7 @@ class Server {
                 
                 if ($this->db->error !== NULL) {
                         http_response_code(500);
-                        $this->error =  $this->db->error;
+                        array_push($this->error, $this->db->error);
                         return;
                 }
                 //$t = $token;
@@ -175,11 +175,11 @@ class Server {
                 $dbitem = new DBItem($query);
                 if ($dbitem->error !== NULL) {
                         http_response_code(500);
-                        $this->error =  $dbitem->error;
+                        array_push($this->error, $dbitem->error);
                         return;
                 }
                 if (!$this->db->DBPost($dbitem)) {
-                        $this->error =  "Failed the request: ". $this->db->error;
+                        array_push($this->error, $this->db->error);
                         http_response_code(500);
                         return;
                 }
