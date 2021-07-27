@@ -281,7 +281,8 @@ class DB {
             $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
-		echo $sql;
+		$s =  $sql;
+        var_dump($s);
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
