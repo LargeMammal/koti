@@ -286,7 +286,6 @@ class DB {
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
 			$this->error[] = $this->conn->error;
-            var_dump($this->error);
 			return false;
 		}
 	
@@ -303,6 +302,7 @@ class DB {
 			$this->error[] = $this->conn->error;
 			return false;
 		}
+		echo "got here";
 		return true;
 	}
 
