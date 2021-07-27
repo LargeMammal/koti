@@ -273,13 +273,13 @@ class DB {
 		// Insert items 
 		$sql = "INSERT INTO items (";
 		$sql .= "hash, title, date, item, user, auth) VALUES ('";
-        $sql .= $dbitem->hash."', ";
-        $sql .= $this->conn->escape_string($dbitem->title).", ";
-        $sql .= $dbitem->date.", ";
+        $sql .= $dbitem->hash."', '";
+        $sql .= $this->conn->escape_string($dbitem->title)."', ";
+        $sql .= $dbitem->date.", '";
         if (is_string($dbitem->item))
-            $sql .= $this->conn->escape_string($dbitem->item).", ";
+            $sql .= $this->conn->escape_string($dbitem->item)."', ";
         else
-            $sql .= $dbitem->item.", ";
+            $sql .= $dbitem->item."', ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
 	
