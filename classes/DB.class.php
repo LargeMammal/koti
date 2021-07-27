@@ -295,7 +295,7 @@ class DB {
 		$sql = "INSERT INTO tags (";
 		$sql .= "hash, tag) VALUES ( ";
         foreach (explode('+', $dbitem->tags) as $tag) {
-            $sql .= "'".$dbitem->hash."','".$tag."'),";
+            $sql .= "'".$dbitem->hash."', ".$tag."),";
         }
         trim($sql, ',');
 		echo "tags success\n";
