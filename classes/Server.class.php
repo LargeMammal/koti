@@ -162,7 +162,7 @@ class Server {
                 echo "token done";
                 
                 if ($this->db->error !== NULL) {
-                        echo "error start";
+                        echo "error: ". implode('\n', $this->db->error);
                         http_response_code(500);
                         echo "response set";
                         $this->error=array_merge($this->error, $this->db->error);
