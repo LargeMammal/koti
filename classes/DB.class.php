@@ -65,7 +65,7 @@ class DB {
 		$this->site = getenv("SITE");
 		$this->pass = getenv("PASS");
 		$this->database = getenv("DB");
-		$this->error = NULL;
+		$this->error = [];
 		if (!$this->connect()) {
 			$this->error = "Connection failed";
             return;
@@ -81,7 +81,7 @@ class DB {
 				" title TEXT NOT NULL, item BLOB NOT NULL,".
 				" auth INT UNSIGNED NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
-				$this->error = "failed to create items table: ".$this->conn->error;
+				$this->error[] = "failed to create items table: ".$this->conn->error;
 			}
 		}
 		// Check tags table 
@@ -91,7 +91,7 @@ class DB {
 			$sql = "CREATE TABLE tags (hash VARCHAR(255) PRIMARY KEY,".
 				" tag TEXT NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
-				$this->error = "db.__construct: failed to create tags table".$this->conn->error;
+				$this->error[] = "db.__construct: failed to create tags table".$this->conn->error;
 			}
 		}
 		// Check tokens table
@@ -101,7 +101,7 @@ class DB {
 			$sql = "CREATE TABLE tokens (token VARCHAR(255) PRIMARY KEY,".
 				" user INT UNSIGNED NOT NULL";
 			if ($this->conn->query($sql) !== TRUE) {
-				$this->error = "db.__construct: failed to create tokens table".$this->conn->error;
+				$this->error[] = "db.__construct: failed to create tokens table".$this->conn->error;
 			}
 		}
 		if($val->num_rows < 1) {
@@ -113,7 +113,7 @@ class DB {
 			$master['exp'] = strtotime('+1 month');
 			echo ($master['token']);
 			if(!$this->SetItem('tokens', $master)) {
-				$this->error = "db.__construct: failed to create master token".$this->conn->error;
+				$this->error[] = "db.__construct: failed to create master token".$this->conn->error;
 			}
 		}
 		// Check users table
@@ -125,7 +125,7 @@ class DB {
 				" uname VARCHAR(255) NOT NULL, auth TINYINT NOT NULL,".
 				" email VARCHAR(255) NOT NULL, date BIGINT NOT NULL";
 			if ($this->conn->query($sql) !== TRUE) {
-				$this->error = "db.__construct: failed to create users table".$this->conn->error;
+				$this->error[] = "db.__construct: failed to create users table".$this->conn->error;
 			}
 		}
 		if ($val->num_rows < 1) {
@@ -137,7 +137,7 @@ class DB {
 				'email'=>crypt(getenv("MASTER_EMAIL"), getenv("SALT"))
 			);
 			if(!$this->SetItem('users', $master)) {
-				$this->error = "db.__construct: failed to create master user".$this->conn->error;
+				$this->error[] = "db.__construct: failed to create master user".$this->conn->error;
 			}
 		}
 	}
@@ -226,7 +226,7 @@ class DB {
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			$this->error = "db.DBGet: ".$sql."; ".$this->conn->error;
+			$this->error[] = "db.DBGet: ".$sql."; ".$this->conn->error;
 			return $output;
 		}
 	
@@ -285,7 +285,7 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
-			$this->error = $this->conn->error;
+			$this->error[] = $this->conn->error;
 			return false;
 		}
 	
@@ -299,7 +299,7 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
-			$this->error = $this->conn->error;
+			$this->error[] = $this->conn->error;
 			return false;
 		}
 		return true;
@@ -324,7 +324,7 @@ class DB {
         //var_dump($results);
         //var_dump($results->fetch_assoc());
 		if ($results === FALSE) {
-			$this->error = "db.SetItem: ".$this->conn->error;
+			$this->error[] = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
 	
@@ -452,7 +452,7 @@ class DB {
 			$this->database
 		);
 		if (!$this->conn) {
-			$this->error = mysqli_connect_error();
+			$this->error[] = mysqli_connect_error();
             echo mysqli_connect_error();
 			return false;
 		}
