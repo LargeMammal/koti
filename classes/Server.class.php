@@ -138,21 +138,22 @@ class Server {
         /**
          * @brief
          * Post function handles post requests.
+         * @return bool returns boolean
          */
-        private function post()
+        private function post():bool
         {
                 echo "at start";
                 if (empty($_POST)) {
                         $this->error[] = 'Empty request'; 
-                        return;
+                        return false;
                 }
                 if ($_POST["token"] === NULL) {
                         $this->error[] = 'Missing token';
-                        return;
+                        return false;
                 }
                 if ((count($this->server) < 2) || $this->server[0] !== 'title') {
                         $this->error[] = 'Malformed request';
-                        return;
+                        return false;
                 }
                 echo "checks done";
 
@@ -166,7 +167,7 @@ class Server {
                         echo "response set";
                         array_push($this->error, $this->db->error);
                         echo "errors merged";
-                        return;
+                        return false;
                 }
                 echo "no token errors";
                 //$t = $token;
@@ -183,15 +184,16 @@ class Server {
                 if (!empty($dbitem->error)) {
                         array_push($this->error, $dbitem->error);
                         http_response_code(500);
-                        return;
+                        return false;
                 }
                 echo "dbitem done";
                 if (!$this->db->DBPost($dbitem)) {
                         array_push($this->error, $this->db->error);
                         http_response_code(500);
-                        return;
+                        return false;
                 }
                 echo "dbpost done";
+                return true;
         }
 
         /**
