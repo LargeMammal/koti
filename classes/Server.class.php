@@ -141,6 +141,7 @@ class Server {
          */
         private function post()
         {
+                echo "at start";
                 if (empty($_POST)) {
                         $this->error[] = 'Empty request'; 
                         return;
@@ -153,6 +154,7 @@ class Server {
                         $this->error[] = 'Malformed request';
                         return;
                 }
+                echo "checks done";
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
@@ -162,6 +164,7 @@ class Server {
                         array_push($this->error, $this->db->error);
                         return;
                 }
+                echo "token done";
                 //$t = $token;
                 //var_dump($t);
                 $query = NULL;
@@ -178,11 +181,13 @@ class Server {
                         http_response_code(500);
                         return;
                 }
+                echo "dbitem done";
                 if (!$this->db->DBPost($dbitem)) {
                         array_push($this->error, $this->db->error);
                         http_response_code(500);
                         return;
                 }
+                echo "dbpost done";
         }
 
         /**
