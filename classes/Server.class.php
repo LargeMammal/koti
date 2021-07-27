@@ -164,7 +164,7 @@ class Server {
                         echo "error start";
                         http_response_code(500);
                         echo "response set";
-                        array_merge($this->error, $this->db->error);
+                        $this->error=array_merge($this->error, $this->db->error);
                         echo "errors merged";
                         return;
                 }
@@ -181,13 +181,13 @@ class Server {
                 //var_dump($q);
                 $dbitem = new DBItem($query);
                 if (!empty($dbitem->error)) {
-                        array_merge($this->error, $dbitem->error);
+                        $this->error=array_merge($this->error, $dbitem->error);
                         http_response_code(500);
                         return;
                 }
                 echo "dbitem done";
                 if (!$this->db->DBPost($dbitem)) {
-                        array_merge($this->error, $this->db->error);
+                        $this->error=array_merge($this->error, $this->db->error);
                         http_response_code(500);
                         return;
                 }
