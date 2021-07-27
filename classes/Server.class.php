@@ -162,12 +162,8 @@ class Server {
                 echo "token done";
                 
                 if (!empty($this->db->error)) {
-                        echo "error: ". implode('\n', $this->db->error);
                         http_response_code(500);
-                        echo "response set";
                         $this->error=array_merge($this->error, $this->db->error);
-                        var_dump(array_merge($this->error, $this->db->error));
-                        echo "errors merged";
                         return;
                 }
                 echo "no token errors";

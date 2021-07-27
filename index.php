@@ -21,8 +21,7 @@ $server = new Server($_SERVER, $_GET, $_POST);
 echo $server->Serve();
 //var_dump($server->error);
 if (!empty($server->error)) {
-    echo "errors!";
-    var_dump($server->error);
+    echo "errors!\n".implode('\n', $server->error);
     return;
 }
 ?>
