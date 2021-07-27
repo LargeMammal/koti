@@ -161,7 +161,7 @@ class Server {
                 $token = $this->db->DBGetToken($_POST['token']);
                 echo "token done";
                 
-                if ($this->db->error !== NULL) {
+                if (!empty($this->db->error)) {
                         echo "error: ". implode('\n', $this->db->error);
                         http_response_code(500);
                         echo "response set";
