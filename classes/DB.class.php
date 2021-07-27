@@ -303,6 +303,7 @@ class DB {
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
             echo "tags error: ". $this->conn->error;
+            echo "sql: $sql";
 			$this->error[] = $this->conn->error;
 			return false;
 		}
