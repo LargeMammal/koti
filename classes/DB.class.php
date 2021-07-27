@@ -319,7 +319,7 @@ class DB {
 		$var = $this->conn->escape_string($token);
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
-        echo "gettoken start";
+        
 		// Generate query
 		$sql = "SELECT * FROM tokens WHERE token='$var'";
 	
@@ -330,13 +330,11 @@ class DB {
 			$this->error[] = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
-		echo "query done";
 	
 		// Fetch each row in associative form and pass it to output.
 		while($row = $results->fetch_assoc()) $output[] = $row;
 		//$output = $results->fetch_assoc();
 		$results->free();
-        echo "token done";
 		return $output;
 	}
 

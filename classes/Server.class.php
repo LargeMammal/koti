@@ -158,13 +158,17 @@ class Server {
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
+                echo "token done";
                 
                 if ($this->db->error !== NULL) {
+                        echo "error start";
                         http_response_code(500);
+                        echo "response set";
                         array_push($this->error, $this->db->error);
+                        echo "errors merged";
                         return;
                 }
-                echo "token done";
+                echo "no token errors";
                 //$t = $token;
                 //var_dump($t);
                 $query = NULL;
