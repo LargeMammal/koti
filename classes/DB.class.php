@@ -269,6 +269,7 @@ class DB {
 	 * @return bool returns boolean value indicating success or failure
 	 */
 	public function DBPost($dbitem): bool {
+		echo "dbpost start\n";
 		// Insert items 
 		$sql = "INSERT INTO items (";
 		$sql .= "hash, title, date, item, user, auth) VALUES ('";
@@ -284,6 +285,7 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
+            echo "$sql \n";
 			$this->error[] = $this->conn->error;
 			return false;
 		}
