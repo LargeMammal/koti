@@ -88,7 +88,9 @@ class DB {
 		$val = $this->conn->query("select 1 from `tags` LIMIT 1");
 		if ($val === FALSE) {
 			// Create the table
-			$sql = "CREATE TABLE tags (hash VARCHAR(255) PRIMARY KEY,".
+			$sql = "CREATE TABLE tags ".
+                "(id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, ".
+                "hash VARCHAR(255) NOT NULL,".
 				" tag TEXT NOT NULL)";
 			if ($this->conn->query($sql) !== TRUE) {
 				$this->error[] = "db.__construct: failed to create tags table".$this->conn->error;
@@ -269,7 +271,6 @@ class DB {
 	 * @return bool returns boolean value indicating success or failure
 	 */
 	public function DBPost($dbitem): bool {
-		echo "dbpost start\n";
 		// Insert items 
 		$sql = "INSERT INTO items (";
 		$sql .= "hash, title, date, item, user, auth) VALUES ('";
@@ -289,7 +290,6 @@ class DB {
 			$this->error[] = $this->conn->error;
 			return false;
 		}//*/
-		echo "items success\n";
 	
 		// insert tags
 		$sql = "INSERT INTO tags (";
@@ -300,15 +300,12 @@ class DB {
         }
         
         $sql .= implode(',', $s).')';
-		echo "tags success\n";
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
-            echo "sql: $sql \n";
 			$this->error[] = $this->conn->error;
 			return false;
 		}
-		echo "post success\n";
 		return true;
 	}
 
