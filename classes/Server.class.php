@@ -166,6 +166,7 @@ class Server {
                         http_response_code(500);
                         echo "response set";
                         $this->error=array_merge($this->error, $this->db->error);
+                        var_dump(array_merge($this->error, $this->db->error));
                         echo "errors merged";
                         return;
                 }
