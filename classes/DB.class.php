@@ -283,7 +283,7 @@ class DB {
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
 	
-		/* Query
+		//* Query
 		if ($this->conn->query($sql) === FALSE) {
             echo "$sql \n";
 			$this->error[] = $this->conn->error;
