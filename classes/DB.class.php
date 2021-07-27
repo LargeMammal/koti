@@ -284,7 +284,7 @@ class DB {
 		//echo $sql;
 	
 		// Query
-		if ($this->conn->query($sql) !== TRUE) {
+		if ($this->conn->query($sql) === FALSE) {
 			$this->error = $this->conn->error;
 			return false;
 		}
@@ -298,7 +298,7 @@ class DB {
         trim($sql, ',');
 	
 		// Query
-		if ($this->conn->query($sql) !== TRUE) {
+		if ($this->conn->query($sql) === FALSE) {
 			$this->error = $this->conn->error;
 			return false;
 		}
