@@ -296,7 +296,7 @@ class DB {
 		$sql .= "hash, tag) VALUES ( ";
         $s = [];
         foreach (explode('+', $dbitem->tags) as $tag) {
-            $sql[] = "'".$dbitem->hash."', '".$tag."'";
+            $s[] = "'".$dbitem->hash."', '".$tag."'";
         }
         
         $sql .= implode(',', $s).')';
