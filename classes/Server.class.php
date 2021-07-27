@@ -72,6 +72,7 @@ class Server {
                         break;
                 case 'POST':
                         $this->post();
+                        echo "out of post";
                         break;
                 case 'DELETE':
                         $this->delete();
