@@ -294,11 +294,12 @@ class DB {
 		// insert tags
 		$sql = "INSERT INTO tags (";
 		$sql .= "hash, tag) VALUES ( ";
+        $s = [];
         foreach (explode('+', $dbitem->tags) as $tag) {
-            $sql .= "'".$dbitem->hash."', '".$tag."',";
+            $sql[] = "'".$dbitem->hash."', '".$tag."'";
         }
-        trim($sql, ',');
-        $sql .= ')';
+        
+        $sql .= implode(',', $s).')';
 		echo "tags success\n";
 	
 		// Query
