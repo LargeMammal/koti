@@ -139,7 +139,7 @@ class Server {
          * @brief
          * Post function handles post requests.
          */
-        private function post():bool
+        private function post()
         {
                 echo "at start";
                 if (empty($_POST)) {
