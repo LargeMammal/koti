@@ -81,6 +81,7 @@ class Server {
                         header('Allow: GET POST');
                         break;
                 }
+                echo "serve finished";
                 return $output;
         }
         
