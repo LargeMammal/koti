@@ -281,16 +281,13 @@ class DB {
             $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
-		$s =  $sql;
-        var_dump($s);
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
-            echo "items error: ". $this->conn->error;
 			$this->error[] = $this->conn->error;
 			return false;
 		}
-		echo "items success";
+		echo "items success\n";
 	
 		// insert tags
 		$sql = "INSERT INTO tags (";
@@ -299,7 +296,7 @@ class DB {
             $sql .= ' ('.$dbitem['hash'].','.$tag.'),';
         }
         trim($sql, ',');
-		echo "tags success";
+		echo "tags success\n";
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
@@ -307,7 +304,7 @@ class DB {
 			$this->error[] = $this->conn->error;
 			return false;
 		}
-		echo "post success";
+		echo "post success\n";
 		return true;
 	}
 
@@ -322,7 +319,7 @@ class DB {
 		$var = $this->conn->escape_string($token);
 		// Hash tokens in future.
 		//$var = $this->conn->escape_string(crypt($token, getenv("SALT")));
-	
+        echo "gettoken start";
 		// Generate query
 		$sql = "SELECT * FROM tokens WHERE token='$var'";
 	
@@ -333,11 +330,13 @@ class DB {
 			$this->error[] = "db.SetItem: ".$this->conn->error;
 			return [];
 		}
+		echo "query done";
 	
 		// Fetch each row in associative form and pass it to output.
 		while($row = $results->fetch_assoc()) $output[] = $row;
 		//$output = $results->fetch_assoc();
 		$results->free();
+        echo "token done";
 		return $output;
 	}
 
