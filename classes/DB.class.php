@@ -302,7 +302,7 @@ class DB {
 			$this->error[] = $this->conn->error;
 			return false;
 		}
-		echo "got here";
+		var_dump("got here");
 		return true;
 	}
 
