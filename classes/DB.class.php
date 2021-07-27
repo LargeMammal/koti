@@ -285,6 +285,7 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
+            echo "items error: ". $this->conn->error;
 			$this->error[] = $this->conn->error;
 			return false;
 		}
@@ -299,10 +300,11 @@ class DB {
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
+            echo "tags error: ". $this->conn->error;
 			$this->error[] = $this->conn->error;
 			return false;
 		}
-		var_dump("got here");
+		echo "post success";
 		return true;
 	}
 
