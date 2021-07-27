@@ -281,7 +281,7 @@ class DB {
             $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
-		//echo $sql;
+		echo $sql;
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
@@ -289,6 +289,7 @@ class DB {
 			$this->error[] = $this->conn->error;
 			return false;
 		}
+		echo "items success";
 	
 		// insert tags
 		$sql = "INSERT INTO tags (";
@@ -297,6 +298,7 @@ class DB {
             $sql .= ' ('.$dbitem['hash'].','.$tag.'),';
         }
         trim($sql, ',');
+		echo "tags success";
 	
 		// Query
 		if ($this->conn->query($sql) === FALSE) {
