@@ -270,8 +270,8 @@ class DB {
 	 */
 	public function DBPost($dbitem): bool {
 		// Insert items 
-		$sql = "INSERT INTO 'items' (";
-		$sql .= "'hash', 'title', 'date', 'item', 'user', 'auth') VALUES ('";
+		$sql = "INSERT INTO items (";
+		$sql .= "hash, title, date, item, user, auth) VALUES ('";
         $sql .= $dbitem->hash."', ";
         $sql .= $this->conn->escape_string($dbitem->title).", ";
         $sql .= $dbitem->date.", ";
@@ -281,7 +281,7 @@ class DB {
             $sql .= $dbitem->item.", ";
         $sql .= $dbitem->user.", ";
         $sql .= $dbitem->auth.");";
-		echo $sql;
+		//echo $sql;
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
@@ -295,8 +295,7 @@ class DB {
         foreach (explode('+', $dbitem['tags']) as $tag) {
             $sql .= ' ('.$dbitem['hash'].','.$tag.'),';
         }
-        trim($sql, ',');
-		$sql .= ';';
+        trim($sql, ',')
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
