@@ -295,7 +295,7 @@ class DB {
         foreach (explode('+', $dbitem['tags']) as $tag) {
             $sql .= ' ('.$dbitem['hash'].','.$tag.'),';
         }
-        trim($sql, ',')
+        trim($sql, ',');
 	
 		// Query
 		if ($this->conn->query($sql) !== TRUE) {
