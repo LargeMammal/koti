@@ -103,7 +103,7 @@ class Server {
                         return "";
                 }
                 if (empty($this->items)) 
-                        $this->items = ["title"=>"empty"];
+                        $this->items[] = ["title"=>"empty"];
 
                 switch ($this->type) {
                         case 'json':
