@@ -93,15 +93,17 @@ class Server {
          */
         private function get() : string
         {
+                $str = '<!DOCTYPE html><head>';
+                
                 if(isset($this->get['token']))
-                    $token = $this->get['token'];
+                        $token = $this->get['token'];
                 $this->items = $this->db->DBGet($this->server);
                 if (!empty($this->db->error)) {
-                    $this->error = array_merge($this->error, $this->db->error);
-                    return "";
+                        $this->error = array_merge($this->error, $this->db->error);
+                        return "";
                 }
-                if (empty($this->items) < 1) 
-                        $this->items = NULL;
+                if (empty($this->items)) 
+                        $this->items = ["title"=>"empty"];
 
                 switch ($this->type) {
                         case 'json':
@@ -119,7 +121,6 @@ class Server {
                 }
 
                 // Stuff in head
-                $str = '<!DOCTYPE html><head>';
                 $str .= $this->loadHead();
                 $str .= '</head>';
                 // Stuff in body
@@ -129,7 +130,8 @@ class Server {
                 if (!empty($nav))
                         $str .= '<nav>'.$nav[0].'</nav></header>';
                 else $str .= '<nav>empty</nav></header>';
-                $str .= '<section>'.$this->loadBody().'</section>';
+                $str .= '<section>'.$this->loadBody();
+                $str .= "\n".implode("\n",$this->db->error).'</section>';
                 $footer = $this->db->DBGet(["title", "footer"]);
                 array_filter($footer);
                 if (!empty($footer))
@@ -207,7 +209,7 @@ class Server {
         {
                 $title = "empty";
                 if (isset($this->items))
-                        if (count($this->items) == 1)
+                        if (!empty($this->items))
                                 $title = $this->items[0]['title'];
                                 
                 $str = '<meta charset="UTF-8">';
