@@ -230,7 +230,10 @@ class DB {
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			$this->error[] = "db.DBGet: items:".var_export($items)." \ninputs:".var_export($inputs)."\n ".$sql.";\n".$this->conn->error;
+			$this->error[] = "db.DBGet: items:".
+                var_export($items, true).
+                " \ninputs:".var_export($inputs, true).
+                "\n ".$sql.";\n".$this->conn->error;
 			return $output;
 		}
 	
