@@ -209,15 +209,15 @@ class DB {
 		// Generate query
 		$sql = "SELECT * FROM items JOIN tags ON items.hash=tags.hash";
 
-		$i = $items;
-        var_dump($items);
+		//$i = $items;
+        //var_dump($items);
 		$str = "";
         if (count($inputs) > 1) {
             foreach ($inputs as $key => $var) {
                 if ($key % 2 !== 0) continue;
                 $items = ["$var[$key]" => $var[$key+1]];
             }
-            var_dump($items);
+            //var_dump($items);
             
             foreach ($items as $column=>$item) {
                 if ($str != "") $str .= " AND";
@@ -230,7 +230,7 @@ class DB {
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
-			$this->error[] = "db.DBGet: ".$sql."; ".$this->conn->error;
+			$this->error[] = "db.DBGet: ".$sql.";\n"."items:$items \ninputs:$inputs\n ".$this->conn->error;
 			return $output;
 		}
 	
