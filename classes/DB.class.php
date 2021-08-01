@@ -215,7 +215,7 @@ class DB {
         if (count($inputs) > 1) {
             foreach ($inputs as $key => $var) {
                 if ($key % 2 !== 0) continue;
-                $items = ["$var[$key]" => $var[$key+1]];
+                $items[$inputs[$key]] = $inputs[$key+1];
             }
             //var_dump($items);
             
