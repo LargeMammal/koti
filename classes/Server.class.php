@@ -188,7 +188,7 @@ class Server {
                         http_response_code(500);
                         return;
                 }
-                echo "dbitem done\n";
+                //echo "dbitem done\n";
                 if (!$this->db->DBPost($dbitem)) {
                         $this->error=array_merge($this->error, $this->db->error);
                         http_response_code(500);
@@ -246,11 +246,11 @@ class Server {
         private function loadBody() 
         {
                 $content = "";
-                if (is_null($this->items) || count($this->items) < 1) 
+                if (empty($this->items)) 
                         return "<h1>Site came up empty!</h1>";
                 foreach ($this->items as $items) {
 			$content .= "<section>";
-			$content .= $items['Content'];
+			$content .= $items['item'];
 			$content .= "</section>";
                 }
                 return $content;
