@@ -207,40 +207,55 @@ class DB {
 		}
 	
 		// Generate query
-		$sql = "SELECT * FROM items JOIN tags ON items.hash=tags.hash";
+		$sql = "SELECT * FROM items";
 
-		//$i = $items;
-        //var_dump($items);
 		$str = "";
-        if (count($inputs) > 1) {
-            foreach ($inputs as $key => $var) {
-                if ($key % 2 !== 0) continue;
-                $items[$inputs[$key]] = $inputs[$key+1];
-            }
-            //var_dump($items);
-            
-            foreach ($items as $column=>$item) {
-                if ($str != "") $str .= " AND";
-                else $str .= " WHERE";
-                $str .= " ".$column."='".$item."'";
-            }
-        }
-		$sql .= $str." GROUP BY items.hash LIMIT 10"; // Make this so that user decides.
+		if (count($inputs) > 1) {
+			foreach ($inputs as $key => $var) {
+				if ($key % 2 !== 0) continue;
+				$items[$inputs[$key]] = $inputs[$key+1];
+			}
+			
+			foreach ($items as $column=>$item) {
+				if ($str != "") $str .= " AND";
+				else $str .= " WHERE";
+				$str .= " ".$column."='".$item."'";
+			}
+		}
+		$sql .= $str." LIMIT 10"; // Make this so that user decides.
 	
 		$results = $this->conn->query($sql);
 		// If query fails stop here
 		if ($results === FALSE) {
 			$this->error[] = "db.DBGet: items:".
-                var_export($items, true).
-                " \ninputs:".var_export($inputs, true).
-                "\n ".$sql.";\n".$this->conn->error;
+			var_export($items, true).
+			" \ninputs:".var_export($inputs, true).
+			"\n ".$sql.";\n".$this->conn->error;
 			return $output;
 		}
 	
 		// Fetch each row in associative form and pass it to output.
 		while($row = $results->fetch_assoc()) $output[] = $row;
 		$results->free();
-		
+		// tags
+		if (count($inputs) < 1) {
+			foreach($output as $key => $o) {
+				$tags = "SELECT * FROM tags WHERE hash=".$o["hash"];
+			
+				$results = $this->conn->query($tags);
+				// If query fails stop here
+				if ($results === FALSE) {
+					$this->error[] = "db.DBGet: item:".
+					var_export($o, true).
+					"\n ".$tags.";\n".$this->conn->error;
+					return $output;
+				}
+				
+				// Fetch each row in associative form and pass it to output.
+				while($row = $results->fetch_assoc()) $output[$key]["tags"][] = $row;
+				$results->free();
+			}
+		}
 		return $output;
 	}
 	
