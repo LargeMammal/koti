@@ -162,14 +162,18 @@ class Server {
 
                 // Get token id pair that matches token in request
                 $token = $this->db->DBGetToken($_POST['token']);
-                
                 if (!empty($this->db->error)) {
-                        http_response_code(500);
                         $this->error=array_merge($this->error, $this->db->error);
+                        http_response_code(500);
                         return;
                 }
-                //$t = $token;
-                //var_dump($t);
+                
+                if (empty($token)) {
+                    $this->error[] = 'Wrong token';
+                    http_response_code(403);
+                    return;
+                }
+                
                 $query = NULL;
                 $query['title'] = $this->server[1];
                 $query['user'] = $token[0]['user']; // token 'user' is just user id number
