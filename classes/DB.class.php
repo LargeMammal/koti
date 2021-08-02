@@ -240,7 +240,7 @@ class DB {
 		// tags
 		if (count($inputs) < 1) {
 			foreach($output as $key => $o) {
-				$tags = "SELECT * FROM tags WHERE hash=".$o["hash"];
+				$tags = "SELECT * FROM tags WHERE hash='".$o["hash"]."'";
 			
 				$results = $this->conn->query($tags);
 				// If query fails stop here
