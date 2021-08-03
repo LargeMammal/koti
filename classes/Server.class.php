@@ -45,7 +45,7 @@ class Server {
                 }
                 $this->type = "html";
                 $this->server = $this->paths($server['REQUEST_URI']);
-                if ($this->server === NULL) $this->server = ["title", "index"];
+                if (empty($this->server)) $this->server = ["title", "index"];
                 $n = count($this->server);
                 if (($n > 1) && ($n % 2 !== 0))
                         $this->error[] = "Malformed request!";
@@ -264,7 +264,7 @@ class Server {
          */
         private function paths($url):array
         {
-                if ($url === '') return NULL;
+                if ($url === "") return [];
                 // Get get variables. 
                 $vget = explode('?', trim($url, "/"));
                 $type = explode('.', $vget[0]);
