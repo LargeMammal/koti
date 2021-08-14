@@ -1,12 +1,19 @@
-_notes/
-projects/*
-cgi-bin/
-config/*
-/.htaccess # Need to study effects of this. Is needed for true REST API
 .htaccess
 hackerman_hacktime*
 .well-known
 update.sh
+
+# Directories #
+##########
+vendor/
+_notes/
+projects/
+cgi-bin/
+config/
+
+# Lock files #
+##############
+*.lock
 
 # Compiled source #
 ###################
