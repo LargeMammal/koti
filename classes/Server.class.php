@@ -38,7 +38,6 @@ class Server {
                 $this->get = $get;
 
                 $this->items = [];
-                $this->items = [];
                 $this->db = new DB();
                 if (!empty($this->db->error)) {
                     $this->error[] = $this->db->error;
@@ -93,6 +92,21 @@ class Server {
          */
         private function get() : string
         {
+		if ($this->server[0] === "GetToken" && isset($_GET['token'])) {
+			// Get token id pair that matches token in request
+			$token = $this->db->DBGetToken($_GET['token']);
+			if (!empty($this->db->error)) {
+				$this->error=array_merge($this->error, $this->db->error);
+				http_response_code(500);
+				return;
+			}
+			
+			if (empty($token)) {
+				$this->error[] = 'Wrong token';
+				http_response_code(403);
+				return;
+			}
+		}
                 $str = '<!DOCTYPE html><head>';
                 
                 if(isset($this->get['token']))
@@ -103,7 +117,7 @@ class Server {
                         return "";
                 }
                 if (empty($this->items)) 
-                        $this->items[] = ["title"=>"empty"];
+                        $this->items[] = ["title", "empty"];
 
                 switch ($this->type) {
                         case 'json':
@@ -123,6 +137,8 @@ class Server {
                 // Stuff in head
                 $str .= $this->loadHead();
                 $str .= '</head>';
+		$str .= '<script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>';
+		$str .= '<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>';
                 // Stuff in body
                 $str .= '<body><div id="root"><div><header>'.$this->loadHeader();
                 $nav = $this->db->DBGet(["title", "nav"]);
@@ -130,7 +146,8 @@ class Server {
                 if (!empty($nav))
                         $str .= '<nav>'.$nav[0].'</nav></header>';
                 else $str .= '<nav>empty</nav></header>';
-                $str .= '<section>'.$this->loadBody();
+                $str .= '<section><noscript>I use JavaScript for extra functionality, '.
+			'site should work well enough without it</noscript>'.$this->loadBody();
                 $str .= "\n".implode("\n",$this->db->error).'</section>';
                 $footer = $this->db->DBGet(["title", "footer"]);
                 array_filter($footer);
@@ -151,6 +168,20 @@ class Server {
                         $this->error[] = 'Empty request'; 
                         return;
                 }
+                
+                switch ($this->server[0]) {
+			case 'resgister':
+				// request registeration
+				$query = [];
+				$query['user'] = $this->server[1];
+				$query['platform'] = $_POST['platform'];
+				$query['browser'] = $_POST['browser'];
+				$query['version'] = $_POST['version'];
+				break;
+			default:
+				// perus koodi
+		}
+                
                 if ($_POST["token"] === NULL) {
                         $this->error[] = 'Missing token';
                         return;
@@ -169,9 +200,9 @@ class Server {
                 }
                 
                 if (empty($token)) {
-                    $this->error[] = 'Wrong token';
-                    http_response_code(403);
-                    return;
+			$this->error[] = 'Wrong token';
+			http_response_code(403);
+			return;
                 }
                 
                 $query = NULL;
