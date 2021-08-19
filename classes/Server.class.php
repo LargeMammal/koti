@@ -293,7 +293,7 @@ class Server {
          * @param string URI in string form 
          * @return array returns array of URI elements. 
          */
-        private function paths($url):array
+        private function paths(string $url):array
         {
                 if ($url === "") return [];
                 // Get get variables. 
@@ -325,5 +325,20 @@ class Server {
                 $items = explode("/", $vget[0]);
                 return $items;
         }
+        
+        /**
+	 * detectDevice gets device info 
+	 * and saves it into database
+	 */
+	private function detectDevice() {
+		
+	$browser = new Browser();
+
+	if ($browser->getName() === Browser::IE && $browser->getVersion() < 11) {
+		echo 'Please upgrade your browser.';
+	}
+
+		return;
+	}
 }
 ?>
