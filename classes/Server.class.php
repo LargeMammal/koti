@@ -98,13 +98,13 @@ class Server {
 			if (!empty($this->db->error)) {
 				$this->error=array_merge($this->error, $this->db->error);
 				http_response_code(500);
-				return;
+				return "";
 			}
 			
 			if (empty($token)) {
 				$this->error[] = 'Wrong token';
 				http_response_code(403);
-				return;
+				return "";
 			}
 		}
                 $str = '<!DOCTYPE html><head>';
